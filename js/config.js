@@ -3,5 +3,5 @@
 // Как его получить: файл DEPLOY_RU.txt, шаг 3. Пример значения:
 //   '123456789012-abcdefg1234567.apps.googleusercontent.com'
 window.MONEY_CONFIG = {
-    googleClientId: '609648190816-smvc0bsd5jp4a8u1lfm28l2den6t8etg.apps.googleusercontent.com.apps.googleusercontent.com'
+    googleClientId: '609648190816-smvc0bsd5jp4a8u1lfm28l2den6t8etg.apps.googleusercontent.com.'
 };
