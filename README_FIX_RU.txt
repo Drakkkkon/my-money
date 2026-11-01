@@ -1,4 +1,8 @@
-My Money v3.4.0 — сайт
+My Money v3.5.0 — сайт
+
+Что нового в 3.5.0:
+- Тема «Аква» (id aqua в js/themes.js, стили css/aqua.css — все правила под html[data-w95="aqua"],
+  поэтому остальные темы не затронуты). Звуковой пакет glass в js/sound.js. sw.js: кэш my-money-v6.
 
 Что нового в 3.4.0:
 - Свои категории: список customCategories [{id, name}] сливается поштучно (SYNC_LISTS, ключ cats);

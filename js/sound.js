@@ -306,6 +306,21 @@ const SOUND_PACKS = {
         close: c => growl(c, { dur: 0.32, f0: 80, f1: 55, gain: 0.22 }),
         startup: c => { growl(c, { dur: 1.3, f0: 70, f1: 105, gain: 0.3 }); claws(c, { start: 1.1, strikes: 4, gain: 0.13 }); }
     },
+    // «Аква»: короткие «стеклянные» синусоиды с тихим верхним обертоном (своя мелодия, не звук включения Mac)
+    glass: {
+        click: c => { tone(c, { freq: 2637, dur: 0.045, gain: 0.07, attack: 0.002 }); tone(c, { freq: 5274, dur: 0.03, gain: 0.02, attack: 0.002 }); },
+        open: c => { tone(c, { freq: 1318.5, dur: 0.16, gain: 0.08 }); tone(c, { freq: 1975.5, start: 0.06, dur: 0.2, gain: 0.07 }); tone(c, { freq: 3951, start: 0.06, dur: 0.12, gain: 0.015 }); },
+        close: c => { tone(c, { freq: 1975.5, dur: 0.14, gain: 0.07 }); tone(c, { freq: 1318.5, start: 0.06, dur: 0.18, gain: 0.07 }); },
+        menu: c => { tone(c, { freq: 1760, dur: 0.06, gain: 0.07 }); tone(c, { freq: 3520, dur: 0.04, gain: 0.015 }); },
+        scroll: c => tone(c, { freq: 3135, dur: 0.015, gain: 0.02 }),
+        startup: c => {
+            [659.25, 987.77, 1318.5, 1567.98, 1975.53].forEach((f, i) => {
+                tone(c, { freq: f, start: i * 0.09, dur: 1.1, gain: 0.07, attack: 0.01 });
+                tone(c, { freq: f * 2, start: i * 0.09, dur: 0.5, gain: 0.012, attack: 0.01 });
+            });
+            pad(c, [329.63, 493.88, 659.25], { start: 0.45, dur: 1.5, gain: 0.04, type: 'sine', attack: 0.3 });
+        }
+    },
     neon: {
         click: c => neonZap(c, { dur: 0.05, from: 2400, to: 900, gain: 0.08 }),
         open: c => { neonHum(c, { dur: 0.3 }); neonZap(c, { start: 0.05, dur: 0.14, from: 500, to: 2200, gain: 0.08 }); },

@@ -11,8 +11,13 @@ const THEME_DEFAULTS = {
     light: '#ffffff', hilite: '#dfdfdf', shadow: '#808080', dark: '#0a0a0a',
     field: '#fdfdfb', text: '#161616', muted: '#3c3c3c', titleText: '#ffffff',
     hover: '#e6e6f4', grid: '#d0d0d0', income: '#1b7a2b', expense: '#b3261e',
-    pattern: 'none', patternSize: 'auto'
+    pattern: 'none', patternSize: 'auto',
+    fontUi: "'Pixelify Sans', 'Tahoma', 'MS Sans Serif', 'Segoe UI', sans-serif",
+    fontText: "'Tahoma', 'MS Sans Serif', 'Segoe UI', 'Roboto', Arial, sans-serif"
 };
+
+// Шрифт темы «Аква» (по мотивам Mac OS X 2000 года): системные шрифты, без файлов Apple
+const AQUA_FONT = "'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif";
 
 const LEOPARD_SPOT = (x, y, w, h) =>
     `radial-gradient(ellipse ${w}px ${h}px at ${x}px ${y}px, #9a6424 40%, #2b1a0b 42% 70%, transparent 72%)`;
@@ -85,7 +90,18 @@ const W95_THEMES = [
         hover: '#2a2448', grid: '#3a3358', income: '#4fd18b', expense: '#ff7a95',
         title: '#7a2fb8', title2: '#1d9aa6', desktop: '#141126', select: '#7a2fb8',
         pattern: 'linear-gradient(rgba(122,47,184,.14) 1px, transparent 1px), linear-gradient(90deg, rgba(29,154,166,.14) 1px, transparent 1px)',
-        patternSize: '28px 28px' }
+        patternSize: '28px 28px' },
+    // «Аква» — отдельный стиль по мотивам первой Mac OS X (2000): форма окон, кнопок и меню задаётся в css/aqua.css,
+    // который действует только при этой теме (html[data-w95="aqua"])
+    { id: 'aqua', name: 'Аква', sounds: 'glass',
+        face: '#ececec', light: '#ffffff', hilite: '#f6f6f6', shadow: '#a9a9a9', dark: '#6e6e6e',
+        field: '#ffffff', text: '#1a1a1a', muted: '#555555', titleText: '#1a1a1a',
+        hover: '#e3edfb', grid: '#d8d8d8', income: '#1e7b34', expense: '#c0392b',
+        title: '#ececec', title2: '#cfcfcf', desktop: '#1f5fc8', select: '#3875d7',
+        pattern: 'radial-gradient(ellipse 55% 45% at 16% 10%, rgba(255,255,255,.32), rgba(255,255,255,0) 70%), ' +
+            'linear-gradient(160deg, #1f5fc8 0%, #4d9cf2 48%, #1846a8 100%)',
+        patternSize: 'cover',
+        fontUi: AQUA_FONT, fontText: AQUA_FONT }
 ];
 
 let currentThemeId = 'standard';
@@ -113,7 +129,8 @@ function applyTheme(id, { save = true, preview = false } = {}) {
         '--w95-field': t.field, '--w95-text': t.text, '--w95-muted': t.muted, '--w95-title-text': t.titleText,
         '--w95-face-pressed': shadeColor(t.face, t.dark === true ? 0.85 : 0.93),
         '--w95-hover': t.hover, '--w95-grid': t.grid, '--w95-income': t.income, '--w95-expense': t.expense,
-        '--w95-pattern': t.pattern, '--w95-pattern-size': t.patternSize
+        '--w95-pattern': t.pattern, '--w95-pattern-size': t.patternSize,
+        '--w95-font-ui': t.fontUi, '--w95-font-text': t.fontText
     };
     const target = document.body || document.documentElement;
     Object.entries(vars).forEach(([k, v]) => target.style.setProperty(k, v));
@@ -142,6 +159,7 @@ function applySavedTheme() {
 function updateChartTheme(t) {
     if (typeof Chart === 'undefined') return;
     Chart.defaults.color = t.text;
+    Chart.defaults.font.family = t.fontText || THEME_DEFAULTS.fontText;
     Chart.defaults.borderColor = t.dark === true ? 'rgba(231, 226, 255, 0.16)' : 'rgba(0, 0, 0, 0.16)';
     const charts = [];
     if (typeof myChart !== 'undefined' && myChart) charts.push(myChart);
@@ -170,9 +188,9 @@ function renderThemePicker() {
     box.innerHTML = W95_THEMES.map(raw => {
         const t = { ...THEME_DEFAULTS, ...raw };
         const desk = t.pattern !== 'none'
-            ? `background-color:${t.desktop};background-image:${t.pattern};background-size:${t.patternSize === 'auto' ? 'auto' : '60px 60px'};`
+            ? `background-color:${t.desktop};background-image:${t.pattern};background-size:${['auto', 'cover'].includes(t.patternSize) ? t.patternSize : '60px 60px'};`
             : `background:${t.desktop};`;
-        return `<button type="button" class="theme-swatch${t.id === currentThemeId ? ' is-active' : ''}" onclick="applyTheme('${t.id}', { preview: true })" aria-pressed="${t.id === currentThemeId}">
+        return `<button type="button" class="theme-swatch theme-swatch-${t.id}${t.id === currentThemeId ? ' is-active' : ''}" onclick="applyTheme('${t.id}', { preview: true })" aria-pressed="${t.id === currentThemeId}">
             <span class="theme-swatch-desk" style="${desk}">
                 <span class="theme-swatch-win" style="background:${t.face};">
                     <span class="theme-swatch-title" style="background:linear-gradient(90deg, ${t.title}, ${t.title2});"></span>

@@ -1,0 +1,432 @@
+/* =========================================================================
+   ТЕМА «АКВА» — по мотивам первой Mac OS X (2000)
+   Без логотипов, фирменных значков, шрифтов и звуков Apple: всё нарисовано градиентами и простыми SVG.
+   Каждое правило начинается с html[data-w95="aqua"], поэтому остальные темы этот файл не затрагивает.
+   Цвета темы (фон, текст, шрифт) задаются в js/themes.js; здесь — форма и «гель».
+   ========================================================================= */
+
+html[data-w95="aqua"] body {
+    --aqua-stripes: repeating-linear-gradient(to bottom, #f4f4f4 0 1px, #e7e7e7 1px 2px);
+    --aqua-window-shadow: 0 6px 18px rgba(0, 0, 0, .28), 0 0 0 1px rgba(0, 0, 0, .16);
+    --aqua-dialog-shadow: 0 20px 50px rgba(0, 0, 0, .45), 0 0 0 1px rgba(0, 0, 0, .2);
+    --aqua-title: linear-gradient(to bottom, #fbfbfb 0%, #e8e8e8 50%, #d9d9d9 100%);
+    --aqua-gel-white: linear-gradient(to bottom, #ffffff 0%, #f6f6f6 45%, #e1e1e1 50%, #ececec 85%, #fafafa 100%);
+    --aqua-gel-blue: linear-gradient(to bottom, #cfe3fb 0%, #93c3f7 45%, #3f88ea 50%, #5aa0f2 80%, #94c6fa 100%);
+    --aqua-gel-blue-press: linear-gradient(to bottom, #a9c9ef 0%, #6aa1e4 45%, #2a6fcf 50%, #3e86de 80%, #6aa9ec 100%);
+    --aqua-select: linear-gradient(to bottom, #6aa1ee 0%, #3875d7 100%);
+    --aqua-btn-shadow: 0 1px 2px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .9);
+    --aqua-panel-shadow: inset 0 1px 3px rgba(0, 0, 0, .16);
+    /* Три гелевых круга в заголовке: закрыть / свернуть / развернуть */
+    --aqua-lights: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='14'%3E%3Cdefs%3E%3CradialGradient id='r' cx='50%25' cy='35%25' r='65%25'%3E%3Cstop offset='0' stop-color='%23ffb8b0'/%3E%3Cstop offset='.55' stop-color='%23ec4a3f'/%3E%3Cstop offset='1' stop-color='%23b3241b'/%3E%3C/radialGradient%3E%3CradialGradient id='y' cx='50%25' cy='35%25' r='65%25'%3E%3Cstop offset='0' stop-color='%23ffeaa8'/%3E%3Cstop offset='.55' stop-color='%23f4b72c'/%3E%3Cstop offset='1' stop-color='%23c38a10'/%3E%3C/radialGradient%3E%3CradialGradient id='g' cx='50%25' cy='35%25' r='65%25'%3E%3Cstop offset='0' stop-color='%23c8f2aa'/%3E%3Cstop offset='.55' stop-color='%235cc544'/%3E%3Cstop offset='1' stop-color='%232f8f22'/%3E%3C/radialGradient%3E%3ClinearGradient id='h' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='.85'/%3E%3Cstop offset='1' stop-color='%23fff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='7' cy='7' r='6.2' fill='url(%23r)' stroke='%238e1d16' stroke-width='.8'/%3E%3Cellipse cx='7' cy='4.3' rx='3.6' ry='2' fill='url(%23h)'/%3E%3Ccircle cx='27' cy='7' r='6.2' fill='url(%23y)' stroke='%23946a0a' stroke-width='.8'/%3E%3Cellipse cx='27' cy='4.3' rx='3.6' ry='2' fill='url(%23h)'/%3E%3Ccircle cx='47' cy='7' r='6.2' fill='url(%23g)' stroke='%23246f1a' stroke-width='.8'/%3E%3Cellipse cx='47' cy='4.3' rx='3.6' ry='2' fill='url(%23h)'/%3E%3C/svg%3E");
+    /* У неактивных окон (когда открыт диалог) круги серые */
+    --aqua-lights-off: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='14'%3E%3Cdefs%3E%3CradialGradient id='s' cx='50%25' cy='35%25' r='65%25'%3E%3Cstop offset='0' stop-color='%23f4f4f4'/%3E%3Cstop offset='.55' stop-color='%23c4c4c4'/%3E%3Cstop offset='1' stop-color='%23939393'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='7' cy='7' r='6.2' fill='url(%23s)' stroke='%23858585' stroke-width='.8'/%3E%3Ccircle cx='27' cy='7' r='6.2' fill='url(%23s)' stroke='%23858585' stroke-width='.8'/%3E%3Ccircle cx='47' cy='7' r='6.2' fill='url(%23s)' stroke='%23858585' stroke-width='.8'/%3E%3C/svg%3E");
+    /* Стрелки выпадающего списка: синий гелевый «колпачок» с белыми стрелками */
+    --aqua-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='18'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cfe3fb'/%3E%3Cstop offset='.48' stop-color='%2393c3f7'/%3E%3Cstop offset='.5' stop-color='%233f88ea'/%3E%3Cstop offset='1' stop-color='%2394c6fa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='.5' y='.5' width='19' height='17' rx='4' fill='url(%23b)' stroke='%232a64b6'/%3E%3Cpath d='M6 7.5l4-3.5 4 3.5zM6 10.5l4 3.5 4-3.5z' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+html[data-w95="aqua"] body ::selection { background: #b5d3f7; color: #000; }
+
+/* ---------- Окна ---------- */
+html[data-w95="aqua"] body .card,
+html[data-w95="aqua"] body main > .tab > .card,
+html[data-w95="aqua"] body .tx-container > .forms,
+html[data-w95="aqua"] body .tx-container > .history,
+html[data-w95="aqua"] body header,
+html[data-w95="aqua"] body header[class],
+html[data-w95="aqua"] body .splash-content {
+    background: var(--aqua-stripes) !important;
+    box-shadow: var(--aqua-window-shadow) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0 12px 12px !important;
+}
+html[data-w95="aqua"] body .export-sheet {
+    background: var(--aqua-stripes) !important;
+    box-shadow: var(--aqua-dialog-shadow) !important;
+    border-radius: 8px !important;
+    padding: 0 12px 12px !important;
+}
+html[data-w95="aqua"] body .export-sheet-overlay { background: rgba(0, 0, 0, .25) !important; }
+
+/* Заголовок окна: светлая полоса, текст по центру обычного веса, круги слева */
+html[data-w95="aqua"] body .card > h3,
+html[data-w95="aqua"] body .header-top,
+html[data-w95="aqua"] body .export-sheet-head {
+    position: relative;
+    background: var(--aqua-title) !important;
+    color: var(--w95-text) !important;
+    border-bottom: 1px solid #a9a9a9;
+    border-radius: 8px 8px 0 0 !important;
+    margin: 0 -12px 12px !important;
+    padding: 4px 70px !important;
+    min-height: 24px;
+    justify-content: center !important;
+    text-align: center;
+    font-family: var(--w95-font-text) !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .85);
+    overflow: visible;
+}
+html[data-w95="aqua"] body .header-top { margin-bottom: 10px !important; }
+html[data-w95="aqua"] body .card > h3 *,
+html[data-w95="aqua"] body .header-top *,
+html[data-w95="aqua"] body .export-sheet-head h3,
+html[data-w95="aqua"] body .export-sheet-head h3 * { color: var(--w95-text) !important; }
+html[data-w95="aqua"] body .export-sheet-head h3 { flex: 1 1 auto; text-align: center; font-size: 13px !important; font-weight: 400 !important; margin: 0; }
+html[data-w95="aqua"] body .card > h3 .material-icons { display: none !important; }
+html[data-w95="aqua"] body .header-top .mobile-title { font-family: var(--w95-font-text) !important; font-size: 13px !important; font-weight: 400 !important; }
+html[data-w95="aqua"] body .header-top .app-logo { width: 16px; height: 16px; border-radius: 4px !important; }
+
+html[data-w95="aqua"] body .card > h3::after,
+html[data-w95="aqua"] body .header-top::after,
+html[data-w95="aqua"] body .export-sheet-head::after {
+    content: '' !important; position: absolute; left: 9px; right: auto !important; top: 50%;
+    width: 54px; height: 14px; margin-top: -7px;
+    background: var(--aqua-lights) no-repeat !important;
+    filter: none !important; display: block !important;
+}
+html[data-w95="aqua"] body:has(.export-sheet-overlay) .card > h3::after,
+html[data-w95="aqua"] body:has(.export-sheet-overlay) .header-top::after { background-image: var(--aqua-lights-off) !important; }
+
+/* Настоящая кнопка закрытия диалога лежит поверх красного круга; знак × виден при наведении */
+html[data-w95="aqua"] body .export-sheet-close {
+    position: absolute !important; left: 9px; top: 50%; z-index: 1; transform: translateY(-50%);
+    width: 14px !important; height: 14px !important; min-height: 0 !important; padding: 0 !important;
+    background: transparent !important; box-shadow: none !important; border: none !important; border-radius: 50% !important;
+}
+html[data-w95="aqua"] body .export-sheet-close .material-icons { font-size: 11px !important; color: rgba(70, 0, 0, .75) !important; opacity: 0; }
+html[data-w95="aqua"] body .export-sheet-head:hover .export-sheet-close .material-icons,
+html[data-w95="aqua"] body .export-sheet-close:focus-visible .material-icons { opacity: 1; }
+
+/* Настоящие кнопки окна (список Oldbook): закрыть — свернуть — развернуть, слева */
+html[data-w95="aqua"] body .card > h3.has-controls { padding: 4px 70px !important; }
+html[data-w95="aqua"] body .card > h3.has-controls::after { display: none !important; }
+html[data-w95="aqua"] body .w95-ctls { left: 9px; right: auto; gap: 7px; }
+html[data-w95="aqua"] body .w95-ctl {
+    width: 13px !important; height: 13px !important; margin: 0 !important;
+    border-radius: 50% !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, .6), 0 0 0 .8px rgba(0, 0, 0, .35) !important;
+}
+html[data-w95="aqua"] body .w95-ctl-close { order: 0; background: radial-gradient(circle at 50% 35%, #ffb8b0, #ec4a3f 55%, #b3241b) !important; }
+html[data-w95="aqua"] body .w95-ctl-min { order: 1; background: radial-gradient(circle at 50% 35%, #ffeaa8, #f4b72c 55%, #c38a10) !important; }
+html[data-w95="aqua"] body .w95-ctl-max { order: 2; background: radial-gradient(circle at 50% 35%, #c8f2aa, #5cc544 55%, #2f8f22) !important; }
+html[data-w95="aqua"] body .w95-ctl::before,
+html[data-w95="aqua"] body .card.is-maximized .w95-ctl-max::before { display: none !important; content: none !important; }
+html[data-w95="aqua"] body .w95-ctl::after,
+html[data-w95="aqua"] body .card.is-maximized .w95-ctl-max::after {
+    position: absolute; inset: 0; left: 0 !important; top: 0 !important; width: auto !important; height: auto !important;
+    border: none !important; background: none !important; transform: none !important;
+    display: flex; align-items: center; justify-content: center;
+    font: 700 10px/1 var(--w95-font-text); color: rgba(60, 20, 0, .75); opacity: 0;
+}
+html[data-w95="aqua"] body .w95-ctl-close::after { content: '×' !important; }
+html[data-w95="aqua"] body .w95-ctl-min::after { content: '–' !important; }
+html[data-w95="aqua"] body .w95-ctl-max::after,
+html[data-w95="aqua"] body .card.is-maximized .w95-ctl-max::after { content: '+' !important; }
+html[data-w95="aqua"] body .w95-ctls:hover .w95-ctl::after,
+html[data-w95="aqua"] body .w95-ctl:focus-visible::after { opacity: 1; }
+html[data-w95="aqua"] body .card.is-maximized { border-radius: 0 !important; }
+
+/* ---------- Кнопки: гелевые «таблетки» ---------- */
+html[data-w95="aqua"] body .btn-primary, html[data-w95="aqua"] body .btn-secondary,
+html[data-w95="aqua"] body .btn-income, html[data-w95="aqua"] body .btn-expense,
+html[data-w95="aqua"] body .export-btn, html[data-w95="aqua"] body .pay-btn,
+html[data-w95="aqua"] body label.btn-secondary, html[data-w95="aqua"] body #settings button:not(.menu-row-btn),
+html[data-w95="aqua"] body #reports .export-btn, html[data-w95="aqua"] body #add-btns .btn-income,
+html[data-w95="aqua"] body #add-btns .btn-expense, html[data-w95="aqua"] body #salary .btn-income,
+html[data-w95="aqua"] body .icon-btn, html[data-w95="aqua"] body .tx-actions button,
+html[data-w95="aqua"] body .sub-actions button, html[data-w95="aqua"] body .export-sheet-actions > button,
+html[data-w95="aqua"] body .theme-swatch, html[data-w95="aqua"] body .menu-row,
+html[data-w95="aqua"] body .cat-chip {
+    background: var(--aqua-gel-white) !important;
+    color: var(--w95-text) !important;
+    border: 1px solid #8c8c8c !important;
+    border-radius: 999px !important;
+    box-shadow: var(--aqua-btn-shadow) !important;
+    font-family: var(--w95-font-text) !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .7);
+    padding: 6px 16px !important;
+    min-height: 30px;
+}
+html[data-w95="aqua"] body .theme-swatch, html[data-w95="aqua"] body .menu-row { border-radius: 8px !important; padding: 6px !important; }
+html[data-w95="aqua"] body .cat-chip { padding: 2px 4px 2px 10px !important; min-height: 0; }
+html[data-w95="aqua"] body .tx-actions button, html[data-w95="aqua"] body .sub-actions button { padding: 3px 9px !important; min-height: 28px; }
+html[data-w95="aqua"] body .btn-secondary *, html[data-w95="aqua"] body .export-btn *, html[data-w95="aqua"] body label.btn-secondary *,
+html[data-w95="aqua"] body #settings button:not(.menu-row-btn) *, html[data-w95="aqua"] body .icon-btn * { color: var(--w95-text) !important; }
+/* Главная кнопка и выбранная — синий гель */
+html[data-w95="aqua"] body .btn-primary, html[data-w95="aqua"] body #settings button.btn-primary,
+html[data-w95="aqua"] body .export-sheet-actions > .btn-primary, html[data-w95="aqua"] body .icon-btn.selected,
+html[data-w95="aqua"] body .theme-swatch.is-active {
+    background: var(--aqua-gel-blue) !important;
+    border-color: #2a64b6 !important;
+    color: #fff !important;
+    text-shadow: 0 -1px 0 rgba(0, 40, 120, .35);
+}
+html[data-w95="aqua"] body .btn-primary *, html[data-w95="aqua"] body #settings button.btn-primary *,
+html[data-w95="aqua"] body .icon-btn.selected *, html[data-w95="aqua"] body .theme-swatch.is-active .theme-swatch-name { color: #fff !important; }
+/* Доход и расход — цветной текст на белом геле */
+html[data-w95="aqua"] body .btn-income, html[data-w95="aqua"] body .btn-income *,
+html[data-w95="aqua"] body #add-btns .btn-income, html[data-w95="aqua"] body #add-btns .btn-income *,
+html[data-w95="aqua"] body #salary .btn-income, html[data-w95="aqua"] body #salary .btn-income * { color: var(--w95-income) !important; font-weight: 700 !important; }
+html[data-w95="aqua"] body .btn-expense, html[data-w95="aqua"] body .btn-expense *,
+html[data-w95="aqua"] body #add-btns .btn-expense, html[data-w95="aqua"] body #add-btns .btn-expense * { color: var(--w95-expense) !important; font-weight: 700 !important; }
+/* Нажатие: мгновенно темнеет, без сдвига */
+html[data-w95="aqua"] body button:active:not(:disabled),
+html[data-w95="aqua"] body label.btn-secondary:active { filter: brightness(.86); }
+html[data-w95="aqua"] body .btn-primary:active, html[data-w95="aqua"] body .btn-secondary:active,
+html[data-w95="aqua"] body .btn-income:active, html[data-w95="aqua"] body .btn-expense:active,
+html[data-w95="aqua"] body .export-btn:active, html[data-w95="aqua"] body .pay-btn:active,
+html[data-w95="aqua"] body label.btn-secondary:active, html[data-w95="aqua"] body #settings button:not(.menu-row-btn):active,
+html[data-w95="aqua"] body #add-btns .btn-income:active, html[data-w95="aqua"] body #add-btns .btn-expense:active,
+html[data-w95="aqua"] body .icon-btn:active, html[data-w95="aqua"] body .tx-actions button:active,
+html[data-w95="aqua"] body .sub-actions button:active, html[data-w95="aqua"] body .export-sheet-actions > button:active {
+    padding: 6px 16px !important;
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, .22) !important;
+}
+html[data-w95="aqua"] body .btn-primary:active { background: var(--aqua-gel-blue-press) !important; }
+html[data-w95="aqua"] body button:focus-visible, html[data-w95="aqua"] body label.btn-secondary:focus-visible {
+    outline: none !important; box-shadow: 0 0 0 3px rgba(63, 136, 234, .55) !important;
+}
+
+/* Цифровая клавиатура, ПИН-код, кнопка синхронизации */
+html[data-w95="aqua"] body .ob-keypad button {
+    background: var(--aqua-gel-white) !important; border: 1px solid #8c8c8c !important; border-radius: 10px !important;
+    box-shadow: var(--aqua-btn-shadow) !important; font-family: var(--w95-font-text) !important;
+}
+html[data-w95="aqua"] body .ob-keypad button:active { padding: 0 !important; box-shadow: inset 0 2px 3px rgba(0, 0, 0, .22) !important; }
+html[data-w95="aqua"] body .pin-btn {
+    background: var(--aqua-gel-white) !important; border: 1px solid #8c8c8c !important; border-radius: 50% !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .3), inset 0 1px 0 #fff !important; width: 66px; height: 66px;
+}
+html[data-w95="aqua"] body .pin-btn:active { padding: 0 !important; }
+html[data-w95="aqua"] body .pin-screen h2 { color: #fff !important; text-shadow: 0 1px 3px rgba(0, 0, 0, .5); font-family: var(--w95-font-text); font-weight: 400; }
+html[data-w95="aqua"] body .pin-dots .dot { border-radius: 50% !important; background: rgba(255, 255, 255, .9) !important; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3) !important; }
+html[data-w95="aqua"] body .pin-dots .dot.filled { background: var(--aqua-gel-blue) !important; box-shadow: 0 0 0 1px #2a64b6 !important; }
+html[data-w95="aqua"] body .fab-sync {
+    border-radius: 50% !important; background: var(--aqua-gel-blue) !important; border: 1px solid #2a64b6 !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .6) !important;
+}
+html[data-w95="aqua"] body .fab-sync .material-icons { color: #fff !important; }
+html[data-w95="aqua"] body .fab-sync:active { filter: brightness(.86); }
+
+/* ---------- Сегменты (переключатель «Кто» в Oldbook): одна полоса по центру ---------- */
+html[data-w95="aqua"] body .ob-persons { display: flex !important; justify-content: center; gap: 0 !important; }
+html[data-w95="aqua"] body .ob-persons .icon-btn { flex: 0 1 112px; border-radius: 0 !important; margin-left: -1px !important; padding: 5px 10px !important; }
+html[data-w95="aqua"] body .ob-persons .icon-btn:first-child { border-radius: 999px 0 0 999px !important; margin-left: 0 !important; }
+html[data-w95="aqua"] body .ob-persons .icon-btn:last-child { border-radius: 0 999px 999px 0 !important; }
+
+/* ---------- Поля ввода ---------- */
+html[data-w95="aqua"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-w95="aqua"] body textarea {
+    background: #fff !important; color: var(--w95-text) !important;
+    border: 1px solid #9a9a9a !important; border-radius: 0 !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .26) !important;
+    font-family: var(--w95-font-text) !important; font-size: 14px;
+}
+html[data-w95="aqua"] body select {
+    background: #fff var(--aqua-select-arrow) no-repeat right 3px center / 20px 18px !important;
+    color: var(--w95-text) !important; border: 1px solid #9a9a9a !important; border-radius: 5px !important;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .12) !important; padding-right: 30px !important;
+    font-family: var(--w95-font-text) !important; font-size: 14px;
+}
+html[data-w95="aqua"] body input:focus, html[data-w95="aqua"] body select:focus, html[data-w95="aqua"] body textarea:focus {
+    outline: none !important; border-color: #3f88ea !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .18), 0 0 0 3px rgba(63, 136, 234, .55) !important;
+}
+/* Галочки и переключатели (если появятся) */
+html[data-w95="aqua"] body input[type="checkbox"], html[data-w95="aqua"] body input[type="radio"] {
+    -webkit-appearance: none; appearance: none; width: 15px; height: 15px; padding: 0 !important; margin: 0 6px 0 0 !important;
+    vertical-align: middle; border: 1px solid #8c8c8c !important; background: var(--aqua-gel-white) !important;
+    border-radius: 4px !important; box-shadow: inset 0 1px 1px #fff !important; position: relative;
+}
+html[data-w95="aqua"] body input[type="radio"] { border-radius: 50% !important; }
+html[data-w95="aqua"] body input[type="checkbox"]:checked, html[data-w95="aqua"] body input[type="radio"]:checked {
+    background: var(--aqua-gel-blue) !important; border-color: #2a64b6 !important;
+}
+html[data-w95="aqua"] body input[type="checkbox"]:checked::after { content: '✓'; position: absolute; inset: 0; color: #fff; font-size: 11px; line-height: 14px; text-align: center; }
+html[data-w95="aqua"] body input[type="radio"]:checked::after { content: ''; position: absolute; left: 4px; top: 4px; width: 5px; height: 5px; border-radius: 50% !important; background: #fff; }
+/* Ползунок громкости (если появится) — синий гелевый круг */
+html[data-w95="aqua"] body input[type="range"] {
+    -webkit-appearance: none; appearance: none; height: 6px; padding: 0 !important; border: none !important;
+    background: linear-gradient(to bottom, #c9c9c9, #f3f3f3) !important; border-radius: 3px !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3) !important;
+}
+html[data-w95="aqua"] body input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--aqua-gel-blue); border: 1px solid #2a64b6; box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+}
+
+/* ---------- Вдавленные панели и списки (скругление 6px) ---------- */
+html[data-w95="aqua"] body .balance-main, html[data-w95="aqua"] body .balance-info,
+html[data-w95="aqua"] body #tx-list, html[data-w95="aqua"] body #subs-list, html[data-w95="aqua"] body #salary-list,
+html[data-w95="aqua"] body .table-scroll, html[data-w95="aqua"] body .export-sheet-table,
+html[data-w95="aqua"] body .kpi, html[data-w95="aqua"] body .chart-box, html[data-w95="aqua"] body .cat-list,
+html[data-w95="aqua"] body .changelog, html[data-w95="aqua"] body .ob-amount-display, html[data-w95="aqua"] body .ob-list,
+html[data-w95="aqua"] body .custom-categories, html[data-w95="aqua"] body .sound-slots, html[data-w95="aqua"] body #splash-weather,
+html[data-w95="aqua"] body .ob-share-row, html[data-w95="aqua"] body .stats-summary .stat-value, html[data-w95="aqua"] body .theme-swatch-desk {
+    background: #fff !important;
+    border: 1px solid #b6b6b6 !important;
+    border-radius: 6px !important;
+    box-shadow: var(--aqua-panel-shadow) !important;
+}
+html[data-w95="aqua"] body .theme-swatch-desk { background-color: var(--w95-desktop) !important; }
+html[data-w95="aqua"] body .balance-main .limits, html[data-w95="aqua"] body .balance-info .info-lines { border-top-color: #dadada; }
+html[data-w95="aqua"] body .date-group-header {
+    background: linear-gradient(to bottom, #fbfbfb, #e2e2e2) !important; box-shadow: none !important;
+    border: none !important; border-bottom: 1px solid #c6c6c6 !important; border-top: 1px solid #fff !important;
+}
+html[data-w95="aqua"] body .date-group-header h4 { font-family: var(--w95-font-text) !important; }
+html[data-w95="aqua"] body .tx-item, html[data-w95="aqua"] body .sub-item { border-bottom: 1px solid #ececec !important; }
+html[data-w95="aqua"] body .tx-item:active, html[data-w95="aqua"] body .sub-item:active { background: #e3edfb !important; }
+html[data-w95="aqua"] body .analytics-table th {
+    background: linear-gradient(to bottom, #fbfbfb, #e1e1e1) !important; box-shadow: none !important;
+    border: 1px solid #c8c8c8 !important; font-family: var(--w95-font-text) !important; font-weight: 400;
+}
+html[data-w95="aqua"] body .export-sheet .export-table th { background: linear-gradient(to bottom, #fbfbfb, #e1e1e1) !important; color: var(--w95-text) !important; }
+html[data-w95="aqua"] body .ob-person { color: #fff !important; border-radius: 4px !important; border-color: rgba(0, 0, 0, .25) !important; }
+html[data-w95="aqua"] body .app-wrapper .cl-tag { color: #fff !important; border-radius: 999px !important; background: var(--aqua-select) !important; }
+html[data-w95="aqua"] body .google-avatar { border-radius: 50% !important; }
+
+/* Выделенный пункт списка — синий градиент */
+html[data-w95="aqua"] body .custom-dropdown { border: 1px solid #9a9a9a !important; border-radius: 6px !important; box-shadow: 0 6px 16px rgba(0, 0, 0, .25) !important; }
+html[data-w95="aqua"] body .dropdown-item:hover { background: var(--aqua-select) !important; color: #fff !important; }
+
+/* ---------- Прогресс: скруглённая полоса с синими косыми полосками ---------- */
+html[data-w95="aqua"] body .goal-progress {
+    background: linear-gradient(to bottom, #d9d9d9, #f4f4f4) !important; border-radius: 999px !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3) !important; padding: 2px; height: 16px !important;
+}
+html[data-w95="aqua"] body .goal-bar {
+    border-radius: 999px !important;
+    background:
+        repeating-linear-gradient(-45deg, rgba(255, 255, 255, .35) 0 6px, rgba(255, 255, 255, 0) 6px 12px),
+        linear-gradient(to bottom, #a9cdf7 0%, #3f88ea 50%, #5ea2f1 100%) !important;
+}
+
+/* ---------- Подсказки ---------- */
+html[data-w95="aqua"] body .app-toast {
+    background: #ffffc7 !important; color: #1a1a1a !important; border: 1px solid #a0a0a0 !important;
+    border-radius: 3px !important; box-shadow: 0 2px 6px rgba(0, 0, 0, .25) !important;
+}
+
+/* ---------- Заставка ---------- */
+html[data-w95="aqua"] body .splash-content::before {
+    background: var(--aqua-title) !important; color: var(--w95-text) !important; text-align: center;
+    margin: 0 -14px 14px !important; padding: 4px 70px !important; border-radius: 8px 8px 0 0 !important;
+    border-bottom: 1px solid #a9a9a9; font-family: var(--w95-font-text) !important; font-size: 13px !important; font-weight: 400 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .85);
+}
+html[data-w95="aqua"] body .splash-content::after { left: 9px; right: auto !important; top: 6px !important; width: 54px; height: 14px; background: var(--aqua-lights) no-repeat !important; }
+html[data-w95="aqua"] body .splash-content { padding: 0 14px 16px !important; }
+html[data-w95="aqua"] body #splash-greeting { font-family: var(--w95-font-text) !important; font-weight: 400; }
+html[data-w95="aqua"] body #splash-time {
+    font-family: var(--w95-font-text) !important; font-weight: 400 !important; color: #1a1a1a !important;
+    background: #fff !important; border: 1px solid #b6b6b6; border-radius: 6px !important; box-shadow: var(--aqua-panel-shadow) !important;
+}
+html[data-w95="aqua"] body .slider-container {
+    background: linear-gradient(to bottom, #d0d0d0, #f2f2f2) !important; border-radius: 999px !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, .35) !important;
+}
+html[data-w95="aqua"] body .slider-text { font-family: var(--w95-font-text) !important; font-size: 15px; color: #333 !important; -webkit-text-fill-color: #333 !important; }
+html[data-w95="aqua"] body .slider-thumb {
+    border-radius: 50% !important; width: 48px !important; height: 48px !important;
+    background: var(--aqua-gel-blue) !important; border: 1px solid #2a64b6 !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .7) !important;
+}
+html[data-w95="aqua"] body .slider-thumb .material-icons { color: #fff !important; }
+
+/* ---------- Полоса прокрутки внутри блоков: жёлоб, синяя «таблетка», обе стрелки внизу ---------- */
+html[data-w95="aqua"] body .w95-sb-track {
+    order: 0; border-radius: 7px !important;
+    background: linear-gradient(to right, #dedede, #f7f7f7 60%, #ececec) !important;
+    background-image: linear-gradient(to right, #dedede, #f7f7f7 60%, #ececec) !important;
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, .3) !important;
+}
+html[data-w95="aqua"] body .w95-sb-up { order: 1; margin-top: 2px; border-radius: 7px 7px 0 0 !important; }
+html[data-w95="aqua"] body .w95-sb-down { order: 2; border-radius: 0 0 7px 7px !important; }
+html[data-w95="aqua"] body .w95-sb-btn { background: var(--aqua-gel-white) !important; box-shadow: inset 0 0 0 1px #a5a5a5 !important; }
+html[data-w95="aqua"] body .w95-sb-thumb {
+    left: 1px; right: 1px; border-radius: 999px !important;
+    background: linear-gradient(to right, #6fa8ee, #b3d3f8 42%, #3f88ea 55%, #5d9ff0) !important;
+    box-shadow: inset 0 0 0 1px #2a64b6 !important;
+}
+@media (hover: hover) and (pointer: fine) {
+    html[data-w95="aqua"] body ::-webkit-scrollbar-track { background-color: #ececec !important; background-image: linear-gradient(to right, #dedede, #f7f7f7 60%, #ececec) !important; }
+    html[data-w95="aqua"] body ::-webkit-scrollbar-thumb {
+        background: linear-gradient(to right, #6fa8ee, #b3d3f8 42%, #3f88ea 55%, #5d9ff0) !important;
+        border-radius: 8px !important; border: 2px solid transparent; background-clip: padding-box !important;
+        box-shadow: inset 0 0 0 1px #2a64b6 !important;
+    }
+}
+
+/* ---------- Навигация: «док» на ПК ---------- */
+@media (min-width: 769px) {
+    html[data-w95="aqua"] body .sidebar {
+        position: fixed !important; left: 50%; bottom: 10px; top: auto; transform: translateX(-50%);
+        width: auto !important; height: auto !important; z-index: 1500;
+        padding: 6px 10px 4px !important;
+        background: rgba(255, 255, 255, .28) !important;
+        -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
+        border: 1px solid rgba(255, 255, 255, .55) !important; border-radius: 16px !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .3) !important;
+    }
+    html[data-w95="aqua"] body .sidebar-header { display: none !important; }
+    html[data-w95="aqua"] body .sidebar-nav { flex-direction: row !important; gap: 4px !important; padding: 0 !important; }
+    html[data-w95="aqua"] body .sidebar-nav button {
+        position: relative; flex-direction: column !important; justify-content: center !important; align-items: center;
+        width: 76px !important; padding: 4px 2px 10px !important; gap: 2px !important;
+        background: transparent !important; border-radius: 10px !important; box-shadow: none !important;
+    }
+    html[data-w95="aqua"] body .sidebar-nav button .material-icons {
+        flex: none; width: auto; font-size: 34px !important; color: #fff !important;
+        filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .35)); transition: transform .15s ease !important;
+    }
+    html[data-w95="aqua"] body .sidebar-nav button:hover .material-icons { transform: translateY(-4px) scale(1.12) !important; }
+    html[data-w95="aqua"] body .sidebar-nav button .nav-label {
+        font-family: var(--w95-font-text) !important; font-size: 11px !important; color: #fff !important;
+        text-align: center; text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+    }
+    html[data-w95="aqua"] body .sidebar-nav button:hover,
+    html[data-w95="aqua"] body .sidebar-nav button.active { background: rgba(255, 255, 255, .18) !important; }
+    html[data-w95="aqua"] body .sidebar-nav button.active::after {
+        content: ''; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%);
+        border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 5px solid #fff;
+    }
+    html[data-w95="aqua"] body main { padding-bottom: 120px !important; }
+    html[data-w95="aqua"] body .fab-sync { bottom: 24px !important; }
+}
+
+/* ---------- Навигация: полупрозрачная панель на телефоне ---------- */
+@media (max-width: 768px) {
+    html[data-w95="aqua"] body .mobile-nav {
+        background: rgba(255, 255, 255, .55) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
+        border-top: 1px solid rgba(255, 255, 255, .7) !important; box-shadow: 0 -2px 12px rgba(0, 0, 0, .2) !important;
+    }
+    html[data-w95="aqua"] body .mobile-nav button {
+        background: transparent !important; box-shadow: none !important; border-radius: 10px !important;
+        font-family: var(--w95-font-text) !important; font-size: 11px !important; font-weight: 400 !important;
+    }
+    html[data-w95="aqua"] body .mobile-nav button.active {
+        background: var(--aqua-gel-blue) !important; box-shadow: 0 0 0 1px #2a64b6 !important; font-weight: 400 !important;
+    }
+    html[data-w95="aqua"] body .mobile-nav button.active * { color: #fff !important; }
+    html[data-w95="aqua"] body .card > h3 { font-size: 13px !important; }
+    html[data-w95="aqua"] body header, html[data-w95="aqua"] body header[class] { margin: 8px 8px 0; }
+}
+
+/* Сенсорное управление: кнопки крупнее */
+@media (pointer: coarse) {
+    html[data-w95="aqua"] body .btn-primary, html[data-w95="aqua"] body .btn-secondary,
+    html[data-w95="aqua"] body .export-btn, html[data-w95="aqua"] body .icon-btn,
+    html[data-w95="aqua"] body #add-btns .btn-income, html[data-w95="aqua"] body #add-btns .btn-expense { min-height: 40px; }
+    html[data-w95="aqua"] body .tx-actions button, html[data-w95="aqua"] body .sub-actions button { min-height: 34px; min-width: 38px; }
+}
+
+/* Мини-превью темы в настройках (видно при любой теме): окошко со скруглением */
+html body .theme-swatch-aqua .theme-swatch-win { border-radius: 4px !important; }
+html body .theme-swatch-aqua .theme-swatch-title { border-radius: 3px 3px 0 0 !important; }
