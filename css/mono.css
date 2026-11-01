@@ -378,3 +378,34 @@ html body .theme-swatch-mono .theme-swatch-desk { background-size: 2px 2px !impo
 html body .theme-swatch-mono .theme-swatch-win { box-shadow: 0 0 0 1px #000, 2px 2px 0 1px #000 !important; }
 html body .theme-swatch-mono .theme-swatch-title { background: repeating-linear-gradient(to bottom, #000 0 1px, #fff 1px 2px) !important; border-bottom: 1px solid #000; }
 html body .theme-swatch-mono .theme-swatch-field { box-shadow: inset 0 0 0 1px #000 !important; }
+
+/* ---------- Новые блоки 3.7: папки тем, клавиатура, калькулятор, импорт ---------- */
+html[data-w95="mono"] body #settings #theme-picker .theme-folder { font-family: var(--w95-font-ui) !important; }
+html[data-w95="mono"] body #settings #theme-picker .theme-folder.is-open .tf-name { background: #000; color: #fff !important; outline: none; }
+html[data-w95="mono"] body #settings #theme-picker .theme-folder.is-current .tf-icon::after { background: #000; color: #fff; border-color: #000; }
+html[data-w95="mono"] body .tf-back, html[data-w95="mono"] body .tf-back::before {
+    background: #fff var(--mono-dither) 0 0 / 2px 2px !important; border-color: #000 !important;
+}
+html[data-w95="mono"] body .tf-paper { border-color: #000 !important; }
+html[data-w95="mono"] body .tf-front { background: #fff !important; border-color: #000 !important; box-shadow: none !important; }
+html[data-w95="mono"] body .theme-folder-panel { background: #fff; border: 1px solid #000; box-shadow: var(--mono-shadow); padding: 0 10px 10px; }
+html[data-w95="mono"] body .tf-panel-head {
+    background: var(--mono-stripes) center / calc(100% - 8px) 11px no-repeat, #fff !important;
+    border-bottom: 1px solid #000; margin: 0 -10px 10px; padding: 3px 34px !important; justify-content: center;
+}
+html[data-w95="mono"] body .tf-panel-head .tf-icon { display: none; }
+html[data-w95="mono"] body .tf-panel-title { flex: 0 1 auto; background: #fff; padding: 0 8px; color: #000 !important; font-weight: 700; }
+html[data-w95="mono"] body #settings #theme-picker .tf-panel-close {
+    position: absolute !important; left: 8px; top: 50%; transform: translateY(-50%);
+    width: 13px !important; height: 13px !important; background: #fff !important; border: 1px solid #000 !important; box-shadow: 0 0 0 3px #fff !important;
+}
+html[data-w95="mono"] body #settings #theme-picker .tf-panel-close .material-icons { font-size: 11px !important; color: #000 !important; opacity: 0; }
+html[data-w95="mono"] body #settings #theme-picker .tf-panel-close:active { background: #000 !important; }
+html[data-w95="mono"] body .tx-keypad-box, html[data-w95="mono"] body .calc-display, html[data-w95="mono"] body .calc-tape,
+html[data-w95="mono"] body .import-preview { background: #fff !important; border: 1px solid #000 !important; box-shadow: none !important; }
+html[data-w95="mono"] body .import-drop { border: 2px dashed #000 !important; background: #fff !important; }
+html[data-w95="mono"] body .calc-tape-row:hover { background: #000 !important; }
+html[data-w95="mono"] body .calc-tape-row:hover * { color: #fff !important; }
+html[data-w95="mono"] body .calc-keys button, html[data-w95="mono"] body .tx-keypad-box button { font-family: var(--w95-font-text) !important; font-weight: 700 !important; }
+html[data-w95="mono"] body .te-color input[type="color"] { border: 1px solid #000; box-shadow: none !important; background: #fff !important; }
+html[data-w95="mono"] body .import-preview th { background: #fff !important; }

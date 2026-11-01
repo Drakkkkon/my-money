@@ -1,0 +1,472 @@
+/* =========================================================================
+   ТЕМА «АЭРО» — по мотивам Windows Vista (2007)
+   Стеклянные полупрозрачные рамки окон с размытием фона и бликами, светлая рабочая область,
+   глянцевые кнопки с голубой подсветкой, чёрная стеклянная панель задач.
+   Без логотипов, фирменных значков, обоев и звуков Microsoft: всё нарисовано градиентами и простыми SVG.
+   Каждое правило начинается с html[data-w95="aero"], поэтому остальные темы этот файл не затрагивает.
+   Цвет стекла — переменные --w95-title / --w95-title-2 (их можно поменять в своей теме).
+   ========================================================================= */
+
+html[data-w95="aero"] body {
+    --aero-th: 34px; /* высота стеклянного заголовка окна */
+    --aero-tint: linear-gradient(to bottom, rgba(150, 190, 230, .55), rgba(80, 130, 190, .45));
+    --aero-gloss: linear-gradient(110deg, rgba(255, 255, 255, .42) 0%, rgba(255, 255, 255, .12) 16%, rgba(255, 255, 255, 0) 26%,
+        rgba(255, 255, 255, .2) 30%, rgba(255, 255, 255, 0) 36%, rgba(255, 255, 255, 0) 100%);
+    --aero-client: linear-gradient(var(--w95-face), var(--w95-face));
+    --aero-client-edge: linear-gradient(rgba(40, 60, 90, .55), rgba(40, 60, 90, .55));
+    --aero-window-shadow: inset 0 0 0 1px rgba(255, 255, 255, .5), 0 8px 26px rgba(0, 0, 0, .45);
+    --aero-btn: linear-gradient(to bottom, #f2f2f2 0%, #ebebeb 49%, #dddddd 50%, #cfcfcf 100%);
+    --aero-btn-hover: linear-gradient(to bottom, #eaf6fd 0%, #d9f0fc 49%, #bee6fd 50%, #a7d9f5 100%);
+    --aero-btn-press: linear-gradient(to bottom, #e5f4fc 0%, #c4e5f6 49%, #98d1ef 50%, #68b3db 100%);
+    --aero-sel: linear-gradient(to bottom, #dcebfc 0%, #c1dbfc 100%);
+    --aero-hot: linear-gradient(to bottom, #fafdfe 0%, #e8f5fd 100%);
+    --aero-taskbar: linear-gradient(to bottom, rgba(70, 80, 96, .8) 0%, rgba(24, 28, 38, .88) 50%, rgba(4, 6, 10, .94) 100%);
+    --aero-task-active: linear-gradient(to bottom, rgba(150, 200, 245, .6) 0%, rgba(70, 130, 200, .5) 50%, rgba(20, 70, 140, .55) 51%, rgba(70, 140, 215, .6) 100%);
+    --aero-task-hover: linear-gradient(to bottom, rgba(255, 255, 255, .26) 0%, rgba(255, 255, 255, .09) 50%, rgba(255, 255, 255, 0) 51%, rgba(255, 255, 255, .12) 100%);
+    --aero-orb: radial-gradient(circle at 50% 28%, #d4efff 0%, #59a5e6 38%, #11559f 70%, #062a5a 100%);
+    /* Кнопки окна: свернуть и развернуть — стекло, закрыть — красная */
+    --aero-caption: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='98' height='20'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='.8'/%3E%3Cstop offset='.48' stop-color='%23fff' stop-opacity='.35'/%3E%3Cstop offset='.5' stop-color='%23a9c3e0' stop-opacity='.45'/%3E%3Cstop offset='1' stop-color='%23e2eef9' stop-opacity='.75'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23f3b9a9'/%3E%3Cstop offset='.48' stop-color='%23dc7d63'/%3E%3Cstop offset='.5' stop-color='%23c43d27'/%3E%3Cstop offset='1' stop-color='%23e08a6c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M.5 0V14.5a4 4 0 0 0 4 4H54V0z' fill='url(%23g)' stroke='%23253447'/%3E%3Cpath d='M27.5 0V18.5' stroke='%23253447'/%3E%3Cpath d='M54 0H97.5V14.5a4 4 0 0 1-4 4H54z' fill='url(%23r)' stroke='%234b170e'/%3E%3Crect x='9' y='10' width='10' height='3' fill='%23fff' stroke='%231d2b3a' stroke-width='.8'/%3E%3Crect x='35' y='4.5' width='12' height='9' fill='none' stroke='%231d2b3a' stroke-width='3'/%3E%3Crect x='35' y='4.5' width='12' height='9' fill='none' stroke='%23fff' stroke-width='1.4'/%3E%3Cpath d='M70 4.5l10 9M80 4.5l-10 9' stroke='%234b170e' stroke-width='3.4' stroke-linecap='round'/%3E%3Cpath d='M70 4.5l10 9M80 4.5l-10 9' stroke='%23fff' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+    --aero-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0h9L4.5 5z' fill='%23222'/%3E%3C/svg%3E");
+}
+/* Цвет стекла из темы (в старых браузерах — стандартный голубой) */
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+    html[data-w95="aero"] body {
+        --aero-tint: linear-gradient(to bottom, color-mix(in srgb, var(--w95-title) 62%, transparent), color-mix(in srgb, var(--w95-title-2) 52%, transparent));
+    }
+}
+
+html[data-w95="aero"] body ::selection { background: #3399ff; color: #fff; }
+
+/* ---------- Окна: стеклянная рамка, светлая рабочая область ---------- */
+html[data-w95="aero"] body .card,
+html[data-w95="aero"] body main > .tab > .card,
+html[data-w95="aero"] body .tx-container > .forms,
+html[data-w95="aero"] body .tx-container > .history,
+html[data-w95="aero"] body header,
+html[data-w95="aero"] body header[class],
+html[data-w95="aero"] body .splash-content,
+html[data-w95="aero"] body .export-sheet,
+html[data-w95="aero"] body .theme-folder-panel {
+    background:
+        var(--aero-client) 7px var(--aero-th) / calc(100% - 14px) calc(100% - var(--aero-th) - 7px) no-repeat,
+        var(--aero-client-edge) 6px calc(var(--aero-th) - 1px) / calc(100% - 12px) calc(100% - var(--aero-th) - 5px) no-repeat,
+        var(--aero-gloss),
+        var(--aero-tint) !important;
+    -webkit-backdrop-filter: blur(9px) saturate(1.4);
+    backdrop-filter: blur(9px) saturate(1.4);
+    border: 1px solid rgba(15, 25, 40, .8) !important;
+    border-radius: 8px 8px 6px 6px !important;
+    box-shadow: var(--aero-window-shadow) !important;
+    padding: 0 14px 14px !important;
+}
+html[data-w95="aero"] body header .balance-card { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
+html[data-w95="aero"] body .export-sheet-overlay { background: rgba(0, 10, 25, .3) !important; }
+html[data-w95="aero"] body .card.is-maximized { border-radius: 0 !important; }
+
+/* Заголовок окна: текст на стекле с белым свечением, кнопки окна справа сверху */
+html[data-w95="aero"] body .card > h3,
+html[data-w95="aero"] body .header-top,
+html[data-w95="aero"] body .export-sheet-head,
+html[data-w95="aero"] body .tf-panel-head {
+    position: relative;
+    display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 6px !important;
+    height: var(--aero-th); min-height: var(--aero-th);
+    margin: 0 -14px 12px !important;
+    padding: 0 112px 0 12px !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--w95-title-text) !important;
+    font-family: var(--w95-font-text) !important;
+    font-size: 14px !important; font-weight: 400 !important;
+    text-shadow: 0 0 6px #fff, 0 0 10px #fff, 0 0 2px #fff;
+    white-space: nowrap; overflow: visible;
+}
+html[data-w95="aero"] body .card > h3 *,
+html[data-w95="aero"] body .header-top *,
+html[data-w95="aero"] body .export-sheet-head h3,
+html[data-w95="aero"] body .export-sheet-head h3 *,
+html[data-w95="aero"] body .tf-panel-title { color: var(--w95-title-text) !important; }
+html[data-w95="aero"] body .export-sheet-head h3,
+html[data-w95="aero"] body .header-top .mobile-title {
+    margin: 0 !important; font-family: var(--w95-font-text) !important; font-size: 14px !important; font-weight: 400 !important;
+    overflow: hidden; text-overflow: ellipsis;
+}
+html[data-w95="aero"] body .card > h3 .material-icons { font-size: 18px !important; color: #1b4f80 !important; }
+html[data-w95="aero"] body .header-top .app-logo { width: 18px; height: 18px; border-radius: 3px !important; box-shadow: none; }
+html[data-w95="aero"] body .card > h3::after,
+html[data-w95="aero"] body .header-top::after,
+html[data-w95="aero"] body .export-sheet-head::after {
+    content: '' !important; position: absolute; right: 6px !important; left: auto !important; top: -1px !important;
+    width: 98px; height: 20px; margin: 0 !important;
+    background: var(--aero-caption) no-repeat !important; filter: none !important; display: block !important;
+}
+html[data-w95="aero"] body .export-sheet-head:has(.export-sheet-close:hover)::after { filter: brightness(1.12) saturate(1.2) !important; }
+/* Настоящая кнопка закрытия диалога лежит поверх красной кнопки рисунка */
+html[data-w95="aero"] body .export-sheet-close {
+    position: absolute !important; right: 6px; top: -1px; z-index: 1;
+    width: 44px !important; height: 20px !important; min-height: 0 !important; padding: 0 !important;
+    background: transparent !important; box-shadow: none !important; border: none !important; border-radius: 0 0 4px 0 !important;
+}
+html[data-w95="aero"] body .export-sheet-close .material-icons { opacity: 0; }
+
+/* Настоящие кнопки окна (список Oldbook) */
+html[data-w95="aero"] body .card > h3.has-controls::after { display: none !important; }
+html[data-w95="aero"] body .w95-ctls { right: 6px; top: -1px; transform: none; gap: 0; }
+html[data-w95="aero"] body .w95-ctl {
+    width: 27px !important; height: 20px !important; margin: 0 0 0 -1px !important;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, .8) 0%, rgba(255, 255, 255, .35) 48%, rgba(169, 195, 224, .45) 50%, rgba(226, 238, 249, .75) 100%) !important;
+    border: 1px solid #253447 !important; border-top: none !important; box-shadow: none !important;
+}
+html[data-w95="aero"] body .w95-ctl-min { border-radius: 0 0 0 4px !important; }
+html[data-w95="aero"] body .w95-ctl-close {
+    width: 44px !important; border-radius: 0 0 4px 0 !important; border-color: #4b170e !important;
+    background: linear-gradient(to bottom, #f3b9a9 0%, #dc7d63 48%, #c43d27 50%, #e08a6c 100%) !important;
+}
+html[data-w95="aero"] body .w95-ctl-close::before, html[data-w95="aero"] body .w95-ctl-close::after { left: 20px; top: 3px; background: #fff; box-shadow: 0 0 1px #4b170e; }
+html[data-w95="aero"] body .w95-ctl-min::after { background: #fff; box-shadow: 0 0 0 1px #1d2b3a; left: 8px; bottom: 5px; }
+html[data-w95="aero"] body .w95-ctl-max::after { border-color: #fff !important; box-shadow: 0 0 0 1px #1d2b3a; left: 7px; top: 4px; }
+html[data-w95="aero"] body .w95-ctl-max:hover { filter: brightness(1.1); }
+
+/* ---------- Кнопки: глянцевые, при наведении — голубое свечение ---------- */
+html[data-w95="aero"] body .btn-primary, html[data-w95="aero"] body .btn-secondary,
+html[data-w95="aero"] body .btn-income, html[data-w95="aero"] body .btn-expense,
+html[data-w95="aero"] body .export-btn, html[data-w95="aero"] body .pay-btn,
+html[data-w95="aero"] body label.btn-secondary, html[data-w95="aero"] body #settings button:not(.menu-row-btn),
+html[data-w95="aero"] body #reports .export-btn, html[data-w95="aero"] body #add-btns .btn-income,
+html[data-w95="aero"] body #add-btns .btn-expense, html[data-w95="aero"] body #salary .btn-income,
+html[data-w95="aero"] body .icon-btn, html[data-w95="aero"] body .tx-actions button,
+html[data-w95="aero"] body .sub-actions button, html[data-w95="aero"] body .export-sheet-actions > button,
+html[data-w95="aero"] body .theme-swatch, html[data-w95="aero"] body .menu-row,
+html[data-w95="aero"] body .cat-chip, html[data-w95="aero"] body .ob-keypad button {
+    background: var(--aero-btn) !important;
+    color: #000 !important;
+    border: 1px solid #707070 !important;
+    border-radius: 3px !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .75) !important;
+    font-family: var(--w95-font-text) !important;
+    font-weight: 400 !important;
+    text-shadow: none;
+    transition: background-color .2s, border-color .2s !important;
+}
+html[data-w95="aero"] body .ob-keypad button { font-weight: 600 !important; }
+html[data-w95="aero"] body .btn-secondary *, html[data-w95="aero"] body .export-btn *, html[data-w95="aero"] body label.btn-secondary *,
+html[data-w95="aero"] body #settings button:not(.menu-row-btn) *, html[data-w95="aero"] body .icon-btn *,
+html[data-w95="aero"] body .btn-primary * { color: #000 !important; }
+/* Главная кнопка — с голубым внутренним свечением, как кнопка по умолчанию */
+html[data-w95="aero"] body .btn-primary, html[data-w95="aero"] body #settings button.btn-primary,
+html[data-w95="aero"] body .export-sheet-actions > .btn-primary {
+    border-color: #3c7fb1 !important;
+    box-shadow: inset 0 0 0 1px rgba(72, 215, 251, .85), inset 0 0 0 2px rgba(255, 255, 255, .6) !important;
+}
+@media (hover: hover) {
+    html[data-w95="aero"] body .btn-primary:hover, html[data-w95="aero"] body .btn-secondary:hover,
+    html[data-w95="aero"] body .btn-income:hover, html[data-w95="aero"] body .btn-expense:hover,
+    html[data-w95="aero"] body .export-btn:hover, html[data-w95="aero"] body .pay-btn:hover,
+    html[data-w95="aero"] body label.btn-secondary:hover, html[data-w95="aero"] body #settings button:not(.menu-row-btn):hover,
+    html[data-w95="aero"] body #reports .export-btn:hover, html[data-w95="aero"] body #add-btns .btn-income:hover,
+    html[data-w95="aero"] body #add-btns .btn-expense:hover, html[data-w95="aero"] body #salary .btn-income:hover,
+    html[data-w95="aero"] body .icon-btn:hover, html[data-w95="aero"] body .tx-actions button:hover,
+    html[data-w95="aero"] body .sub-actions button:hover, html[data-w95="aero"] body .export-sheet-actions > button:hover,
+    html[data-w95="aero"] body .theme-swatch:hover, html[data-w95="aero"] body .ob-keypad button:hover {
+        background: var(--aero-btn-hover) !important; border-color: #3c7fb1 !important;
+    }
+}
+html[data-w95="aero"] body .icon-btn.selected, html[data-w95="aero"] body .theme-swatch.is-active,
+html[data-w95="aero"] body .btn-primary:active, html[data-w95="aero"] body .btn-secondary:active,
+html[data-w95="aero"] body .btn-income:active, html[data-w95="aero"] body .btn-expense:active,
+html[data-w95="aero"] body .export-btn:active, html[data-w95="aero"] body .pay-btn:active,
+html[data-w95="aero"] body label.btn-secondary:active, html[data-w95="aero"] body #settings button:not(.menu-row-btn):active,
+html[data-w95="aero"] body #add-btns .btn-income:active, html[data-w95="aero"] body #add-btns .btn-expense:active,
+html[data-w95="aero"] body #salary .btn-income:active, html[data-w95="aero"] body .icon-btn:active,
+html[data-w95="aero"] body .tx-actions button:active, html[data-w95="aero"] body .sub-actions button:active,
+html[data-w95="aero"] body .export-sheet-actions > button:active, html[data-w95="aero"] body .ob-keypad button:active {
+    background: var(--aero-btn-press) !important; border-color: #2c628b !important;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, .25) !important;
+}
+html[data-w95="aero"] body .btn-primary:active, html[data-w95="aero"] body .btn-secondary:active,
+html[data-w95="aero"] body .export-btn:active, html[data-w95="aero"] body #settings button:not(.menu-row-btn):active,
+html[data-w95="aero"] body #add-btns .btn-income:active, html[data-w95="aero"] body #add-btns .btn-expense:active { padding: 6px 14px !important; }
+html[data-w95="aero"] body .ob-keypad button:active { padding: 0 !important; }
+html[data-w95="aero"] body .btn-income, html[data-w95="aero"] body .btn-income *,
+html[data-w95="aero"] body #add-btns .btn-income, html[data-w95="aero"] body #add-btns .btn-income *,
+html[data-w95="aero"] body #salary .btn-income, html[data-w95="aero"] body #salary .btn-income * { color: var(--w95-income) !important; font-weight: 600 !important; }
+html[data-w95="aero"] body .btn-expense, html[data-w95="aero"] body .btn-expense *,
+html[data-w95="aero"] body #add-btns .btn-expense, html[data-w95="aero"] body #add-btns .btn-expense * { color: var(--w95-expense) !important; font-weight: 600 !important; }
+html[data-w95="aero"] body button:focus-visible, html[data-w95="aero"] body label.btn-secondary:focus-visible {
+    outline: 1px dotted #000 !important; outline-offset: -4px !important;
+}
+html[data-w95="aero"] body .theme-swatch, html[data-w95="aero"] body .menu-row { padding: 6px !important; }
+html[data-w95="aero"] body .theme-swatch-name { color: #000 !important; }
+
+/* ПИН-код, кнопка синхронизации — стеклянные круги */
+html[data-w95="aero"] body .pin-screen h2 { color: #fff !important; text-shadow: 0 0 8px rgba(120, 200, 255, .8), 0 1px 2px #000; font-family: var(--w95-font-text); font-weight: 400; }
+html[data-w95="aero"] body .pin-btn {
+    border-radius: 50% !important; width: 68px; height: 68px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, .45) 0%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .04) 51%, rgba(255, 255, 255, .2) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, .55) !important; box-shadow: 0 2px 8px rgba(0, 0, 0, .4), inset 0 0 0 1px rgba(0, 0, 0, .25) !important;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+html[data-w95="aero"] body .pin-btn, html[data-w95="aero"] body .pin-btn * { color: #fff !important; text-shadow: 0 1px 2px #000; }
+html[data-w95="aero"] body .pin-btn:active { padding: 0 !important; background: var(--aero-task-active) !important; }
+html[data-w95="aero"] body .pin-dots .dot { border-radius: 50% !important; background: rgba(255, 255, 255, .85) !important; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .35) !important; }
+html[data-w95="aero"] body .pin-dots .dot.filled { background: var(--aero-orb) !important; box-shadow: 0 0 6px rgba(120, 200, 255, .9) !important; }
+html[data-w95="aero"] body .fab-sync {
+    border-radius: 50% !important; background: var(--aero-orb) !important; border: 1px solid rgba(0, 0, 0, .6) !important;
+    box-shadow: 0 0 10px rgba(100, 190, 255, .55), inset 0 1px 0 rgba(255, 255, 255, .7) !important;
+}
+html[data-w95="aero"] body .fab-sync .material-icons { color: #fff !important; }
+html[data-w95="aero"] body .fab-sync:active { filter: brightness(1.15); }
+
+/* ---------- Поля ввода ---------- */
+html[data-w95="aero"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-w95="aero"] body textarea {
+    background: var(--w95-field) !important; color: var(--w95-text) !important;
+    border: 1px solid !important; border-color: #abadb3 #dbdfe6 #e3e9ef #e2e3ea !important; border-radius: 2px !important;
+    box-shadow: none !important; font-family: var(--w95-font-text) !important;
+}
+html[data-w95="aero"] body input:hover, html[data-w95="aero"] body textarea:hover { border-color: #5794bf #b7d5ea #c7e2f1 #c5daed !important; }
+html[data-w95="aero"] body input:focus, html[data-w95="aero"] body textarea:focus, html[data-w95="aero"] body select:focus {
+    outline: none !important; border-color: #3d7bad #a4c9e3 #b7d9ed #b5cfe7 !important;
+}
+html[data-w95="aero"] body select {
+    background: var(--aero-select-arrow) no-repeat right 9px center / 9px 5px, var(--aero-btn) !important;
+    color: #000 !important; border: 1px solid #707070 !important; border-radius: 3px !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .75) !important; padding-right: 28px !important;
+    font-family: var(--w95-font-text) !important;
+}
+html[data-w95="aero"] body select:hover { background: var(--aero-select-arrow) no-repeat right 9px center / 9px 5px, var(--aero-btn-hover) !important; border-color: #3c7fb1 !important; }
+html[data-w95="aero"] body input::placeholder { color: #6d6d6d !important; font-style: italic; }
+html[data-w95="aero"] body input[type="checkbox"], html[data-w95="aero"] body input[type="radio"] {
+    -webkit-appearance: none; appearance: none; width: 14px; height: 14px; padding: 0 !important; margin: 0 6px 0 0 !important;
+    vertical-align: middle; position: relative; border: 1px solid #8e8f8f !important; border-radius: 2px !important;
+    background: linear-gradient(135deg, #dcdcdc, #fff) !important; box-shadow: inset 0 0 0 2px #f4f4f4 !important;
+}
+html[data-w95="aero"] body input[type="radio"] { border-radius: 50% !important; }
+html[data-w95="aero"] body input[type="checkbox"]:checked::after { content: '✓'; position: absolute; inset: -2px 0 0; text-align: center; color: #1c4f84; font-size: 13px; font-weight: 700; line-height: 14px; }
+html[data-w95="aero"] body input[type="radio"]:checked::after { content: ''; position: absolute; left: 3px; top: 3px; width: 6px; height: 6px; border-radius: 50% !important; background: radial-gradient(circle at 40% 35%, #8fd0ff, #1c64b4); }
+html[data-w95="aero"] body input[type="range"] {
+    -webkit-appearance: none; appearance: none; height: 4px; padding: 0 !important; border: 1px solid #b8b8b8 !important;
+    background: #e7eaea !important; border-radius: 2px !important; box-shadow: none !important;
+}
+html[data-w95="aero"] body input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 20px; border-radius: 2px; border: 1px solid #707070; background: var(--aero-btn); }
+html[data-w95="aero"] body input[type="color"] { border: 1px solid #707070 !important; border-radius: 3px !important; background: var(--aero-btn) !important; box-shadow: none !important; }
+
+/* ---------- Панели и списки ---------- */
+html[data-w95="aero"] body .balance-main, html[data-w95="aero"] body .balance-info,
+html[data-w95="aero"] body #tx-list, html[data-w95="aero"] body #subs-list, html[data-w95="aero"] body #salary-list,
+html[data-w95="aero"] body .table-scroll, html[data-w95="aero"] body .export-sheet-table,
+html[data-w95="aero"] body .kpi, html[data-w95="aero"] body .chart-box, html[data-w95="aero"] body .cat-list,
+html[data-w95="aero"] body .changelog, html[data-w95="aero"] body .ob-amount-display, html[data-w95="aero"] body .ob-list,
+html[data-w95="aero"] body .custom-categories, html[data-w95="aero"] body .sound-slots, html[data-w95="aero"] body #splash-weather,
+html[data-w95="aero"] body .ob-share-row, html[data-w95="aero"] body .stats-summary .stat-value, html[data-w95="aero"] body .theme-swatch-desk,
+html[data-w95="aero"] body .tx-keypad-box, html[data-w95="aero"] body .calc-display, html[data-w95="aero"] body .calc-tape,
+html[data-w95="aero"] body .import-preview, html[data-w95="aero"] body .import-drop {
+    background: var(--w95-field) !important;
+    border: 1px solid #b5b5b5 !important;
+    border-radius: 3px !important;
+    box-shadow: none !important;
+}
+html[data-w95="aero"] body .theme-swatch-desk { background-color: var(--w95-desktop) !important; }
+html[data-w95="aero"] body .import-drop { border-style: dashed !important; border-color: #7da2ce !important; }
+html[data-w95="aero"] body .balance-main .limits, html[data-w95="aero"] body .balance-info .info-lines { border-top-color: #e2e2e2; }
+html[data-w95="aero"] body .date-group-header {
+    background: linear-gradient(to right, #c4d6ee, rgba(196, 214, 238, 0)) left bottom / 100% 1px no-repeat !important;
+    box-shadow: none !important; border: none !important;
+}
+html[data-w95="aero"] body .date-group-header h4 { color: #1e3287 !important; font-family: var(--w95-font-text) !important; }
+html[data-w95="aero"] body .tx-item, html[data-w95="aero"] body .sub-item { border-bottom: 1px solid #eef1f5 !important; }
+@media (hover: hover) {
+    html[data-w95="aero"] body .tx-item:hover, html[data-w95="aero"] body .sub-item:hover { background: var(--aero-hot) !important; }
+}
+html[data-w95="aero"] body .tx-item:active, html[data-w95="aero"] body .sub-item:active { background: var(--aero-sel) !important; }
+html[data-w95="aero"] body .analytics-table th, html[data-w95="aero"] body .export-sheet .export-table th {
+    background: linear-gradient(to bottom, #ffffff, #f1f2f4) !important; color: #4c607a !important; box-shadow: none !important;
+    border: none !important; border-right: 1px solid #d5d5d5 !important; border-bottom: 1px solid #d5d5d5 !important;
+    font-family: var(--w95-font-text) !important; font-weight: 400;
+}
+html[data-w95="aero"] body .analytics-table td { border: 1px solid #e5e5e5 !important; }
+html[data-w95="aero"] body .ob-person { color: #fff !important; border-radius: 3px !important; border-color: rgba(0, 0, 0, .3) !important; }
+html[data-w95="aero"] body .app-wrapper .cl-tag { color: #fff !important; border-radius: 3px !important; background: linear-gradient(#5aa3e6, #2a6cb3) !important; }
+html[data-w95="aero"] body .google-avatar { border-radius: 3px !important; }
+html[data-w95="aero"] body .menu-row-icon { color: #1b4f80 !important; }
+
+/* Выпадающий список и подсказки */
+html[data-w95="aero"] body .custom-dropdown { border: 1px solid #979797 !important; border-radius: 3px !important; box-shadow: 2px 3px 8px rgba(0, 0, 0, .3) !important; }
+html[data-w95="aero"] body .dropdown-item:hover { background: var(--aero-sel) !important; color: #000 !important; box-shadow: inset 0 0 0 1px #7da2ce; border-radius: 3px !important; }
+html[data-w95="aero"] body .app-toast {
+    background: linear-gradient(to bottom, #ffffff, #e4e5f0) !important; color: #3b3b3b !important;
+    border: 1px solid #767676 !important; border-radius: 3px !important; box-shadow: 1px 2px 5px rgba(0, 0, 0, .3) !important;
+}
+
+/* ---------- Прогресс: зелёная глянцевая полоса с бегущим бликом ---------- */
+html[data-w95="aero"] body .goal-progress {
+    background: linear-gradient(to bottom, #f4f4f4, #dcdcdc) !important; border: 1px solid #b2b2b2 !important;
+    border-radius: 3px !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .7) !important; padding: 1px; height: 18px !important;
+}
+html[data-w95="aero"] body .goal-bar {
+    position: relative; overflow: hidden; border-radius: 2px !important;
+    background: linear-gradient(to bottom, #e0f5d6 0%, #9fdc81 45%, #37b012 50%, #56c42e 100%) !important;
+}
+html[data-w95="aero"] body .goal-bar::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 60px; left: -60px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .7), rgba(255, 255, 255, 0));
+    animation: aeroShine 2.6s linear infinite;
+}
+@keyframes aeroShine { from { left: -60px; } to { left: 100%; } }
+
+/* ---------- Заставка ---------- */
+html[data-w95="aero"] body .splash-content { position: relative; padding: 0 14px 16px !important; }
+html[data-w95="aero"] body .splash-content::before {
+    background: transparent !important; color: var(--w95-title-text) !important; text-align: left;
+    height: var(--aero-th); line-height: var(--aero-th);
+    margin: 0 -14px 14px !important; padding: 0 112px 0 12px !important;
+    font-family: var(--w95-font-text) !important; font-size: 14px !important; font-weight: 400 !important;
+    text-shadow: 0 0 6px #fff, 0 0 10px #fff;
+}
+html[data-w95="aero"] body .splash-content::after { right: 6px !important; top: -1px !important; width: 98px; height: 20px; background: var(--aero-caption) no-repeat !important; }
+html[data-w95="aero"] body #splash-greeting { font-family: var(--w95-font-text) !important; font-weight: 300; }
+html[data-w95="aero"] body #splash-time {
+    font-family: var(--w95-font-text) !important; font-weight: 300 !important; color: #1e3287 !important;
+    background: var(--w95-field) !important; border: 1px solid #b5b5b5; border-radius: 3px !important; box-shadow: none !important;
+}
+html[data-w95="aero"] body .slider-container {
+    background: var(--aero-taskbar) !important; border: 1px solid rgba(255, 255, 255, .35); border-radius: 8px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .4) !important;
+    -webkit-backdrop-filter: blur(10px) !important; backdrop-filter: blur(10px) !important;
+}
+html[data-w95="aero"] body .slider-text { color: #fff !important; -webkit-text-fill-color: #fff !important; font-family: var(--w95-font-text) !important; }
+html[data-w95="aero"] body .slider-thumb {
+    border-radius: 50% !important; width: 48px !important; height: 48px !important;
+    background: var(--aero-orb) !important; border: 1px solid rgba(0, 0, 0, .6) !important;
+    box-shadow: 0 0 10px rgba(100, 190, 255, .7), inset 0 1px 0 rgba(255, 255, 255, .7) !important;
+}
+html[data-w95="aero"] body .slider-thumb .material-icons { color: #fff !important; }
+
+/* ---------- Полосы прокрутки: светлый жёлоб, глянцевый ползунок с насечками ---------- */
+html[data-w95="aero"] body .w95-sb-track {
+    background: linear-gradient(to right, #e3e3e3, #f2f2f2 40%, #eaeaea) !important;
+    box-shadow: inset 0 0 0 1px #d8d8d8 !important;
+}
+html[data-w95="aero"] body .w95-sb-btn {
+    background: linear-gradient(to right, #f6f6f6, #e5e5e5 49%, #d7d7d7 50%, #e6e6e6) !important;
+    box-shadow: inset 0 0 0 1px #9c9c9c !important; border-radius: 2px !important;
+}
+html[data-w95="aero"] body .w95-sb-thumb {
+    border-radius: 3px !important; box-shadow: inset 0 0 0 1px #979797 !important;
+    background:
+        linear-gradient(#8a8a8a, #8a8a8a) center calc(50% - 3px) / 7px 1px no-repeat,
+        linear-gradient(#8a8a8a, #8a8a8a) center 50% / 7px 1px no-repeat,
+        linear-gradient(#8a8a8a, #8a8a8a) center calc(50% + 3px) / 7px 1px no-repeat,
+        linear-gradient(to right, #f5f5f5, #e6e6e6 49%, #d4d4d4 50%, #e2e2e2) !important;
+}
+html[data-w95="aero"] body .w95-sb-thumb:hover, html[data-w95="aero"] body .w95-sb-thumb.is-dragging {
+    box-shadow: inset 0 0 0 1px #3c7fb1 !important;
+    background:
+        linear-gradient(#3c7fb1, #3c7fb1) center calc(50% - 3px) / 7px 1px no-repeat,
+        linear-gradient(#3c7fb1, #3c7fb1) center 50% / 7px 1px no-repeat,
+        linear-gradient(#3c7fb1, #3c7fb1) center calc(50% + 3px) / 7px 1px no-repeat,
+        linear-gradient(to right, #e3f4fc, #c7e7f8 49%, #a6d8f4 50%, #b9e2f8) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+    html[data-w95="aero"] body ::-webkit-scrollbar-track { background: linear-gradient(to right, #e3e3e3, #f2f2f2 40%, #eaeaea) !important; }
+    html[data-w95="aero"] body ::-webkit-scrollbar-thumb {
+        background: linear-gradient(to right, #f5f5f5, #e6e6e6 49%, #d4d4d4 50%, #e2e2e2) !important;
+        box-shadow: inset 0 0 0 1px #979797 !important; border-radius: 3px !important;
+    }
+    html[data-w95="aero"] body ::-webkit-scrollbar-thumb:hover { background: linear-gradient(to right, #e3f4fc, #c7e7f8 49%, #a6d8f4 50%, #b9e2f8) !important; box-shadow: inset 0 0 0 1px #3c7fb1 !important; }
+}
+
+/* ---------- ПК: чёрная стеклянная панель задач внизу с круглой кнопкой ---------- */
+@media (min-width: 769px) {
+    html[data-w95="aero"] body .sidebar {
+        position: fixed !important; left: 0; right: 0; bottom: 0; top: auto;
+        width: auto !important; height: 46px !important; z-index: 1500;
+        flex-direction: row !important; align-items: center; gap: 8px;
+        padding: 0 10px 0 6px !important;
+        background: var(--aero-taskbar) !important;
+        -webkit-backdrop-filter: blur(12px) saturate(1.3); backdrop-filter: blur(12px) saturate(1.3);
+        border: none !important; border-top: 1px solid rgba(255, 255, 255, .35) !important; border-radius: 0 !important;
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, .6) !important;
+    }
+    html[data-w95="aero"] body .sidebar-header {
+        flex: 0 0 auto; width: 40px; height: 40px; padding: 0 !important; justify-content: center !important;
+        background: var(--aero-orb) !important; border: 1px solid rgba(0, 0, 0, .7) !important; border-radius: 50% !important;
+        box-shadow: 0 0 10px rgba(100, 190, 255, .6), inset 0 1px 0 rgba(255, 255, 255, .7) !important;
+    }
+    html[data-w95="aero"] body .sidebar-header h2 { display: none; }
+    html[data-w95="aero"] body .sidebar-header .app-logo { width: 24px; height: 24px; border-radius: 50% !important; box-shadow: none; }
+    html[data-w95="aero"] body .sidebar-nav { flex-direction: row !important; flex: 1 1 auto; min-width: 0; gap: 3px !important; padding: 0 !important; overflow: hidden; }
+    html[data-w95="aero"] body .sidebar-nav button {
+        flex: 0 1 150px; min-width: 0; height: 38px; width: auto !important;
+        padding: 0 10px !important; gap: 6px !important;
+        background: transparent !important; border: 1px solid transparent !important; border-radius: 3px !important; box-shadow: none !important;
+        font-family: var(--w95-font-text) !important; font-size: 13px !important; white-space: nowrap;
+    }
+    html[data-w95="aero"] body .sidebar-nav button, html[data-w95="aero"] body .sidebar-nav button * { color: #fff !important; }
+    html[data-w95="aero"] body .sidebar-nav button .nav-label { overflow: hidden; text-overflow: ellipsis; }
+    html[data-w95="aero"] body .sidebar-nav button .material-icons { font-size: 20px !important; flex: none; width: auto; filter: drop-shadow(0 1px 1px #000); }
+    html[data-w95="aero"] body .sidebar-nav button:hover { background: var(--aero-task-hover) !important; border-color: rgba(255, 255, 255, .3) !important; }
+    html[data-w95="aero"] body .sidebar-nav button.active {
+        background: var(--aero-task-active) !important; border-color: rgba(160, 210, 255, .6) !important;
+        box-shadow: inset 0 0 6px rgba(160, 220, 255, .6) !important;
+    }
+    html[data-w95="aero"] body main { padding-bottom: 80px !important; }
+    html[data-w95="aero"] body .fab-sync { bottom: 60px !important; }
+}
+
+/* ---------- Телефон: стеклянная панель задач ---------- */
+@media (max-width: 768px) {
+    html[data-w95="aero"] body .mobile-nav {
+        background: var(--aero-taskbar) !important;
+        -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3);
+        border-top: 1px solid rgba(255, 255, 255, .35) !important; box-shadow: none !important;
+    }
+    html[data-w95="aero"] body .mobile-nav button {
+        background: transparent !important; box-shadow: none !important; border: 1px solid transparent !important; border-radius: 3px !important;
+        font-family: var(--w95-font-text) !important; font-size: 11px !important; font-weight: 400 !important;
+    }
+    html[data-w95="aero"] body .mobile-nav button, html[data-w95="aero"] body .mobile-nav button * { color: #fff !important; }
+    html[data-w95="aero"] body .mobile-nav button.active {
+        background: var(--aero-task-active) !important; border-color: rgba(160, 210, 255, .6) !important;
+        box-shadow: inset 0 0 6px rgba(160, 220, 255, .6) !important; font-weight: 400 !important;
+    }
+    html[data-w95="aero"] body header, html[data-w95="aero"] body header[class] { margin: 8px 8px 0; }
+    html[data-w95="aero"] body .card > h3 { font-size: 14px !important; }
+    /* на телефоне размытие слабее: так быстрее */
+    html[data-w95="aero"] body .card, html[data-w95="aero"] body main > .tab > .card { -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+}
+@media (pointer: coarse) {
+    html[data-w95="aero"] body .btn-primary, html[data-w95="aero"] body .btn-secondary,
+    html[data-w95="aero"] body .export-btn, html[data-w95="aero"] body .icon-btn,
+    html[data-w95="aero"] body #add-btns .btn-income, html[data-w95="aero"] body #add-btns .btn-expense { min-height: 40px; }
+}
+
+/* ---------- Папки тем: глянцевые жёлтые папки, выделение — голубая рамка ---------- */
+html[data-w95="aero"] body #settings #theme-picker .theme-folder { border-radius: 3px !important; font-family: var(--w95-font-text) !important; }
+@media (hover: hover) {
+    html[data-w95="aero"] body #settings #theme-picker .theme-folder:hover { background: var(--aero-hot) !important; border-color: #b8d6fb !important; }
+}
+html[data-w95="aero"] body #settings #theme-picker .theme-folder.is-open { background: var(--aero-sel) !important; border-color: #7da2ce !important; }
+html[data-w95="aero"] body #settings #theme-picker .theme-folder.is-open .tf-name { background: transparent; color: #000 !important; outline: none; }
+html[data-w95="aero"] body .tf-back, html[data-w95="aero"] body .tf-back::before {
+    background: linear-gradient(to bottom, #f6dc8a, #e2b44a) !important; border-color: #b98a2a !important;
+}
+html[data-w95="aero"] body .tf-back { border-radius: 3px !important; }
+html[data-w95="aero"] body .tf-back::before { border-radius: 3px 3px 0 0 !important; }
+html[data-w95="aero"] body .tf-paper { border-color: #c8c8c8 !important; border-radius: 1px !important; }
+html[data-w95="aero"] body .tf-front {
+    background: linear-gradient(to bottom, rgba(255, 244, 200, .95) 0%, rgba(250, 222, 140, .92) 48%, rgba(238, 196, 92, .95) 50%, rgba(246, 214, 120, .95) 100%) !important;
+    border-color: #c1922f !important; border-radius: 3px !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8) !important;
+}
+html[data-w95="aero"] body #settings #theme-picker .tf-panel-close {
+    position: absolute !important; right: 6px; top: -1px;
+    width: 44px !important; height: 20px !important; min-height: 0 !important; padding: 0 !important;
+    background: linear-gradient(to bottom, #f3b9a9 0%, #dc7d63 48%, #c43d27 50%, #e08a6c 100%) !important;
+    border: 1px solid #4b170e !important; border-top: none !important; border-radius: 0 0 4px 4px !important; box-shadow: none !important;
+}
+html[data-w95="aero"] body #settings #theme-picker .tf-panel-close .material-icons { color: #fff !important; font-size: 15px !important; text-shadow: 0 0 2px #4b170e; }
+html[data-w95="aero"] body .tf-panel-head .tf-icon { filter: drop-shadow(0 0 3px #fff); }
+
+/* Мини-превью темы в настройках (видно при любой теме): стеклянное окошко */
+html body .theme-swatch-aero .theme-swatch-win { border-radius: 3px !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .6), 0 0 0 1px rgba(0, 0, 0, .6) !important; }
+html body .theme-swatch-aero .theme-swatch-title { border-radius: 2px 2px 0 0 !important; opacity: .85; }

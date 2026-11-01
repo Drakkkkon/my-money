@@ -1,4 +1,14 @@
-My Money v3.6.0 — сайт
+My Money v3.7.0 — сайт
+
+Что нового в 3.7.0:
+- Тема «Аэро» (id aero, css/vista.css — правила только под html[data-w95="aero"]), звуки aero в js/sound.js.
+- Папки тем и редактор своих тем (js/themes.js). Свои темы: customThemes [{id, name, folder, base, colors, patternOff}],
+  localStorage finance_custom_themes, синхронизация в Google (SYNC_LISTS, ключ themes). Свои цвета в «зашитых»
+  стилях применяет css/custom.css только при флагах data-c-* (ставятся лишь для своих тем).
+- css/features.css — базовый вид новых блоков; js/extras.js — клавиатура на главной, свайпы, калькулятор с лентой
+  (localStorage finance_calc_tape); js/importer.js — загрузка своей таблицы .xlsx/.csv.
+- Oldbook: без выбора «Кто»; подпись записи = person (у старых) или владелец книги.
+- sw.js: кэш my-money-v8.
 
 Что нового в 3.6.0:
 - Тема «Классика 1-бит» (id mono в js/themes.js, стили css/mono.css — все правила под html[data-w95="mono"],

@@ -7,9 +7,14 @@
     <link rel="stylesheet" href="css/style.css">
     <!-- Оформление в стиле Windows 95 (переопределяет style.css) -->
     <link rel="stylesheet" href="css/win95.css">
-    <!-- Тема «Аква»: действует только когда выбрана (html[data-w95="aqua"]) -->
+    <!-- Папки тем, редактор темы, клавиатура, калькулятор, загрузка таблицы -->
+    <link rel="stylesheet" href="css/features.css">
+    <!-- Темы «Аква», «Классика 1-бит», «Аэро»: действуют только когда выбраны (html[data-w95="..."]) -->
     <link rel="stylesheet" href="css/aqua.css">
     <link rel="stylesheet" href="css/mono.css">
+    <link rel="stylesheet" href="css/vista.css">
+    <!-- Свои темы: цвета из редактора (только при флагах data-c-*) -->
+    <link rel="stylesheet" href="css/custom.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <meta name="theme-color" content="#008080">
@@ -132,6 +137,25 @@
                                 <button type="button" class="btn-expense" onclick="saveTx('expense')"><span class="material-icons" style="font-size:18px;">remove</span> Расход</button>
                             </div>
                             <button type="button" class="btn-primary" id="save-edit-btn" style="display:none;" onclick="saveEdit()">Сохранить изменения</button>
+                            <div class="tx-keypad-box">
+                                <p class="tx-keypad-title">Сумма с цифровой клавиатуры</p>
+                                <div class="ob-keypad tx-keypad" role="group" aria-label="Цифровая клавиатура для суммы">
+                                    <button type="button" onclick="txKey('1')">1</button>
+                                    <button type="button" onclick="txKey('2')">2</button>
+                                    <button type="button" onclick="txKey('3')">3</button>
+                                    <button type="button" onclick="txKey('back')" aria-label="Стереть"><span class="material-icons">backspace</span></button>
+                                    <button type="button" onclick="txKey('4')">4</button>
+                                    <button type="button" onclick="txKey('5')">5</button>
+                                    <button type="button" onclick="txKey('6')">6</button>
+                                    <button type="button" onclick="txKey('clear')" aria-label="Очистить">C</button>
+                                    <button type="button" onclick="txKey('7')">7</button>
+                                    <button type="button" onclick="txKey('8')">8</button>
+                                    <button type="button" onclick="txKey('9')">9</button>
+                                    <button type="button" onclick="txKey('000')">000</button>
+                                    <button type="button" class="ob-key-wide" onclick="txKey('0')">0</button>
+                                    <button type="button" class="ob-key-wide" onclick="txKey('00')">00</button>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="history card">
@@ -201,6 +225,44 @@
                         </select>
                         <div class="kpi-grid" id="stats-kpi"></div>
                     </div>
+                    <div class="card calc-card">
+                        <h3><span class="material-icons">calculate</span> Калькулятор</h3>
+                        <div class="calc-display" aria-live="polite">
+                            <div class="calc-expr" id="calc-expr"></div>
+                            <div class="calc-value" id="calc-value">0</div>
+                        </div>
+                        <div class="ob-keypad calc-keys" role="group" aria-label="Калькулятор">
+                            <button type="button" onclick="calcKey('C')" aria-label="Очистить">C</button>
+                            <button type="button" onclick="calcKey('back')" aria-label="Стереть"><span class="material-icons">backspace</span></button>
+                            <button type="button" class="calc-op" onclick="calcKey('%')">%</button>
+                            <button type="button" class="calc-op" onclick="calcKey('/')" aria-label="Разделить">÷</button>
+                            <button type="button" onclick="calcKey('7')">7</button>
+                            <button type="button" onclick="calcKey('8')">8</button>
+                            <button type="button" onclick="calcKey('9')">9</button>
+                            <button type="button" class="calc-op" onclick="calcKey('*')" aria-label="Умножить">×</button>
+                            <button type="button" onclick="calcKey('4')">4</button>
+                            <button type="button" onclick="calcKey('5')">5</button>
+                            <button type="button" onclick="calcKey('6')">6</button>
+                            <button type="button" class="calc-op" onclick="calcKey('-')" aria-label="Минус">−</button>
+                            <button type="button" onclick="calcKey('1')">1</button>
+                            <button type="button" onclick="calcKey('2')">2</button>
+                            <button type="button" onclick="calcKey('3')">3</button>
+                            <button type="button" class="calc-op" onclick="calcKey('+')" aria-label="Плюс">+</button>
+                            <button type="button" onclick="calcKey('neg')" aria-label="Сменить знак">±</button>
+                            <button type="button" onclick="calcKey('0')">0</button>
+                            <button type="button" onclick="calcKey('.')" aria-label="Запятая">,</button>
+                            <button type="button" class="calc-eq" onclick="calcKey('=')" aria-label="Равно">=</button>
+                        </div>
+                        <p class="hint calc-hint">На ПК можно считать и с клавиатуры: цифры, + − * /, Enter, Backspace, Esc.</p>
+                    </div>
+                    <div class="card calc-tape-card">
+                        <h3><span class="material-icons">receipt</span> Лента калькулятора</h3>
+                        <div class="calc-tape" id="calc-tape"></div>
+                        <div class="calc-tape-tools">
+                            <button type="button" class="btn-secondary" onclick="copyCalcTape()"><span class="material-icons">content_copy</span> Скопировать</button>
+                            <button type="button" class="btn-secondary" onclick="clearCalcTape()"><span class="material-icons">delete_sweep</span> Очистить ленту</button>
+                        </div>
+                    </div>
                     <div class="chart-container card card-wide">
                         <h3><span class="material-icons">bar_chart</span> Доходы и расходы за 7 дней</h3>
                         <div class="chart-box">
@@ -261,6 +323,16 @@
                             <button type="button" class="export-btn" onclick="exportPdf()"><span class="material-icons">picture_as_pdf</span> Скачать PDF (A4)</button>
                         </div>
                     </div>
+                    <div class="card import-card">
+                        <h3><span class="material-icons">upload_file</span> Загрузить свою таблицу</h3>
+                        <p class="hint">Выберите свою таблицу Excel (.xlsx) или CSV. Приложение само найдёт столбцы с датой, суммой, категорией, типом (доход/расход) и комментарием, покажет, что получилось, и только после вашего подтверждения добавит записи в «Записи». Подходит и файл, выгруженный из этого приложения.</p>
+                        <label class="import-drop" id="import-drop">
+                            <span class="material-icons">table_view</span>
+                            <span>Нажмите, чтобы выбрать файл, или перетащите его сюда</span>
+                            <span class="btn-secondary"><span class="material-icons">folder_open</span> Выбрать файл</span>
+                            <input type="file" id="import-table-file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" onchange="importTableFromInput(event)">
+                        </label>
+                    </div>
                 </div>
 
                 <!-- ЦЕЛИ -->
@@ -290,13 +362,6 @@
                     <div class="card ob-form-card" id="ob-form-card">
                         <h3><span class="material-icons">menu_book</span> Новая запись — Oldbook</h3>
                         <input type="datetime-local" id="ob-datetime">
-
-                        <div class="ob-label">Кто</div>
-                        <div class="ob-persons" id="ob-persons">
-                            <button type="button" class="icon-btn" data-person="Катя" onclick="selectObPerson(this)"><span class="material-icons">person</span> Катя</button>
-                            <button type="button" class="icon-btn" data-person="Папа" onclick="selectObPerson(this)"><span class="material-icons">person</span> Папа</button>
-                            <button type="button" class="icon-btn" data-person="Саша" onclick="selectObPerson(this)"><span class="material-icons">person</span> Саша</button>
-                        </div>
 
                         <div class="ob-label">Сумма</div>
                         <div class="ob-amount-display is-empty" id="ob-amount-display" aria-live="polite">0 ₸</div>
@@ -361,9 +426,6 @@
                         <div class="ob-list-toolbar">
                             <select id="ob-filter-person" onchange="renderObList()" aria-label="Чьи записи показать">
                                 <option value="">Все</option>
-                                <option value="Катя">Катя</option>
-                                <option value="Папа">Папа</option>
-                                <option value="Саша">Саша</option>
                             </select>
                             <div class="ob-totals" id="ob-totals"></div>
                         </div>
@@ -491,8 +553,8 @@
 
                     <div class="card card-wide theme-card">
                         <h3><span class="material-icons">palette</span> Темы оформления</h3>
-                        <p class="hint">Цветовые схемы в духе Windows 95, а также «Леопард» и «Неон». У каждой темы свои звуки — при выборе вы их услышите.</p>
-                        <div class="theme-picker" id="theme-picker"></div>
+                        <p class="hint">Темы разложены по папкам по стилю: Windows 95, Windows Vista, Mac OS и ваши папки. Нажмите на папку, чтобы открыть её. У каждой темы свои звуки — при выборе вы их услышите. Свою тему можно создать на основе текущей: поменять цвета фона, окон, кнопок, текста и сохранить в нужную папку.</p>
+                        <div class="theme-browser" id="theme-picker"></div>
                     </div>
 
                     <div class="card sound-card">
@@ -529,7 +591,20 @@
                         <h3><span class="material-icons">history</span> История версий</h3>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>3.6.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>3.7.0 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Новая тема «Аэро» в стиле Windows Vista: стеклянные окна с размытием и бликами, глянцевые кнопки, чёрная стеклянная панель задач, свои «воздушные» звуки.</li>
+                                    <li>Темы разложены по папкам (Windows 95, Windows Vista, Mac OS и ваши папки). Папки нарисованы в стиле текущей темы и открываются с анимацией.</li>
+                                    <li>Свои темы: на основе текущей можно поменять цвета фона, окон, кнопок, текста, полей, заголовков, выделения и сумм и сохранить тему в нужную папку (в том числе новую). Темы синхронизируются через Google.</li>
+                                    <li>Свайп влево / вправо перелистывает разделы меню.</li>
+                                    <li>Отчёты: блок «Загрузить свою таблицу» — Excel (.xlsx) или CSV; столбцы находятся автоматически, перед добавлением показывается предпросмотр.</li>
+                                    <li>Главная: цифровая клавиатура для суммы под кнопками «Доход» и «Расход».</li>
+                                    <li>Статистика: на ПК по два блока в строке; калькулятор и лента со всеми вычислениями.</li>
+                                    <li>Oldbook: убран выбор «Катя / Папа / Саша». Новые записи подписываются владельцем книги, у старых записей имя сохранено.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>3.6.0</h4>
                                 <ul>
                                     <li>Новая тема «Классика 1-бит» в духе самых первых чёрно-белых компьютеров: полосатые заголовки окон с квадратиками, жёсткие тени, рабочий стол из точек, строка меню вверху экрана на ПК, нажатие — «инверсия», свои пищащие звуки. Остальные темы не изменены.</li>
                                 </ul>
@@ -668,6 +743,8 @@
     <script src="js/scrollbars.js"></script>
     <script src="js/cloud.js"></script>
     <script src="js/oldbook.js"></script>
+    <script src="js/extras.js"></script>
+    <script src="js/importer.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>

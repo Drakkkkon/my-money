@@ -287,7 +287,9 @@ const SYNC_LISTS = [
     { key: 'subs', get: () => subscriptions, set: v => { subscriptions = v; } },
     { key: 'ob', get: () => oldbookEntries, set: v => { oldbookEntries = v; } },
     { key: 'links', get: () => oldbookLinks, set: v => { oldbookLinks = v; } },
-    { key: 'cats', get: () => customCategories, set: v => { customCategories = v; } }
+    { key: 'cats', get: () => customCategories, set: v => { customCategories = v; } },
+    // свои темы оформления (js/themes.js)
+    { key: 'themes', get: () => customThemes, set: v => { customThemes = v; if (typeof onCustomThemesChanged === 'function') onCustomThemesChanged(); } }
 ];
 
 function getSyncMeta() {
@@ -355,7 +357,7 @@ function localSnapshot() {
         app: 'my-money', format: 2, savedAt: Date.now(),
         profile: { name: profileName },
         tx: transactions, subs: subscriptions,
-        ob: oldbookEntries, links: oldbookLinks, cats: customCategories,
+        ob: oldbookEntries, links: oldbookLinks, cats: customCategories, themes: customThemes,
         savings, limit: manualLimit, goal: priorityGoal,
         sounds: customSoundMeta,
         scalarsAt: meta.scalarsAt, deleted: meta.deleted

@@ -1,0 +1,186 @@
+/* =========================================================================
+   НОВЫЕ БЛОКИ: папки тем, редактор своей темы, цифровая клавиатура на главной,
+   калькулятор с лентой, загрузка своей таблицы Excel, перелистывание свайпом.
+   Здесь — базовый вид (в стиле Windows 95). Темы «Аква», «Классика 1-бит» и «Аэро»
+   перерисовывают эти блоки у себя (css/aqua.css, css/mono.css, css/vista.css).
+   ========================================================================= */
+
+/* ---------- Папки тем ---------- */
+html body .theme-browser { display: flex; flex-direction: column; gap: 10px; }
+html body #settings #theme-picker .theme-folders { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 6px; }
+html body #settings #theme-picker .theme-folder {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 8px 4px 6px !important; min-height: 0 !important; width: 100%;
+    background: transparent !important; border: 1px solid transparent !important; box-shadow: none !important;
+    color: var(--w95-text) !important; font-family: var(--w95-font-ui); cursor: pointer;
+}
+html body #settings #theme-picker .theme-folder:focus-visible { outline: 1px dotted var(--w95-text) !important; outline-offset: -2px; }
+/* название папки — чётким шрифтом: в пиксельном «95» читается как «9S» */
+html body .tf-name { font-family: var(--w95-font-text) !important; font-size: 13px; font-weight: 600; line-height: 1.2; padding: 1px 4px; text-align: center; overflow-wrap: anywhere; color: var(--w95-text) !important; }
+html body .tf-count { font-size: 11px; color: var(--w95-muted) !important; font-family: var(--w95-font-text); }
+html body #settings #theme-picker .theme-folder.is-open .tf-name {
+    background: var(--w95-select); color: var(--w95-title-text) !important;
+    outline: 1px dotted var(--w95-title-text); outline-offset: -1px;
+}
+/* Папка с текущей темой — галочка на значке */
+html body #settings #theme-picker .theme-folder.is-current .tf-icon::after {
+    content: '✓'; position: absolute; right: -7px; bottom: -3px; z-index: 2;
+    width: 16px; height: 16px; line-height: 15px; text-align: center; font-size: 11px; font-weight: 700;
+    background: var(--w95-select); color: var(--w95-title-text); border: 1px solid var(--w95-dark);
+    font-family: var(--w95-font-text);
+}
+
+/* Значок папки: задняя стенка с ярлычком, лист и передняя створка */
+html body .tf-icon { position: relative; display: block; width: 46px; height: 36px; perspective: 160px; flex: none; }
+html body .tf-back { position: absolute; left: 0; right: 0; top: 5px; bottom: 0; background: #d9a520; border: 1px solid #000; }
+html body .tf-back::before {
+    content: ''; position: absolute; left: -1px; top: -6px; width: 18px; height: 5px;
+    background: #d9a520; border: 1px solid #000; border-bottom: none;
+}
+html body .tf-paper {
+    position: absolute; left: 6px; right: 6px; top: 8px; height: 18px;
+    background: #fff; border: 1px solid #808080; transition: transform .3s ease;
+}
+html body .tf-front {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 24px;
+    background: #ffd84d; border: 1px solid #000; box-shadow: inset 1px 1px #fff3b0;
+    transform-origin: 50% 100%; transition: transform .3s ease;
+}
+html body #settings #theme-picker .theme-folder.is-open .tf-front { transform: rotateX(-48deg); }
+html body #settings #theme-picker .theme-folder.is-open .tf-paper { transform: translateY(-5px); }
+html body #settings #theme-picker .theme-folder.tf-anim .tf-front { animation: tfFlapOpen .3s ease both; }
+html body #settings #theme-picker .theme-folder.tf-anim .tf-paper { animation: tfPaperUp .3s ease both; }
+@media (hover: hover) {
+    html body #settings #theme-picker .theme-folder:not(.is-open):hover .tf-front { transform: rotateX(-16deg); }
+}
+@keyframes tfFlapOpen { from { transform: none; } to { transform: rotateX(-48deg); } }
+@keyframes tfPaperUp { from { transform: none; } to { transform: translateY(-5px); } }
+
+/* Открытая папка: окно с темами «вырастает» из значка и сворачивается в него */
+html body .theme-folder-panel {
+    background: var(--w95-face); box-shadow: var(--w95-window); padding: 3px 8px 8px;
+    transform-origin: var(--tf-origin, 50% 0);
+}
+html body .theme-folder-panel.is-opening { animation: tfPanelOpen .32s cubic-bezier(.2, .8, .3, 1) both; }
+html body .theme-folder-panel.is-closing { animation: tfPanelClose .25s ease-in both; pointer-events: none; }
+@keyframes tfPanelOpen { from { opacity: 0; transform: scale(.3, .15); } to { opacity: 1; transform: none; } }
+@keyframes tfPanelClose { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(.3, .15); } }
+html body .tf-panel-head {
+    position: relative; display: flex; align-items: center; gap: 8px; min-height: 26px;
+    margin: 0 -5px 8px; padding: 3px 4px 3px 6px;
+    background: linear-gradient(90deg, var(--w95-title), var(--w95-title-2));
+}
+html body .tf-panel-head .tf-icon { transform: scale(.45); transform-origin: left center; margin: -10px -25px -10px 0; }
+html body .tf-panel-head .tf-icon::after { display: none; }
+html body .tf-panel-title { flex: 1 1 auto; min-width: 0; font-family: var(--w95-font-ui); font-size: 15px; color: var(--w95-title-text) !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html body #settings #theme-picker .tf-panel-close {
+    display: flex; align-items: center; justify-content: center;
+    width: 22px !important; height: 20px !important; min-height: 0 !important; padding: 0 !important;
+    background: var(--w95-face) !important; box-shadow: var(--w95-raised) !important; border: none !important; cursor: pointer;
+}
+html body #settings #theme-picker .tf-panel-close .material-icons { font-size: 15px !important; color: var(--w95-text) !important; }
+html body #settings #theme-picker .tf-panel-close:active { box-shadow: var(--w95-pressed) !important; }
+html body .theme-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+html body .theme-actions > button { flex: 1 1 220px; width: auto; margin: 0 !important; }
+html body .theme-swatch.is-custom .theme-swatch-name::before { content: '★ '; }
+
+/* ---------- Редактор своей темы ---------- */
+html body .theme-editor { width: min(660px, 100%); max-height: 92vh; display: flex; flex-direction: column; }
+html body .te-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 4px; }
+html body .te-field { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; font-size: 13px; }
+html body .te-field > span { font-family: var(--w95-font-ui); font-size: 14px; }
+html body .te-field input, html body .te-field select { width: 100%; margin: 0 !important; }
+html body .te-colors { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; margin: 6px 0 10px; }
+html body .te-color { display: flex; align-items: center; gap: 8px; padding: 3px; font-size: 13px; cursor: pointer; line-height: 1.2; }
+html body .te-color input[type="color"] {
+    flex: 0 0 auto; width: 42px; height: 28px; padding: 2px !important; margin: 0;
+    background: var(--w95-face); border: none; box-shadow: var(--w95-sunken); cursor: pointer;
+}
+html body .te-check { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-bottom: 6px; cursor: pointer; }
+html body .te-check input { width: auto; margin: 0; }
+
+/* ---------- Цифровая клавиатура на главной (под кнопками «Доход» и «Расход») ---------- */
+html body .tx-keypad-box {
+    margin: 12px auto 0; padding: 8px; max-width: 340px;
+    background: var(--w95-field); box-shadow: var(--w95-sunken);
+}
+html body .tx-keypad-box .ob-keypad { margin: 0; max-width: none; }
+html body .tx-keypad-box .ob-keypad button { height: 42px; font-size: 19px; }
+html body .tx-keypad-title { font-family: var(--w95-font-ui); font-size: 13px; margin: 0 0 6px; color: var(--w95-muted) !important; text-align: center; }
+
+/* ---------- Статистика: на ПК по два блока в строке ---------- */
+@media (min-width: 769px) {
+    main > #statistics { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    main > #statistics > .card-wide { grid-column: auto !important; }
+}
+
+/* ---------- Калькулятор и лента ---------- */
+html body .calc-display {
+    margin-bottom: 8px; padding: 8px 12px; min-height: 76px; overflow: hidden; text-align: right;
+    background: var(--w95-field); box-shadow: var(--w95-sunken); font-family: var(--w95-font-text);
+}
+html body .calc-expr { min-height: 18px; font-size: 13px; color: var(--w95-muted) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; unicode-bidi: plaintext; }
+html body .calc-value { font-size: 30px; font-weight: 700; line-height: 1.25; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html body .calc-keys { margin: 0 auto; }
+html body .calc-keys button { height: 48px; font-size: 20px; }
+html body .calc-keys .calc-op { font-size: 22px; }
+html body .calc-keys .calc-eq { font-size: 24px; }
+html body .calc-hint { margin: 8px 0 0; font-size: 12px; }
+html body .calc-tape {
+    min-height: 260px; max-height: 360px; overflow-y: auto; overscroll-behavior: contain; padding: 4px;
+    background: var(--w95-field); box-shadow: var(--w95-sunken); font-family: var(--w95-font-text);
+}
+html body .calc-tape-empty { text-align: center; padding: 24px 10px; }
+html body .calc-tape-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    width: 100%; padding: 6px 6px !important; min-height: 0 !important; text-align: left;
+    background: transparent !important; box-shadow: none !important; border: none !important;
+    border-bottom: 1px dotted var(--w95-grid) !important; cursor: pointer; font-family: var(--w95-font-text) !important; font-size: 13px !important;
+}
+html body .calc-tape-row:hover { background: var(--w95-hover) !important; }
+html body .calc-tape-main { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
+html body .calc-tape-expr { color: var(--w95-muted) !important; overflow-wrap: anywhere; }
+html body .calc-tape-time { font-size: 11px; color: var(--w95-muted) !important; }
+html body .calc-tape-res { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 15px; }
+html body .calc-tape-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+html body .calc-tape-tools > button { flex: 1 1 140px; width: auto; margin: 0 !important; }
+
+/* ---------- Загрузка своей таблицы Excel ---------- */
+html body .import-drop {
+    display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 10px; margin-bottom: 8px; text-align: center;
+    background: var(--w95-field); border: 2px dashed var(--w95-shadow); box-shadow: none;
+}
+html body .import-drop.is-over { border-color: var(--w95-select); background: var(--w95-hover); }
+html body .import-drop .material-icons { font-size: 34px; color: var(--w95-muted) !important; }
+html body .import-drop input[type="file"] { display: none; }
+html body .import-dialog { width: min(860px, 100%); max-height: 92vh; display: flex; flex-direction: column; }
+html body .import-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 4px; }
+html body .import-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; margin: 8px 0 10px; }
+html body .import-map label { display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+html body .import-map label > span { font-family: var(--w95-font-ui); }
+html body .import-map select { margin: 0 !important; width: 100%; }
+html body .import-options { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 8px; font-size: 13px; }
+html body .import-options label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+html body .import-options select { width: auto; margin: 0 !important; }
+html body .import-options input { width: auto; margin: 0; }
+html body .import-summary { font-weight: 700; margin: 6px 0; }
+html body .import-preview { max-height: 280px; overflow: auto; background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 2px; }
+html body .import-preview table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--w95-font-text); }
+html body .import-preview th, html body .import-preview td { padding: 3px 6px; border: 1px solid var(--w95-grid); white-space: nowrap; text-align: left; }
+html body .import-preview th { background: var(--w95-face); font-weight: 700; position: sticky; top: 0; }
+html body .import-preview tr.is-skip td { opacity: .45; text-decoration: line-through; }
+html body .import-preview td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- Перелистывание разделов свайпом ---------- */
+/* во время сдвига раздела не появляется горизонтальная прокрутка */
+main { overflow-x: clip; }
+main > .tab.tab-swipe-next { animation: tabSwipeNext .28s ease-out both; }
+main > .tab.tab-swipe-prev { animation: tabSwipePrev .28s ease-out both; }
+@keyframes tabSwipeNext { from { opacity: .2; transform: translateX(48px); } to { opacity: 1; transform: none; } }
+@keyframes tabSwipePrev { from { opacity: .2; transform: translateX(-48px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+    html body .theme-folder-panel.is-opening, html body .theme-folder-panel.is-closing,
+    html body #settings #theme-picker .theme-folder.tf-anim .tf-front, html body #settings #theme-picker .theme-folder.tf-anim .tf-paper,
+    main > .tab.tab-swipe-next, main > .tab.tab-swipe-prev { animation-duration: .01s; }
+}

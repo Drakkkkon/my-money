@@ -1229,6 +1229,7 @@ function saveDataLocally() {
         localStorage.setItem('finance_oldbook', JSON.stringify(oldbookEntries));
         localStorage.setItem('finance_ob_links', JSON.stringify(oldbookLinks));
         localStorage.setItem('finance_categories', JSON.stringify(customCategories));
+        if (typeof saveCustomThemesLocal === 'function') saveCustomThemesLocal(); // свои темы (updatedAt ставит stampLocalChanges)
         localStorage.setItem('finance_custom_sounds', JSON.stringify(customSoundMeta));
         localStorage.setItem('finance_tx', JSON.stringify(transactions));
         localStorage.setItem('finance_subs', JSON.stringify(subscriptions));
@@ -1306,6 +1307,7 @@ function clearAllData() {
         oldbookEntries = [];
         oldbookLinks = [];
         customCategories = [];
+        if (typeof onCustomThemesChanged === 'function') { customThemes = []; onCustomThemesChanged(); }
         if (typeof clearCustomSoundsLocal === 'function') clearCustomSoundsLocal();
         renderMenus();
         updateUI(true);

@@ -430,3 +430,38 @@ html[data-w95="aqua"] body .w95-sb-thumb {
 /* Мини-превью темы в настройках (видно при любой теме): окошко со скруглением */
 html body .theme-swatch-aqua .theme-swatch-win { border-radius: 4px !important; }
 html body .theme-swatch-aqua .theme-swatch-title { border-radius: 3px 3px 0 0 !important; }
+
+/* ---------- Новые блоки 3.7: папки тем, клавиатура, калькулятор, импорт ---------- */
+html[data-w95="aqua"] body #settings #theme-picker .theme-folder { border-radius: 8px !important; font-family: var(--w95-font-text) !important; }
+@media (hover: hover) { html[data-w95="aqua"] body #settings #theme-picker .theme-folder:hover { background: rgba(56, 117, 215, .08) !important; } }
+html[data-w95="aqua"] body #settings #theme-picker .theme-folder.is-open .tf-name { background: var(--aqua-select); color: #fff !important; outline: none; border-radius: 999px; padding: 1px 9px; }
+html[data-w95="aqua"] body #settings #theme-picker .theme-folder.is-current .tf-icon::after { border-radius: 50%; background: var(--aqua-gel-blue); border-color: #2a64b6; color: #fff; }
+html[data-w95="aqua"] body .tf-back, html[data-w95="aqua"] body .tf-back::before { background: linear-gradient(to bottom, #8cbdf2, #3f84d8) !important; border-color: #2a64b6 !important; }
+html[data-w95="aqua"] body .tf-back { border-radius: 4px !important; }
+html[data-w95="aqua"] body .tf-back::before { border-radius: 4px 4px 0 0 !important; }
+html[data-w95="aqua"] body .tf-paper { border-color: #c4c4c4 !important; border-radius: 2px !important; }
+html[data-w95="aqua"] body .tf-front {
+    border-radius: 4px !important; border-color: #2a64b6 !important;
+    background: linear-gradient(to bottom, #cfe3fb 0%, #93c3f7 45%, #5aa0f2 50%, #7ab4f5 100%) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8) !important;
+}
+html[data-w95="aqua"] body .theme-folder-panel { background: var(--aqua-stripes); box-shadow: var(--aqua-window-shadow); border-radius: 8px !important; padding: 0 10px 10px; }
+html[data-w95="aqua"] body .tf-panel-head {
+    background: var(--aqua-title) !important; border-bottom: 1px solid #a9a9a9; border-radius: 8px 8px 0 0 !important;
+    margin: 0 -10px 10px; padding: 4px 36px !important; justify-content: center; text-shadow: 0 1px 0 rgba(255, 255, 255, .85);
+}
+html[data-w95="aqua"] body .tf-panel-title { flex: 0 1 auto; color: var(--w95-text) !important; font-family: var(--w95-font-text); font-size: 13px; }
+html[data-w95="aqua"] body #settings #theme-picker .tf-panel-close {
+    position: absolute !important; left: 9px; top: 50%; transform: translateY(-50%);
+    width: 14px !important; height: 14px !important; border-radius: 50% !important;
+    background: radial-gradient(circle at 50% 35%, #ffb8b0, #ec4a3f 55%, #b3241b) !important; box-shadow: 0 0 0 .8px rgba(0, 0, 0, .35) !important;
+}
+html[data-w95="aqua"] body #settings #theme-picker .tf-panel-close .material-icons { font-size: 10px !important; color: rgba(70, 0, 0, .8) !important; opacity: 0; }
+html[data-w95="aqua"] body #settings #theme-picker .tf-panel-close:hover .material-icons { opacity: 1; }
+html[data-w95="aqua"] body .tx-keypad-box, html[data-w95="aqua"] body .calc-display, html[data-w95="aqua"] body .calc-tape,
+html[data-w95="aqua"] body .import-preview {
+    background: #fff !important; border: 1px solid #b6b6b6 !important; border-radius: 6px !important; box-shadow: var(--aqua-panel-shadow) !important;
+}
+html[data-w95="aqua"] body .import-drop { border-radius: 8px !important; border-color: #8cb4e8 !important; background: rgba(255, 255, 255, .7) !important; }
+html[data-w95="aqua"] body .calc-tape-row:hover { background: #e3edfb !important; }
+html[data-w95="aqua"] body .te-color input[type="color"] { border-radius: 6px !important; box-shadow: var(--aqua-btn-shadow) !important; border: 1px solid #8c8c8c; background: var(--aqua-gel-white) !important; }

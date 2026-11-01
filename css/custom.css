@@ -1,0 +1,73 @@
+/* =========================================================================
+   СВОИ ТЕМЫ: цвета, которые пользователь поменял в редакторе (js/themes.js).
+   Правила действуют только при флагах data-c-* на <html>, а флаги ставятся только
+   для своих тем — встроенные темы этот файл не затрагивает.
+   В стилях Windows 95 почти все цвета и так берутся из переменных; здесь — кнопки
+   (во всех стилях) и цвета, «зашитые» в стили «Аква», «Классика 1-бит» и «Аэро».
+   ========================================================================= */
+
+/* Кнопки — во всех стилях */
+html[data-c-btn] body .btn-primary, html[data-c-btn] body .btn-secondary,
+html[data-c-btn] body .btn-income, html[data-c-btn] body .btn-expense,
+html[data-c-btn] body .export-btn, html[data-c-btn] body .pay-btn,
+html[data-c-btn] body label.btn-secondary, html[data-c-btn] body #settings button:not(.menu-row-btn),
+html[data-c-btn] body #reports .export-btn, html[data-c-btn] body #add-btns .btn-income,
+html[data-c-btn] body #add-btns .btn-expense, html[data-c-btn] body #salary .btn-income,
+html[data-c-btn] body .icon-btn, html[data-c-btn] body .tx-actions button,
+html[data-c-btn] body .sub-actions button, html[data-c-btn] body .export-sheet-actions > button,
+html[data-c-btn] body .ob-keypad button, html[data-c-btn] body .pin-btn, html[data-c-btn] body .cat-chip {
+    background: var(--w95-button) !important;
+    color: var(--w95-button-text) !important;
+}
+html[data-c-btn] body .btn-primary *, html[data-c-btn] body .btn-secondary *, html[data-c-btn] body .export-btn *,
+html[data-c-btn] body label.btn-secondary *, html[data-c-btn] body #settings button:not(.menu-row-btn):not(.btn-income):not(.btn-expense) *,
+html[data-c-btn] body .icon-btn *, html[data-c-btn] body .ob-keypad button *, html[data-c-btn] body .pin-btn * { color: var(--w95-button-text) !important; }
+/* В «Акве» и «Аэро» поверх своего цвета остаётся глянцевый блик */
+html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .btn-primary, html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .btn-secondary,
+html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .btn-income, html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .btn-expense,
+html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .export-btn, html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .pay-btn,
+html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body label.btn-secondary, html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body #settings button:not(.menu-row-btn),
+html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body #reports .export-btn, html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body #add-btns .btn-income,
+html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body #add-btns .btn-expense, html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body #salary .btn-income,
+html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .icon-btn, html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .tx-actions button,
+html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .sub-actions button, html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .export-sheet-actions > button,
+html[data-c-btn]:is([data-w95="aqua"], [data-w95="aero"]) body .ob-keypad button {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, .6) 0%, rgba(255, 255, 255, .2) 49%, rgba(0, 0, 0, .05) 50%, rgba(255, 255, 255, .22) 100%), var(--w95-button) !important;
+}
+
+/* Окна — в стилях «Аква» и «Классика 1-бит» (в «Аэро» рабочая область окна и так берёт цвет окна) */
+html[data-c-face]:is([data-w95="aqua"], [data-w95="mono"]) body .card,
+html[data-c-face]:is([data-w95="aqua"], [data-w95="mono"]) body main > .tab > .card,
+html[data-c-face]:is([data-w95="aqua"], [data-w95="mono"]) body .tx-container > .forms,
+html[data-c-face]:is([data-w95="aqua"], [data-w95="mono"]) body .tx-container > .history,
+html[data-c-face]:is([data-w95="aqua"], [data-w95="mono"]) body header,
+html[data-c-face]:is([data-w95="aqua"], [data-w95="mono"]) body .export-sheet,
+html[data-c-face]:is([data-w95="aqua"], [data-w95="mono"]) body .theme-folder-panel { background: var(--w95-face) !important; }
+html[data-c-face]:is([data-w95="aqua"], [data-w95="mono"]) body header .balance-card { background: transparent !important; }
+
+/* Поля ввода и списки */
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body textarea,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body select { background-color: var(--w95-field) !important; }
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body #tx-list, html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body #subs-list,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body #salary-list, html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .ob-list,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .balance-main, html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .balance-info,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .kpi, html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .chart-box,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .calc-display, html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .calc-tape,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .tx-keypad-box { background: var(--w95-field) !important; }
+
+/* Заголовки окон в «Акве» */
+html[data-c-title][data-w95="aqua"] body .card > h3,
+html[data-c-title][data-w95="aqua"] body .header-top,
+html[data-c-title][data-w95="aqua"] body .export-sheet-head,
+html[data-c-title][data-w95="aqua"] body .tf-panel-head { background: linear-gradient(to bottom, var(--w95-title), var(--w95-title-2)) !important; }
+html[data-c-title][data-w95="aqua"] body .card > h3, html[data-c-title][data-w95="aqua"] body .card > h3 *,
+html[data-c-title][data-w95="aqua"] body .header-top *, html[data-c-title][data-w95="aqua"] body .export-sheet-head h3,
+html[data-c-title][data-w95="aqua"] body .tf-panel-title { color: var(--w95-title-text) !important; }
+
+/* Текст в «Классике 1-бит» */
+html[data-c-text][data-w95="mono"] body .app-wrapper *:not(.material-icons):not(.amount-income):not(.amount-expense) { color: var(--w95-text); }
+
+/* Выделение в «Акве» */
+html[data-c-select][data-w95="aqua"] body .btn-primary, html[data-c-select][data-w95="aqua"] body .icon-btn.selected,
+html[data-c-select][data-w95="aqua"] body .theme-swatch.is-active { background: var(--w95-select) !important; }

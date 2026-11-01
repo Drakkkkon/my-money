@@ -246,6 +246,15 @@ function arpeggio(ctx, notes, { type = 'triangle', step = 0.13, gain = 0.11, cho
     if (chord) notes.forEach(f => tone(ctx, { freq: f / 2, start: notes.length * step, dur: 1.6, type: chordType, gain: gain * 0.55, attack: 0.2 }));
 }
 
+// «Воздушный» тон для «Аэро»: мягкая синусоида с тихим верхним обертоном и затухающими повторами (как эхо в зале)
+function airy(ctx, freq, { start = 0, dur = 0.35, gain = 0.07, echoes = 2 } = {}) {
+    for (let i = 0; i <= echoes; i++) {
+        const g = gain * Math.pow(0.38, i);
+        tone(ctx, { freq, start: start + i * 0.085, dur, gain: g, attack: 0.012 });
+        tone(ctx, { freq: freq * 2.01, start: start + i * 0.085, dur: dur * 0.6, gain: g * 0.18, attack: 0.012 });
+    }
+}
+
 const EB_MAJ = [311.13, 392.0, 466.16, 587.33, 698.46];
 const C_MAJ = [261.63, 329.63, 392.0, 493.88, 587.33];
 const A_MIN = [220.0, 261.63, 329.63, 392.0, 523.25];
@@ -319,6 +328,19 @@ const SOUND_PACKS = {
                 tone(c, { freq: f * 2, start: i * 0.09, dur: 0.5, gain: 0.012, attack: 0.01 });
             });
             pad(c, [329.63, 493.88, 659.25], { start: 0.45, dur: 1.5, gain: 0.04, type: 'sine', attack: 0.3 });
+        }
+    },
+    // «Аэро»: мягкие воздушные звуки с эхом (своя мелодия, не звук запуска Windows)
+    aero: {
+        click: c => { tone(c, { freq: 1567.98, dur: 0.035, gain: 0.05, attack: 0.002 }); noise(c, { dur: 0.012, type: 'highpass', freq: 4000, gain: 0.05 }); },
+        open: c => { airy(c, 880, { dur: 0.3, gain: 0.06 }); airy(c, 1318.5, { start: 0.07, dur: 0.32, gain: 0.05 }); },
+        close: c => { airy(c, 1318.5, { dur: 0.25, gain: 0.05, echoes: 1 }); airy(c, 987.77, { start: 0.06, dur: 0.3, gain: 0.05, echoes: 1 }); },
+        menu: c => { tone(c, { freq: 1174.66, dur: 0.06, gain: 0.05, attack: 0.004 }); tone(c, { freq: 1760, start: 0.03, dur: 0.07, gain: 0.03, attack: 0.004 }); },
+        scroll: c => tone(c, { freq: 2349.3, dur: 0.012, gain: 0.015 }),
+        startup: c => {
+            pad(c, [196, 293.66, 392, 493.88], { dur: 2.4, gain: 0.035, type: 'sine', attack: 0.7 });
+            [587.33, 783.99, 987.77, 1174.66, 1567.98].forEach((f, i) => airy(c, f, { start: 0.35 + i * 0.16, dur: 0.7, gain: 0.05 }));
+            noise(c, { start: 0.1, dur: 1.6, type: 'bandpass', freq: 3200, q: 0.7, gain: 0.015, attack: 0.6 });
         }
     },
     // «Классика 1-бит»: простые прямоугольные «пики», как у компьютеров с однобитным звуком (своя мелодия)

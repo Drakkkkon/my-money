@@ -2,8 +2,20 @@
 // Обмен книгами Oldbook между аккаунтами Google — js/cloud.js (раздел OLDBOOK).
 
 const COMMENT_MAX = 100;
-const OB_PERSONS = ['Катя', 'Папа', 'Саша'];
-const OB_PERSON_COLORS = { 'Катя': '#800080', 'Папа': '#000080', 'Саша': '#008080' };
+// Выбора «Кто» в форме больше нет: новые записи подписываются владельцем книги («Вы» или имя того, кто поделился).
+// У старых записей остаётся сохранённое имя (Катя, Папа, Саша).
+const OB_PERSON_COLORS = { 'Катя': '#800080', 'Папа': '#000080', 'Саша': '#008080', 'Вы': '#404040' };
+const OB_EXTRA_COLORS = ['#806000', '#800000', '#006000', '#4b0082', '#8b4513', '#2f4f4f'];
+
+function obWho(e) {
+    return e.person || e.ownerName || '—';
+}
+
+function obWhoColor(label, labels = []) {
+    if (OB_PERSON_COLORS[label]) return OB_PERSON_COLORS[label];
+    const i = Math.max(0, labels.indexOf(label));
+    return OB_EXTRA_COLORS[i % OB_EXTRA_COLORS.length];
+}
 
 // ---------- Комментарий (до 100 символов) ----------
 // prefix: 'tx' — форма «Записи», 'ob' — форма Oldbook. Текст хранится в скрытом поле `${prefix}-comment`.
@@ -96,14 +108,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ---------- Форма Oldbook ----------
-let obSelectedPerson = '';
 let obAmountDigits = '';
 let obEditId = '';
-
-function selectObPerson(btn) {
-    obSelectedPerson = btn.dataset.person;
-    document.querySelectorAll('#ob-persons .icon-btn').forEach(b => b.classList.toggle('selected', b === btn));
-}
 
 // Цифровая клавиатура: сумма вводится без системной клавиатуры телефона
 function obKey(key) {
@@ -143,11 +149,10 @@ function readObForm() {
     const category = (document.getElementById('ob-category') || {}).value || '';
     const date = (document.getElementById('ob-datetime') || {}).value || '';
     const amount = Number(obAmountDigits || 0);
-    if (!obSelectedPerson) { alert('Выберите, кто: Катя, Папа или Саша.'); return null; }
     if (!amount) { alert('Наберите сумму на цифровой клавиатуре.'); return null; }
     if (!category.trim()) { alert('Укажите категорию (на что).'); return null; }
     if (!date) { alert('Укажите дату и время.'); return null; }
-    return { person: obSelectedPerson, amount, category: category.trim().slice(0, 60), date, comment: getFormComment('ob') };
+    return { amount, category: category.trim().slice(0, 60), date, comment: getFormComment('ob') };
 }
 
 function saveObEntry(type) {
@@ -158,7 +163,7 @@ function saveObEntry(type) {
     oldbookEntries.push(entry);
     resetObForm();
     updateUI(true);
-    showToast(`${type === 'income' ? 'Доход' : 'Расход'} записан: ${entry.person}, ${fmtMoney(entry.amount)} ₸`);
+    showToast(`${type === 'income' ? 'Доход' : 'Расход'} записан: ${entry.category}, ${fmtMoney(entry.amount)} ₸`);
 }
 
 function editObEntry(id) {
@@ -167,8 +172,6 @@ function editObEntry(id) {
     obEditId = id;
     obAmountDigits = String(Math.round(Number(e.amount) || 0));
     renderObAmount();
-    const btn = document.querySelector(`#ob-persons .icon-btn[data-person="${e.person}"]`);
-    if (btn) selectObPerson(btn);
     document.getElementById('ob-category').value = e.category || '';
     document.getElementById('ob-datetime').value = e.date || almatyIsoNow();
     setFormComment('ob', e.comment || '');
@@ -229,9 +232,18 @@ function renderOldbook() {
 function renderObList() {
     const box = document.getElementById('ob-list');
     if (!box) return;
-    const filter = (document.getElementById('ob-filter-person') || {}).value || '';
-    const items = allOldbookEntries()
-        .filter(e => !filter || e.person === filter)
+    const all = allOldbookEntries();
+    const labels = [...new Set(all.map(obWho))];
+    // Фильтр «чьи записи» строится по тем, кто есть в записях
+    const sel = document.getElementById('ob-filter-person');
+    if (sel) {
+        const keep = labels.includes(sel.value) ? sel.value : '';
+        sel.innerHTML = '<option value="">Все</option>' + labels.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
+        sel.value = keep;
+    }
+    const filter = sel ? sel.value : '';
+    const items = all
+        .filter(e => !filter || obWho(e) === filter)
         .sort((a, b) => String(b.date).localeCompare(String(a.date)));
 
     const inc = items.filter(e => e.type === 'income').reduce((s, e) => s + (Number(e.amount) || 0), 0);
@@ -257,11 +269,11 @@ function renderObList() {
             head = `<div class="date-group-header ob-date"><h4>${p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : escapeHtml(d)}</h4></div>`;
         }
         const isInc = e.type === 'income';
-        const color = OB_PERSON_COLORS[e.person] || '#404040';
+        const who = obWho(e);
         return head + `
             <div class="tx-item ob-item ${isInc ? 'income' : 'expense'}">
                 <div class="tx-info">
-                    <span class="ob-person" style="background:${color}">${escapeHtml(e.person || '—')}</span>
+                    <span class="ob-person" style="background:${obWhoColor(who, labels)}">${escapeHtml(who)}</span>
                     <strong>${escapeHtml(e.category || 'Без категории')}</strong><br>
                     <span class="ob-meta">${escapeHtml(t || '')} · книга: ${escapeHtml(e.ownerName)}</span>
                     ${e.comment ? `<span class="tx-comment">${escapeHtml(e.comment)}</span>` : ''}
@@ -288,8 +300,9 @@ function renderObStats() {
     const sumBy = (arr, fn) => arr.reduce((acc, e) => { const k = fn(e); acc[k] = (acc[k] || 0) + (Number(e.amount) || 0); return acc; }, {});
 
     // 1) Кто сколько потратил
-    const byPerson = sumBy(expenses, e => e.person || '—');
-    const persons = OB_PERSONS.concat(Object.keys(byPerson).filter(p => !OB_PERSONS.includes(p)));
+    const byPerson = sumBy(expenses, obWho);
+    const persons = [...new Set(list.map(obWho))];
+    const personColor = p => obWhoColor(p, persons);
     const hasExp = expenses.length > 0;
     if (typeof upsertChart === 'function') {
         upsertChart('obPerson', 'ob-person-chart', {
@@ -298,7 +311,7 @@ function renderObStats() {
                 labels: hasExp ? persons : ['Нет данных'],
                 datasets: [{
                     data: hasExp ? persons.map(p => byPerson[p] || 0) : [1],
-                    backgroundColor: hasExp ? persons.map(p => OB_PERSON_COLORS[p] || '#808080') : ['#c0c0c0'],
+                    backgroundColor: hasExp ? persons.map(personColor) : ['#c0c0c0'],
                     borderWidth: 1, borderColor: '#000'
                 }]
             },
@@ -314,8 +327,8 @@ function renderObStats() {
                 labels: cats.length ? cats : ['Нет данных'],
                 datasets: persons.map(p => ({
                     label: p,
-                    data: cats.map(c => expenses.filter(e => e.person === p && (e.category || 'Без категории') === c).reduce((s, e) => s + (Number(e.amount) || 0), 0)),
-                    backgroundColor: OB_PERSON_COLORS[p] || '#808080',
+                    data: cats.map(c => expenses.filter(e => obWho(e) === p && (e.category || 'Без категории') === c).reduce((s, e) => s + (Number(e.amount) || 0), 0)),
+                    backgroundColor: personColor(p),
                     borderWidth: 1, borderColor: '#000', borderRadius: 0
                 }))
             },
@@ -328,7 +341,7 @@ function renderObStats() {
 
         // 3) Доходы и расходы по людям
         const incomes = list.filter(e => e.type === 'income');
-        const incBy = sumBy(incomes, e => e.person || '—');
+        const incBy = sumBy(incomes, obWho);
         upsertChart('obBalance', 'ob-balance-chart', {
             type: 'bar',
             data: {
@@ -348,7 +361,7 @@ function renderObStats() {
         const top = [...expenses].sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0)).slice(0, 6);
         why.innerHTML = top.length ? top.map(e => `
             <div class="ob-why-row">
-                <span class="ob-person" style="background:${OB_PERSON_COLORS[e.person] || '#404040'}">${escapeHtml(e.person || '—')}</span>
+                <span class="ob-person" style="background:${personColor(obWho(e))}">${escapeHtml(obWho(e))}</span>
                 <span class="ob-why-text"><b>${escapeHtml(e.category || '')}</b>${e.comment ? ` — <i>${escapeHtml(e.comment)}</i>` : ''}</span>
                 <span class="amount-expense ob-why-sum">${fmtMoney(e.amount)} ₸</span>
             </div>`).join('') : '<p class="hint" style="text-align:center;">Нет расходов за период</p>';

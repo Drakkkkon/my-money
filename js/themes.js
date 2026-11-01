@@ -18,6 +18,8 @@ const THEME_DEFAULTS = {
 
 // Шрифт темы «Аква» (по мотивам Mac OS X 2000 года): системные шрифты, без файлов Apple
 const AQUA_FONT = "'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif";
+// Шрифт темы «Аэро»: системный шрифт Windows, на других устройствах — похожие
+const AERO_FONT = "'Segoe UI', 'Noto Sans', 'Open Sans', Tahoma, Arial, sans-serif";
 
 const LEOPARD_SPOT = (x, y, w, h) =>
     `radial-gradient(ellipse ${w}px ${h}px at ${x}px ${y}px, #9a6424 40%, #2b1a0b 42% 70%, transparent 72%)`;
@@ -93,7 +95,7 @@ const W95_THEMES = [
         patternSize: '28px 28px' },
     // «Аква» — отдельный стиль по мотивам первой Mac OS X (2000): форма окон, кнопок и меню задаётся в css/aqua.css,
     // который действует только при этой теме (html[data-w95="aqua"])
-    { id: 'aqua', name: 'Аква', sounds: 'glass',
+    { id: 'aqua', name: 'Аква', sounds: 'glass', folder: 'mac',
         face: '#ececec', light: '#ffffff', hilite: '#f6f6f6', shadow: '#a9a9a9', dark: '#6e6e6e',
         field: '#ffffff', text: '#1a1a1a', muted: '#555555', titleText: '#1a1a1a',
         hover: '#e3edfb', grid: '#d8d8d8', income: '#1e7b34', expense: '#c0392b',
@@ -105,7 +107,7 @@ const W95_THEMES = [
     // «Классика 1-бит» — по мотивам самых первых чёрно-белых систем Макинтоша (1984): полосатые заголовки,
     // жёсткие тени, рабочий стол из шахматных точек. Форма — в css/mono.css (только при html[data-w95="mono"]).
     // Цветные остаются лишь суммы дохода/расхода и диаграммы, чтобы их можно было различать.
-    { id: 'mono', name: 'Классика 1-бит', sounds: 'beep',
+    { id: 'mono', name: 'Классика 1-бит', sounds: 'beep', folder: 'mac',
         face: '#ffffff', light: '#ffffff', hilite: '#ffffff', shadow: '#000000', dark: '#000000',
         field: '#ffffff', text: '#000000', muted: '#333333', titleText: '#ffffff',
         hover: '#ffffff', grid: '#000000', income: '#006b24', expense: '#a8000e',
@@ -113,13 +115,96 @@ const W95_THEMES = [
         pattern: 'repeating-conic-gradient(#000000 0 25%, #ffffff 0 50%)',
         patternSize: '2px 2px',
         fontUi: "'Pixelify Sans', 'Courier New', monospace",
-        fontText: "Verdana, Tahoma, 'Segoe UI', Arial, sans-serif" }
+        fontText: "Verdana, Tahoma, 'Segoe UI', Arial, sans-serif" },
+    // «Аэро» — по мотивам Windows Vista: полупрозрачные «стеклянные» рамки окон с размытием и бликами,
+    // светлая рабочая область, глянцевые кнопки, чёрная стеклянная панель задач. Форма — в css/vista.css
+    // (только при html[data-w95="aero"]). Цвет стекла берётся из title/title2 — его можно поменять в своей теме.
+    { id: 'aero', name: 'Аэро', sounds: 'aero', folder: 'vista',
+        face: '#ffffff', light: '#ffffff', hilite: '#f4f7fb', shadow: '#a0a0a0', dark: '#3c3c3c',
+        field: '#ffffff', text: '#1e1e1e', muted: '#5a5a5a', titleText: '#000000',
+        hover: '#e5f3fb', grid: '#dadada', income: '#1e7b34', expense: '#c0392b',
+        title: '#8fb8e0', title2: '#4f86c2', desktop: '#0b3d4f', select: '#3399ff',
+        pattern: 'radial-gradient(ellipse 70% 38% at 28% 62%, rgba(120,220,170,.55), rgba(120,220,170,0) 70%), ' +
+            'radial-gradient(ellipse 60% 32% at 76% 34%, rgba(90,170,235,.55), rgba(90,170,235,0) 70%), ' +
+            'radial-gradient(ellipse 42% 22% at 55% 82%, rgba(200,255,225,.35), rgba(200,255,225,0) 70%), ' +
+            'linear-gradient(160deg, #06303f 0%, #0b5a63 45%, #0a2f52 100%)',
+        patternSize: 'cover',
+        fontUi: AERO_FONT, fontText: AERO_FONT }
 ];
 
 let currentThemeId = 'standard';
 
+// Папки в настройках: встроенные стили плюс папки, которые пользователь создал для своих тем
+const THEME_FOLDERS = [
+    { id: 'win95', name: 'Windows 95' },
+    { id: 'vista', name: 'Windows Vista' },
+    { id: 'mac', name: 'Mac OS' }
+];
+const CUSTOM_FOLDER_DEFAULT = 'Мои темы';
+
+// Цвета, которые можно поменять в своей теме
+const THEME_COLOR_FIELDS = [
+    ['desktop', 'Фон экрана'], ['face', 'Окна'], ['button', 'Кнопки'], ['buttonText', 'Текст на кнопках'],
+    ['text', 'Текст'], ['field', 'Поля ввода и списки'], ['title', 'Заголовок окна (в «Аэро» — стекло)'],
+    ['title2', 'Заголовок окна — переход'], ['titleText', 'Текст заголовка'], ['select', 'Выделение'],
+    ['income', 'Доход'], ['expense', 'Расход']
+];
+const THEME_COLOR_RE = /^#[0-9a-f]{6}$/i;
+
+// --- СВОИ ТЕМЫ ---
+// [{ id, name, folder, base, colors: { только изменённые цвета }, patternOff }]
+// Хранятся на устройстве и в аккаунте Google (js/cloud.js, ключ themes).
+const CUSTOM_THEMES_KEY = 'finance_custom_themes';
+let customThemes = [];
+try {
+    const v = JSON.parse(localStorage.getItem(CUSTOM_THEMES_KEY) || '[]');
+    if (Array.isArray(v)) customThemes = v.filter(isValidCustomTheme);
+} catch (e) {}
+
+function isValidCustomTheme(c) {
+    return !!(c && /^ct[a-z0-9]+$/.test(String(c.id)) && W95_THEMES.some(t => t.id === c.base));
+}
+
+function saveCustomThemesLocal() {
+    try { localStorage.setItem(CUSTOM_THEMES_KEY, JSON.stringify(customThemes)); } catch (e) {}
+}
+
+// После синхронизации с Google Диском: темы могли прийти с другого устройства или быть удалены там
+function onCustomThemesChanged() {
+    customThemes = customThemes.filter(isValidCustomTheme);
+    saveCustomThemesLocal();
+    let saved = '';
+    try { saved = localStorage.getItem(THEME_KEY) || ''; } catch (e) {}
+    if (saved && saved !== currentThemeId && customThemes.some(c => c.id === saved)) applyTheme(saved, { save: false });
+    else if (String(currentThemeId).startsWith('ct') && !customThemes.some(c => c.id === currentThemeId)) applyTheme('standard');
+    else renderThemePicker();
+}
+
 function themeById(id) {
     return W95_THEMES.find(t => t.id === id) || W95_THEMES[0];
+}
+
+function cleanThemeColors(colors) {
+    const out = {};
+    THEME_COLOR_FIELDS.forEach(([k]) => { if (colors && THEME_COLOR_RE.test(colors[k] || '')) out[k] = colors[k]; });
+    return out;
+}
+
+// Полное описание темы: встроенной или своей (своя = основа + изменённые цвета)
+function resolveCustomTheme(c) {
+    const base = themeById(c.base);
+    const colors = cleanThemeColors(c.colors);
+    const t = { ...THEME_DEFAULTS, ...base, ...colors, id: c.id, name: c.name || 'Своя тема', cssId: base.id,
+        folder: c.folder || CUSTOM_FOLDER_DEFAULT, custom: true, overrides: colors };
+    if (c.patternOff) t.pattern = 'none';
+    return t;
+}
+
+function resolveTheme(id) {
+    const c = customThemes.find(x => x.id === id);
+    if (c) return resolveCustomTheme(c);
+    const b = themeById(id);
+    return { ...THEME_DEFAULTS, ...b, cssId: b.id, folder: b.folder || 'win95', overrides: {} };
 }
 
 // Чуть затемнить цвет (для «нажатой» кнопки)
@@ -131,8 +216,17 @@ function shadeColor(hex, factor) {
     return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0')).join('');
 }
 
-function applyTheme(id, { save = true, preview = false } = {}) {
-    const t = { ...THEME_DEFAULTS, ...themeById(id) };
+function applyTheme(id, opts = {}) {
+    applyResolvedTheme(resolveTheme(id), opts);
+}
+
+// Флаги своих цветов: в стилях с «зашитыми» цветами (Аква, 1-бит, Аэро) цвет берётся из темы только при флаге (css/custom.css)
+const THEME_COLOR_FLAGS = {
+    face: 'data-c-face', button: 'data-c-btn', buttonText: 'data-c-btn', field: 'data-c-field',
+    title: 'data-c-title', title2: 'data-c-title', titleText: 'data-c-title', text: 'data-c-text', select: 'data-c-select'
+};
+
+function applyResolvedTheme(t, { save = true, preview = false, render = true } = {}) {
     currentThemeId = t.id;
     const vars = {
         '--w95-face': t.face, '--w95-light': t.light, '--w95-hilite': t.hilite, '--w95-shadow': t.shadow,
@@ -142,12 +236,18 @@ function applyTheme(id, { save = true, preview = false } = {}) {
         '--w95-face-pressed': shadeColor(t.face, t.dark === true ? 0.85 : 0.93),
         '--w95-hover': t.hover, '--w95-grid': t.grid, '--w95-income': t.income, '--w95-expense': t.expense,
         '--w95-pattern': t.pattern, '--w95-pattern-size': t.patternSize,
-        '--w95-font-ui': t.fontUi, '--w95-font-text': t.fontText
+        '--w95-font-ui': t.fontUi, '--w95-font-text': t.fontText,
+        '--w95-button': t.button || t.face, '--w95-button-text': t.buttonText || t.text
     };
     const target = document.body || document.documentElement;
     Object.entries(vars).forEach(([k, v]) => target.style.setProperty(k, v));
-    document.documentElement.setAttribute('data-w95', t.id);
-    document.documentElement.setAttribute('data-w95-mode', t.dark === true ? 'dark' : 'light');
+    const root = document.documentElement;
+    root.setAttribute('data-w95', t.cssId || t.id);
+    root.setAttribute('data-w95-mode', t.dark === true ? 'dark' : 'light');
+    const flags = new Set(Object.keys(t.overrides || {}).map(k => THEME_COLOR_FLAGS[k]).filter(Boolean));
+    [...new Set(Object.values(THEME_COLOR_FLAGS))].forEach(f => {
+        if (flags.has(f)) root.setAttribute(f, ''); else root.removeAttribute(f);
+    });
 
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', t.desktop);
@@ -157,7 +257,7 @@ function applyTheme(id, { save = true, preview = false } = {}) {
     if (save) {
         try { localStorage.setItem(THEME_KEY, t.id); } catch (e) {}
     }
-    renderThemePicker();
+    if (render) renderThemePicker();
     if (preview && typeof playSound === 'function') playSound('open');
 }
 
@@ -193,27 +293,310 @@ function updateChartTheme(t) {
     });
 }
 
-// Выбор темы в настройках: мини-окошки с цветами каждой темы
-function renderThemePicker() {
+// --- ВЫБОР ТЕМЫ: ПАПКИ ---
+let openThemeFolder = null;
+
+function themeEsc(v) {
+    return String(v).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+function themeFolders() {
+    const builtinIds = THEME_FOLDERS.map(f => f.id);
+    const user = [];
+    customThemes.forEach(c => {
+        const f = c.folder || CUSTOM_FOLDER_DEFAULT;
+        if (!builtinIds.includes(f) && !user.includes(f)) user.push(f);
+    });
+    return THEME_FOLDERS.concat(user.map(name => ({ id: name, name, user: true })));
+}
+
+function themesInFolder(fid) {
+    const list = W95_THEMES.filter(t => (t.folder || 'win95') === fid).map(t => resolveTheme(t.id));
+    customThemes.filter(c => (c.folder || CUSTOM_FOLDER_DEFAULT) === fid).forEach(c => list.push(resolveCustomTheme(c)));
+    return list;
+}
+
+function themeCountLabel(n) {
+    const m10 = n % 10, m100 = n % 100;
+    const word = m10 === 1 && m100 !== 11 ? 'тема' : (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'темы' : 'тем');
+    return `${n} ${word}`;
+}
+
+// Значок папки: задняя стенка, лист внутри и передняя створка (открывается анимацией)
+const THEME_FOLDER_ICON = '<span class="tf-icon" aria-hidden="true"><span class="tf-back"></span><span class="tf-paper"></span><span class="tf-front"></span></span>';
+
+function themeSwatchHtml(t) {
+    const desk = t.pattern !== 'none'
+        ? `background-color:${t.desktop};background-image:${t.pattern};background-size:${['auto', 'cover'].includes(t.patternSize) ? t.patternSize : '60px 60px'};`
+        : `background:${t.desktop};`;
+    return `<button type="button" class="theme-swatch theme-swatch-${t.cssId}${t.custom ? ' is-custom' : ''}${t.id === currentThemeId ? ' is-active' : ''}" data-theme-id="${themeEsc(t.id)}" onclick="applyTheme(this.dataset.themeId, { preview: true })" aria-pressed="${t.id === currentThemeId}">
+        <span class="theme-swatch-desk" style="${desk}">
+            <span class="theme-swatch-win" style="background:${t.face};">
+                <span class="theme-swatch-title" style="background:linear-gradient(90deg, ${t.title}, ${t.title2});"></span>
+                <span class="theme-swatch-field" style="background:${t.field};"></span>
+            </span>
+        </span>
+        <span class="theme-swatch-name">${themeEsc(t.name)}</span>
+    </button>`;
+}
+
+// Выбор темы в настройках: папки по стилям, внутри — мини-окошки тем. Папки нарисованы в стиле текущей темы.
+function renderThemePicker({ animate = false, origin = '' } = {}) {
     const box = document.getElementById('theme-picker');
     if (!box) return;
-    box.innerHTML = W95_THEMES.map(raw => {
-        const t = { ...THEME_DEFAULTS, ...raw };
-        const desk = t.pattern !== 'none'
-            ? `background-color:${t.desktop};background-image:${t.pattern};background-size:${['auto', 'cover'].includes(t.patternSize) ? t.patternSize : '60px 60px'};`
-            : `background:${t.desktop};`;
-        return `<button type="button" class="theme-swatch theme-swatch-${t.id}${t.id === currentThemeId ? ' is-active' : ''}" onclick="applyTheme('${t.id}', { preview: true })" aria-pressed="${t.id === currentThemeId}">
-            <span class="theme-swatch-desk" style="${desk}">
-                <span class="theme-swatch-win" style="background:${t.face};">
-                    <span class="theme-swatch-title" style="background:linear-gradient(90deg, ${t.title}, ${t.title2});"></span>
-                    <span class="theme-swatch-field" style="background:${t.field};"></span>
-                </span>
-            </span>
-            <span class="theme-swatch-name">${t.name}</span>
+    const folders = themeFolders();
+    if (openThemeFolder && !folders.some(f => f.id === openThemeFolder)) openThemeFolder = null;
+    const cur = resolveTheme(currentThemeId);
+
+    const folderHtml = folders.map(f => {
+        const open = f.id === openThemeFolder;
+        return `<button type="button" class="theme-folder${open ? ' is-open' : ''}${open && animate ? ' tf-anim' : ''}${f.id === cur.folder ? ' is-current' : ''}${f.user ? ' is-user' : ''}" data-folder="${themeEsc(f.id)}" onclick="toggleThemeFolder(this.dataset.folder, this)" aria-expanded="${open}">
+            ${THEME_FOLDER_ICON}<span class="tf-name">${themeEsc(f.name)}</span><span class="tf-count">${themeCountLabel(themesInFolder(f.id).length)}</span>
         </button>`;
     }).join('');
+
+    let panel = '';
+    const openFolder = folders.find(f => f.id === openThemeFolder);
+    if (openFolder) {
+        const items = themesInFolder(openFolder.id);
+        panel = `<div class="theme-folder-panel${animate ? ' is-opening' : ''}" id="theme-folder-panel" role="region" aria-label="Папка ${themeEsc(openFolder.name)}"${origin ? ` style="--tf-origin:${origin}"` : ''}>
+            <div class="tf-panel-head">${THEME_FOLDER_ICON}<b class="tf-panel-title">${themeEsc(openFolder.name)}</b>
+                <button type="button" class="tf-panel-close" onclick="toggleThemeFolder(null)" aria-label="Закрыть папку" title="Закрыть папку"><span class="material-icons">close</span></button>
+            </div>
+            <div class="theme-picker">${items.length ? items.map(themeSwatchHtml).join('') : '<p class="hint">Папка пуста</p>'}</div>
+        </div>`;
+    }
+
+    const actions = `<div class="theme-actions">
+        <button type="button" class="btn-primary" onclick="openThemeEditor()"><span class="material-icons">palette</span> Создать тему на основе текущей</button>
+        ${cur.custom ? `<button type="button" class="btn-secondary" onclick="openThemeEditor(currentThemeId)"><span class="material-icons">edit</span> Изменить «${themeEsc(cur.name)}»</button>` : ''}
+    </div>`;
+    box.innerHTML = `<div class="theme-folders">${folderHtml}</div>${panel}${actions}`;
+}
+
+// Открыть / закрыть папку с анимацией (не дольше 0,35 с)
+function toggleThemeFolder(fid, btn) {
+    const panel = document.getElementById('theme-folder-panel');
+    clearTimeout(toggleThemeFolder.timer);
+    if (!fid || fid === openThemeFolder) {
+        if (!openThemeFolder) return;
+        if (typeof playSound === 'function') playSound('close');
+        document.querySelectorAll('.theme-folder.is-open').forEach(b => {
+            b.classList.remove('is-open', 'tf-anim');
+            b.setAttribute('aria-expanded', 'false');
+        });
+        if (panel) {
+            panel.classList.remove('is-opening');
+            panel.classList.add('is-closing');
+            toggleThemeFolder.timer = setTimeout(() => { openThemeFolder = null; renderThemePicker(); }, 260);
+        } else {
+            openThemeFolder = null;
+            renderThemePicker();
+        }
+        return;
+    }
+    openThemeFolder = fid;
+    let origin = '';
+    const box = document.getElementById('theme-picker');
+    if (btn && box) {
+        const r = btn.getBoundingClientRect();
+        const b = box.getBoundingClientRect();
+        origin = `${Math.round(r.left + r.width / 2 - b.left)}px 0px`;
+    }
+    if (typeof playSound === 'function') playSound('open');
+    renderThemePicker({ animate: true, origin });
+}
+
+// --- РЕДАКТОР СВОЕЙ ТЕМЫ ---
+let themeEditorState = null;
+
+// Цвета темы для полей редактора (кнопки по умолчанию — цвета окна и текста)
+function themeEditableColors(t) {
+    const out = {};
+    THEME_COLOR_FIELDS.forEach(([k]) => {
+        let v = t[k];
+        if (k === 'button') v = t.button || t.face;
+        if (k === 'buttonText') v = t.buttonText || t.text;
+        out[k] = THEME_COLOR_RE.test(v || '') ? v.toLowerCase() : '#808080';
+    });
+    return out;
+}
+
+function themeEditorEntry(id) {
+    const s = themeEditorState;
+    const baseColors = themeEditableColors(resolveTheme(s.base));
+    const colors = {};
+    Object.entries(s.colors).forEach(([k, v]) => { if (v !== baseColors[k]) colors[k] = v; });
+    const entry = { id, name: s.name, folder: s.folder, base: s.base, colors };
+    if (s.patternOff) entry.patternOff = true;
+    return entry;
+}
+
+function themeEditorPreview() {
+    applyResolvedTheme(resolveCustomTheme(themeEditorEntry('ctpreview')), { save: false, render: false });
+}
+
+function openThemeEditor(editId = '') {
+    closeThemeEditor(false);
+    const editing = editId ? customThemes.find(c => c.id === editId) : null;
+    const cur = editing ? resolveCustomTheme(editing) : resolveTheme(currentThemeId);
+    themeEditorState = {
+        editId: editing ? editing.id : '',
+        prevId: currentThemeId,
+        name: editing ? editing.name : `${cur.name} — моя`.slice(0, 30),
+        folder: cur.folder,
+        base: cur.cssId,
+        colors: themeEditableColors(cur),
+        patternOff: cur.pattern === 'none' && themeById(cur.cssId).pattern !== undefined && themeById(cur.cssId).pattern !== 'none'
+    };
+    const s = themeEditorState;
+    const folders = themeFolders();
+    if (!folders.some(f => f.id === CUSTOM_FOLDER_DEFAULT)) folders.push({ id: CUSTOM_FOLDER_DEFAULT, name: CUSTOM_FOLDER_DEFAULT });
+    const folderOptions = folders.map(f => `<option value="${themeEsc(f.id)}"${f.id === s.folder ? ' selected' : ''}>${themeEsc(f.name)}</option>`).join('') +
+        '<option value="__new">Новая папка…</option>';
+    const baseOptions = THEME_FOLDERS.map(f => `<optgroup label="${themeEsc(f.name)}">` +
+        W95_THEMES.filter(t => (t.folder || 'win95') === f.id).map(t => `<option value="${t.id}"${t.id === s.base ? ' selected' : ''}>${themeEsc(t.name)}</option>`).join('') +
+        '</optgroup>').join('');
+    const colorInputs = THEME_COLOR_FIELDS.map(([k, label]) =>
+        `<label class="te-color"><input type="color" data-key="${k}" value="${s.colors[k]}"><span>${themeEsc(label)}</span></label>`).join('');
+
+    const overlay = document.createElement('div');
+    overlay.id = 'theme-editor';
+    overlay.className = 'export-sheet-overlay theme-editor-overlay';
+    overlay.innerHTML = `
+        <div class="export-sheet theme-editor" role="dialog" aria-modal="true" aria-label="Своя тема">
+            <div class="export-sheet-head">
+                <h3>${editing ? 'Изменить тему' : 'Новая тема'}</h3>
+                <button type="button" class="export-sheet-close" data-act="cancel" aria-label="Закрыть"><span class="material-icons">close</span></button>
+            </div>
+            <div class="te-body">
+                <label class="te-field"><span>Название</span><input type="text" id="te-name" maxlength="30" value="${themeEsc(s.name)}"></label>
+                <label class="te-field"><span>Сохранить в папку</span><select id="te-folder">${folderOptions}</select></label>
+                <label class="te-field" id="te-newfolder-wrap" hidden><span>Название новой папки</span><input type="text" id="te-newfolder" maxlength="24" placeholder="Например: Летние"></label>
+                <label class="te-field"><span>Основа: вид окон, кнопок и звуки</span><select id="te-base">${baseOptions}</select></label>
+                <div class="te-colors">${colorInputs}</div>
+                <label class="te-check"><input type="checkbox" id="te-pattern"${s.patternOff ? '' : ' checked'}> <span>Узор / картинка на фоне (как у основы)</span></label>
+                <p class="hint">Изменения видны сразу. Тема сохраняется на этом устройстве и в аккаунте Google.</p>
+            </div>
+            <div class="export-sheet-actions">
+                <button type="button" class="btn-primary" data-act="save"><span class="material-icons">save</span> Сохранить</button>
+                ${editing ? '<button type="button" class="btn-secondary" data-act="saveas"><span class="material-icons">library_add</span> Сохранить как новую</button>' : ''}
+                <button type="button" class="btn-secondary" data-act="reset"><span class="material-icons">restart_alt</span> Цвета основы</button>
+                ${editing ? '<button type="button" class="btn-secondary" data-act="delete"><span class="material-icons">delete</span> Удалить тему</button>' : ''}
+                <button type="button" class="btn-secondary" data-act="cancel">Отмена</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const q = sel => overlay.querySelector(sel);
+    const syncPatternBox = () => {
+        const has = (themeById(s.base).pattern || 'none') !== 'none';
+        q('#te-pattern').disabled = !has;
+        if (!has) q('#te-pattern').checked = false;
+    };
+    syncPatternBox();
+    overlay.addEventListener('input', (e) => {
+        const el = e.target;
+        if (el.matches('input[type="color"]')) {
+            s.colors[el.dataset.key] = el.value.toLowerCase();
+            // Свой цвет фона виден только без узора основы
+            if (el.dataset.key === 'desktop' && q('#te-pattern').checked) { q('#te-pattern').checked = false; s.patternOff = true; }
+            themeEditorPreview();
+        } else if (el.id === 'te-name') {
+            s.name = el.value;
+        } else if (el.id === 'te-newfolder') {
+            s.newFolder = el.value;
+        }
+    });
+    overlay.addEventListener('change', (e) => {
+        const el = e.target;
+        if (el.id === 'te-pattern') { s.patternOff = !el.checked; themeEditorPreview(); }
+        else if (el.id === 'te-folder') {
+            q('#te-newfolder-wrap').hidden = el.value !== '__new';
+            if (el.value !== '__new') s.folder = el.value; else q('#te-newfolder').focus();
+        } else if (el.id === 'te-base') {
+            s.base = el.value;
+            s.colors = themeEditableColors(resolveTheme(s.base));
+            s.patternOff = false;
+            overlay.querySelectorAll('input[type="color"]').forEach(i => { i.value = s.colors[i.dataset.key]; });
+            q('#te-pattern').checked = true;
+            syncPatternBox();
+            if (q('#te-pattern').disabled) s.patternOff = false;
+            themeEditorPreview();
+        }
+    });
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) { closeThemeEditor(true); return; }
+        const btn = e.target.closest('[data-act]');
+        if (!btn) return;
+        const act = btn.dataset.act;
+        if (act === 'cancel') closeThemeEditor(true);
+        else if (act === 'reset') {
+            s.colors = themeEditableColors(resolveTheme(s.base));
+            s.patternOff = false;
+            overlay.querySelectorAll('input[type="color"]').forEach(i => { i.value = s.colors[i.dataset.key]; });
+            syncPatternBox();
+            if (!q('#te-pattern').disabled) q('#te-pattern').checked = true;
+            themeEditorPreview();
+        } else if (act === 'save' || act === 'saveas') saveThemeFromEditor(act === 'saveas');
+        else if (act === 'delete') deleteCustomTheme(s.editId);
+    });
+    overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeThemeEditor(true); });
+    if (typeof playSound === 'function') playSound('open');
+    themeEditorPreview();
+    setTimeout(() => { const n = q('#te-name'); if (n) n.focus(); }, 50);
+}
+
+// cancel=true — вернуть тему, которая была до открытия редактора
+function closeThemeEditor(cancel) {
+    const el = document.getElementById('theme-editor');
+    if (el) el.remove();
+    if (cancel && themeEditorState) {
+        applyTheme(themeEditorState.prevId, { save: false });
+        if (typeof playSound === 'function') playSound('close');
+    }
+    themeEditorState = null;
+}
+
+function saveThemeFromEditor(asNew) {
+    const s = themeEditorState;
+    if (!s) return;
+    const folderSel = document.getElementById('te-folder');
+    if (folderSel && folderSel.value === '__new') {
+        const name = (s.newFolder || '').replace(/\s+/g, ' ').trim().slice(0, 24);
+        if (!name) { alert('Введите название новой папки.'); return; }
+        s.folder = name;
+    }
+    s.name = (s.name || '').replace(/\s+/g, ' ').trim().slice(0, 30) || 'Своя тема';
+    const id = (!asNew && s.editId) ? s.editId : 'ct' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const entry = themeEditorEntry(id);
+    const idx = customThemes.findIndex(c => c.id === id);
+    if (idx >= 0) customThemes[idx] = { ...customThemes[idx], ...entry, patternOff: !!entry.patternOff };
+    else customThemes.push(entry);
+    saveCustomThemesLocal();
+    themeEditorState = null;
+    const el = document.getElementById('theme-editor');
+    if (el) el.remove();
+    openThemeFolder = entry.folder;
+    applyTheme(id);
+    if (typeof playSound === 'function') playSound('success');
+    if (typeof showToast === 'function') showToast(`Тема «${entry.name}» сохранена в папку «${entry.folder}»`);
+    if (typeof updateUI === 'function') updateUI(true); // отправить в аккаунт Google
+}
+
+function deleteCustomTheme(id) {
+    const c = customThemes.find(x => x.id === id);
+    if (!c || !confirm(`Удалить тему «${c.name}»?`)) return;
+    customThemes = customThemes.filter(x => x.id !== id);
+    saveCustomThemesLocal();
+    const prev = themeEditorState && themeEditorState.prevId;
+    themeEditorState = null;
+    const el = document.getElementById('theme-editor');
+    if (el) el.remove();
+    applyTheme(prev && prev !== id ? prev : c.base);
+    if (typeof updateUI === 'function') updateUI(true);
 }
 
 // Тема применяется сразу (до загрузки картинок и шрифтов), чтобы не мигала стандартная
 try { applySavedTheme(); } catch (e) { console.warn('Тема не применилась', e); }
-window.addEventListener('DOMContentLoaded', renderThemePicker);
+window.addEventListener('DOMContentLoaded', () => renderThemePicker());
