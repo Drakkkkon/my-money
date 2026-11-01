@@ -1,6 +1,10 @@
 // Service worker My Money: свежие файлы сайта из сети (автообновление), без интернета — из кэша.
 // Внешние запросы (Google, курсы, погода, библиотеки) не перехватываются.
-const CACHE = 'my-money-v3';
+//
+// Важно: запрос самой страницы (navigate) нельзя пересоздавать с параметрами — браузер выдаёт ошибку,
+// и раньше из-за этого всегда открывалась старая копия index.html из кэша (в установленном приложении
+// старая страница + новые скрипты ломали запуск). Теперь страница запрашивается по адресу.
+const CACHE = 'my-money-v5';
 const CORE = [
     './',
     'index.html',
@@ -8,6 +12,9 @@ const CORE = [
     'css/win95.css',
     'js/config.js',
     'js/sound.js',
+    'js/soundpicker.js',
+    'js/themes.js',
+    'js/scrollbars.js',
     'js/cloud.js',
     'js/oldbook.js',
     'js/script.js',
@@ -17,7 +24,12 @@ const CORE = [
 ];
 
 self.addEventListener('install', (event) => {
-    event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
+    // Каждый файл кэшируется отдельно: отсутствие одного (например, config.js) не ломает установку
+    event.waitUntil(
+        caches.open(CACHE)
+            .then(cache => Promise.all(CORE.map(url => cache.add(new Request(url, { cache: 'reload' })).catch(() => null))))
+            .then(() => self.skipWaiting())
+    );
 });
 
 self.addEventListener('activate', (event) => {
@@ -32,18 +44,23 @@ self.addEventListener('fetch', (event) => {
     const req = event.request;
     if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
 
+    const isPage = req.mode === 'navigate';
+    const network = isPage
+        ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
+        : fetch(req, { cache: 'no-cache' });
+
     // Сначала сеть (с проверкой свежести у сервера), при ошибке — кэш
     event.respondWith(
-        fetch(req, { cache: 'no-cache' })
+        network
             .then(res => {
                 if (res && res.ok) {
                     const copy = res.clone();
-                    caches.open(CACHE).then(cache => cache.put(req, copy));
+                    caches.open(CACHE).then(cache => cache.put(isPage ? req.url : req, copy)).catch(() => {});
                 }
                 return res;
             })
-            .catch(() => caches.match(req, { ignoreSearch: true })
-                .then(hit => hit || (req.mode === 'navigate' ? caches.match('index.html') : null))
+            .catch(() => caches.match(isPage ? req.url : req, { ignoreSearch: true })
+                .then(hit => hit || (isPage ? caches.match('index.html') : null))
                 .then(hit => hit || Response.error()))
     );
 });

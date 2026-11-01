@@ -1,4 +1,22 @@
 // Облако (вход через Google, данные на Google Диске, перенос из старого Firebase-аккаунта) — js/cloud.js.
+
+// Заглушки на случай, если какой-то из файлов js/*.js не загрузился (нет сети, старая копия страницы):
+// приложение должно запуститься в любом случае, просто без этой части.
+['playSound', 'playStartupChime', 'renderOldbook', 'onOldbookTabShown', 'renderSoundSettings', 'applySavedTheme',
+    'openSoundPicker', 'initW95Scrollbars']
+    .forEach(name => { if (typeof window[name] !== 'function') window[name] = function () {}; });
+if (typeof window.getFormComment !== 'function') window.getFormComment = function () { return ''; };
+if (typeof window.setFormComment !== 'function') window.setFormComment = function () {};
+
+// Выполняет шаг запуска; ошибка в одном шаге не останавливает остальные (слайдер, вход, меню)
+function safeStep(name, fn) {
+    try {
+        fn();
+    } catch (e) {
+        console.error('Ошибка при запуске (' + name + '):', e);
+    }
+}
+
 let transactions = [];
 let subscriptions = [];
 let priorityGoal = { name: '', amount: 0, icon: '🎯' };
@@ -7,27 +25,29 @@ let savings = 0;
 let profileName = '';
 let oldbookEntries = [];   // свои записи Oldbook
 let oldbookLinks = [];     // книги Oldbook других пользователей, которыми с вами поделились
+let customCategories = []; // свои категории пользователя: [{ id, name }]
 let myChart = null;
 
 window.onload = function() {
-    loadData();
-    checkDailyRollover();
-    
+    // Слайдер разблокировки — первым: заставка не должна «зависнуть», даже если что-то ниже сломается
+    safeStep('слайдер', initSlider);
+    safeStep('данные', loadData);
+    safeStep('перенос лимита', checkDailyRollover);
+
     let dtInput = document.getElementById('tx-datetime');
     if (dtInput) dtInput.value = almatyIsoNow();
 
-    if (typeof Chart !== 'undefined') {
-        // Диаграммы в стиле Windows 95: чёрный текст, серая сетка, без скруглений
-        Chart.defaults.color = '#000';
-        Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.18)';
+    safeStep('диаграммы', () => {
+        if (typeof Chart === 'undefined') return;
+        // Диаграммы в стиле Windows 95: без скруглений; цвета текста и сетки задаёт тема (js/themes.js)
         Chart.defaults.font.family = "Tahoma, 'MS Sans Serif', 'Segoe UI', sans-serif";
         Chart.defaults.animation.duration = 400; // все анимации приложения не дольше 0.5 с
-    }
-
-    updateUI(false);
-    initSlider();
-    initCloud();
-    registerServiceWorker();
+    });
+    safeStep('тема', applySavedTheme);
+    safeStep('интерфейс', () => updateUI(false));
+    safeStep('полосы прокрутки', initW95Scrollbars);
+    safeStep('облако', initCloud);
+    safeStep('офлайн-режим', registerServiceWorker);
 };
 
 // --- ПРОФИЛЬ ---
@@ -60,6 +80,14 @@ function exportFileName(ext, suffix = '') {
 // sw.js отдаёт свежие файлы сайта из сети, а без интернета — из кэша. Новая версия подхватывается при открытии.
 function registerServiceWorker() {
     if (!('serviceWorker' in navigator) || !window.isSecureContext || location.protocol === 'file:') return;
+    // Когда новая версия сайта взяла управление — один раз перезагружаем страницу, чтобы не смешивать версии
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadController || reloaded) return;
+        reloaded = true;
+        location.reload();
+    });
     navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
         .then(reg => {
             document.addEventListener('visibilitychange', () => {
@@ -81,6 +109,7 @@ function loadData() {
         profileName = localStorage.getItem('finance_profile_name') || '';
         if (localStorage.getItem('finance_oldbook')) oldbookEntries = JSON.parse(localStorage.getItem('finance_oldbook')) || [];
         if (localStorage.getItem('finance_ob_links')) oldbookLinks = JSON.parse(localStorage.getItem('finance_ob_links')) || [];
+        if (localStorage.getItem('finance_categories')) customCategories = JSON.parse(localStorage.getItem('finance_categories')) || [];
     } catch(e) {
         console.error("Error loading local storage:", e);
     }
@@ -151,6 +180,7 @@ function updateUI(pushToCloud = false) {
     generateReport();
     renderStatistics();
     renderOldbook();
+    renderCategorySettings();
 
     // Если флаг pushToCloud true, изменения отправляются на Google Диск (с небольшой задержкой, пачкой)
     if (pushToCloud) scheduleCloudSync();
@@ -1198,6 +1228,8 @@ function saveDataLocally() {
         localStorage.setItem('finance_profile_name', profileName);
         localStorage.setItem('finance_oldbook', JSON.stringify(oldbookEntries));
         localStorage.setItem('finance_ob_links', JSON.stringify(oldbookLinks));
+        localStorage.setItem('finance_categories', JSON.stringify(customCategories));
+        localStorage.setItem('finance_custom_sounds', JSON.stringify(customSoundMeta));
         localStorage.setItem('finance_tx', JSON.stringify(transactions));
         localStorage.setItem('finance_subs', JSON.stringify(subscriptions));
         localStorage.setItem('finance_savings', savings.toString());
@@ -1273,6 +1305,8 @@ function clearAllData() {
         priorityGoal = { name: '', amount: 0, icon: '🎯' };
         oldbookEntries = [];
         oldbookLinks = [];
+        customCategories = [];
+        if (typeof clearCustomSoundsLocal === 'function') clearCustomSoundsLocal();
         renderMenus();
         updateUI(true);
     }
@@ -1823,7 +1857,7 @@ let savedPin = localStorage.getItem('finance_pin');
 let bioEnabled = localStorage.getItem('finance_bio') === 'true';
 
 function proceedFromSplash() {
-    playStartupChime(); // собственная мелодия запуска (звучит после жеста разблокировки)
+    safeStep('мелодия', () => playStartupChime()); // собственная мелодия запуска (звучит после жеста разблокировки)
     document.getElementById('splash-screen').style.opacity = '0';
     setTimeout(() => {
         document.getElementById('splash-screen').style.display = 'none';
@@ -2182,30 +2216,105 @@ function hideCategories() {
     }, 200); 
 }
 
+// Категории Oldbook по умолчанию (подсказки в поле «На что»)
+const OB_DEFAULT_CATEGORIES = ['Продукты', 'Еда вне дома', 'Проезд', 'Одежда', 'Учёба', 'Кружки и секции',
+    'Развлечения', 'Подарки', 'Здоровье', 'Карманные деньги', 'Зарплата', 'Другое'];
+
+function customCategoryNames() {
+    return customCategories.map(c => c && c.name).filter(Boolean);
+}
+
+// Все категории: свои — первыми, затем стандартные; без повторов (без учёта регистра)
+function allCategories(defaults = categoryOptions) {
+    const seen = new Set();
+    return customCategoryNames().concat(defaults).filter(name => {
+        const key = name.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+function addCustomCategory(rawName, { silent = false } = {}) {
+    const name = String(rawName || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+    if (!name) {
+        if (!silent) alert('Введите название категории.');
+        return false;
+    }
+    const exists = allCategories(categoryOptions.concat(OB_DEFAULT_CATEGORIES)).some(c => c.toLowerCase() === name.toLowerCase());
+    if (exists) {
+        if (!silent) showToast(`Категория «${name}» уже есть`);
+        return false;
+    }
+    customCategories.push({ id: 'cat' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name });
+    updateUI(true);
+    if (!silent) showToast(`Категория «${name}» добавлена`);
+    return true;
+}
+
+function addCategoryFromSettings() {
+    const input = document.getElementById('new-category');
+    if (addCustomCategory(input ? input.value : '') && input) input.value = '';
+}
+
+function deleteCustomCategory(id) {
+    const cat = customCategories.find(c => c.id === id);
+    if (!cat || !confirm(`Удалить категорию «${cat.name}» из списка? Уже сделанные записи с ней не изменятся.`)) return;
+    customCategories = customCategories.filter(c => c.id !== id);
+    updateUI(true);
+}
+
+function renderCategorySettings() {
+    const list = document.getElementById('custom-categories');
+    if (list) {
+        list.innerHTML = customCategories.length
+            ? customCategories.map(c => `<div class="cat-chip"><span class="cat-chip-name">${escapeHtml(c.name)}</span>` +
+                `<button type="button" class="cat-chip-del" onclick="deleteCustomCategory('${escapeHtml(c.id)}')" aria-label="Удалить категорию ${escapeHtml(c.name)}"><span class="material-icons">close</span></button></div>`).join('')
+            : '<p class="hint">Своих категорий пока нет.</p>';
+    }
+    // Подсказки в Oldbook: свои + стандартные
+    const dl = document.getElementById('ob-category-list');
+    if (dl) dl.innerHTML = allCategories(OB_DEFAULT_CATEGORIES).map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
+}
+
 function filterCategories() {
     let catInput = document.getElementById('category');
     let drop = document.getElementById('category-dropdown');
     if (!catInput || !drop) return;
-    
-    let input = catInput.value.toLowerCase();
+
+    const typed = catInput.value.trim();
+    let input = typed.toLowerCase();
     drop.innerHTML = '';
-    
-    let filtered = categoryOptions.filter(c => c.toLowerCase().includes(input));
-    
-    if (filtered.length === 0) {
-        drop.style.display = 'none';
-        return;
-    }
-    
+
+    const all = allCategories();
+    let filtered = all.filter(c => c.toLowerCase().includes(input));
+    const customSet = new Set(customCategoryNames().map(c => c.toLowerCase()));
+
     filtered.forEach(c => {
         let div = document.createElement('div');
-        div.className = 'dropdown-item';
-        div.innerText = c;
+        div.className = 'dropdown-item' + (customSet.has(c.toLowerCase()) ? ' is-custom' : '');
+        div.textContent = c;
         div.onclick = function() {
             catInput.value = c;
             drop.style.display = 'none';
         };
         drop.appendChild(div);
     });
-    drop.style.display = 'block';
+
+    // Своя категория прямо из списка: «+ Добавить "…" в мои категории»
+    if (typed && !all.some(c => c.toLowerCase() === input)) {
+        let add = document.createElement('div');
+        add.className = 'dropdown-item dropdown-add';
+        add.innerHTML = `<span class="material-icons">add</span> Добавить «${escapeHtml(typed.slice(0, 40))}» в мои категории`;
+        // mousedown срабатывает раньше, чем поле теряет фокус и список скрывается
+        add.onmousedown = function(e) { e.preventDefault(); };
+        add.onclick = function() {
+            addCustomCategory(typed);
+            catInput.value = typed.slice(0, 40);
+            drop.style.display = 'none';
+        };
+        drop.appendChild(add);
+    }
+
+    drop.style.display = drop.children.length ? 'block' : 'none';
 }

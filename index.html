@@ -315,7 +315,10 @@
                         </div>
 
                         <div class="ob-label">На что</div>
-                        <input type="text" id="ob-category" list="ob-category-list" placeholder="Категория (продукты, кружок, проезд…)" maxlength="60" autocomplete="off">
+                        <div class="ob-category-row">
+                            <input type="text" id="ob-category" list="ob-category-list" placeholder="Категория (продукты, кружок, проезд…)" maxlength="60" autocomplete="off">
+                            <button type="button" class="btn-secondary ob-cat-add" onclick="addCustomCategory(document.getElementById('ob-category').value)" title="Добавить в мои категории" aria-label="Добавить в мои категории"><span class="material-icons">bookmark_add</span></button>
+                        </div>
                         <datalist id="ob-category-list">
                             <option value="Продукты"></option>
                             <option value="Еда вне дома"></option>
@@ -483,12 +486,29 @@
                         <button type="button" class="export-btn" style="background:#d32f2f; margin-top: 15px;" onclick="clearAllData()"><span class="material-icons">delete_forever</span> Сбросить всё</button>
                     </div>
 
+                    <div class="card card-wide theme-card">
+                        <h3><span class="material-icons">palette</span> Темы оформления</h3>
+                        <p class="hint">Цветовые схемы в духе Windows 95, а также «Леопард» и «Неон». У каждой темы свои звуки — при выборе вы их услышите.</p>
+                        <div class="theme-picker" id="theme-picker"></div>
+                    </div>
+
                     <div class="card sound-card">
                         <h3><span class="material-icons">volume_up</span> Звуки</h3>
                         <p class="hint">Щелчки кнопок, звуки открытия и закрытия окон и короткая мелодия при запуске. Все звуки создаются самим приложением.</p>
                         <button type="button" class="btn-secondary btn-block" id="sound-ui-btn" onclick="toggleUiSound()">Звуки интерфейса</button>
                         <button type="button" class="btn-secondary btn-block" id="sound-startup-btn" onclick="toggleStartupSound()">Мелодия при запуске</button>
                         <button type="button" class="btn-secondary btn-block" onclick="previewStartupChime()"><span class="material-icons">play_arrow</span> Прослушать мелодию</button>
+                        <button type="button" class="btn-primary btn-block" onclick="openSoundPicker()"><span class="material-icons">library_music</span> Выбрать звуки</button>
+                    </div>
+
+                    <div class="card categories-card">
+                        <h3><span class="material-icons">label</span> Мои категории</h3>
+                        <p class="hint">Свои категории появляются в подсказках «Записей» и Oldbook и сохраняются в аккаунте Google. Добавить можно и прямо из списка категорий при вводе записи.</p>
+                        <div class="cat-add-form">
+                            <input type="text" id="new-category" placeholder="Название, например «Бензин»" maxlength="40" onkeydown="if(event.key==='Enter'){addCategoryFromSettings();}">
+                            <button type="button" class="btn-primary" onclick="addCategoryFromSettings()"><span class="material-icons">add</span> Добавить</button>
+                        </div>
+                        <div class="custom-categories" id="custom-categories"></div>
                     </div>
 
                     <div class="card menu-editor-card">
@@ -506,7 +526,26 @@
                         <h3><span class="material-icons">history</span> История версий</h3>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>3.2.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>3.4.0 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Свои категории: добавление прямо из списка категорий («+ Добавить … в мои категории»), кнопка в Oldbook и блок «Мои категории» в настройках. Сохраняются в аккаунте Google.</li>
+                                    <li>«Выбрать звуки»: свои файлы (MP3, WAV, OGG, M4A…) для открытия и закрытия приложения, кнопок, открытия и закрытия окошек, главного меню и прокрутки; можно выключить отдельный звук или вернуть звук темы. Файлы хранятся на Google Диске и синхронизируются.</li>
+                                    <li>Новые звуки по умолчанию: кнопки главного меню, прокрутка, закрытие приложения.</li>
+                                    <li>Полосы прокрутки в стиле Windows 95 во всех блоках с прокруткой — со стрелками и ползунком, который можно тянуть, в том числе на телефоне.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>3.3.0</h4>
+                                <ul>
+                                    <li>Исправлено: в установленном приложении открывалась старая копия страницы, из-за чего не работали слайдер разблокировки и остальное приложение.</li>
+                                    <li>Запуск защищён: ошибка в одной части больше не останавливает слайдер, вход и меню.</li>
+                                    <li>Вход через Google: точная подсказка, что не так с файлом js/config.js. Файл настроек больше не входит в архивы обновлений.</li>
+                                    <li>19 тем оформления: схемы в духе Windows 95 (Стандартная, Кирпич, Пустыня, Баклажан, Сирень, Клён, Море, Слива, Тыква, Дождливый день, Красный-белый-синий, Роза, Сланец, Ель, Гроза, Бирюза, Пшеница), а также Леопард и Неон. Цвета смягчены.</li>
+                                    <li>У каждой темы свои звуки: колокольчики, дерево, вода, дождь, гроза, синтезатор, фанфары; у Леопарда — рычание и лязг когтей, у Неона — искажённое гудение и «зипы».</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>3.2.0</h4>
                                 <ul>
                                     <li>Комментарий к записи (до 100 символов): кнопка «Комментарий» в форме, текст курсивом под временем записи, колонка «Комментарий» в Excel и PDF.</li>
                                     <li>Новый раздел Oldbook: записи с выбором «Кто» (Катя, Папа, Саша), цифровая клавиатура для суммы без системной клавиатуры.</li>
@@ -609,6 +648,9 @@
     </div>
     <script src="js/config.js"></script>
     <script src="js/sound.js"></script>
+    <script src="js/soundpicker.js"></script>
+    <script src="js/themes.js"></script>
+    <script src="js/scrollbars.js"></script>
     <script src="js/cloud.js"></script>
     <script src="js/oldbook.js"></script>
     <script src="js/script.js"></script>

@@ -34,9 +34,31 @@ function readJsonKey(key, fallback) {
     try { const v = JSON.parse(localStorage.getItem(key) || 'null'); return v === null ? fallback : v; } catch (e) { return fallback; }
 }
 
+function rawClientId() {
+    return String((window.MONEY_CONFIG && window.MONEY_CONFIG.googleClientId) || '').replace(/\s+/g, '');
+}
+
 function googleClientId() {
-    const id = String((window.MONEY_CONFIG && window.MONEY_CONFIG.googleClientId) || '').trim();
-    return /^\d+-[a-z0-9]+\.apps\.googleusercontent\.com$/i.test(id) ? id : '';
+    const id = rawClientId();
+    return /^\d+-[a-z0-9_-]+\.apps\.googleusercontent\.com$/i.test(id) ? id : '';
+}
+
+// Точная причина, почему Client ID не принят (для подсказки в настройках)
+function clientIdProblem() {
+    if (!window.MONEY_CONFIG) {
+        return 'Файл js/config.js не найден или в нём ошибка (пропущена запятая или кавычка). ' +
+            'Откройте его на GitHub и сверьте с образцом js/config.example.js.';
+    }
+    const id = rawClientId();
+    if (!id || /ВСТАВЬТЕ/i.test(id)) {
+        return 'В файле js/config.js не вписан Client ID — там заглушка «ВСТАВЬТЕ_СЮДА…». ' +
+            'Скорее всего, файл заменился при обновлении. Впишите Client ID заново (он есть в Google Cloud → Clients).';
+    }
+    if (!googleClientId()) {
+        return `Client ID в js/config.js записан неправильно: «${id.slice(0, 40)}${id.length > 40 ? '…' : ''}». ` +
+            'Нужно вида 123456789012-abc123.apps.googleusercontent.com — без https://, без пробелов, в одинарных кавычках.';
+    }
+    return '';
 }
 
 function isCloudConnected() {
@@ -97,7 +119,8 @@ function requestGoogleToken() {
 }
 
 function googleAuthBlockedReason() {
-    if (!googleClientId()) return 'Вход через Google ещё не настроен: впишите Client ID в файл js/config.js (инструкция DEPLOY_RU.txt, шаг 3).';
+    const configProblem = clientIdProblem();
+    if (configProblem) return 'Вход через Google не настроен. ' + configProblem;
     if (typeof isAndroidWebView === 'function' && isAndroidWebView()) return 'Google не разрешает входить в аккаунт во встроенном окне приложения (APK). Откройте сайт в Chrome или установите его на главный экран из Chrome.';
     if (!window.isSecureContext) return 'Вход через Google работает только на сайте с https.';
     return '';
@@ -263,7 +286,8 @@ const SYNC_LISTS = [
     { key: 'tx', get: () => transactions, set: v => { transactions = v; } },
     { key: 'subs', get: () => subscriptions, set: v => { subscriptions = v; } },
     { key: 'ob', get: () => oldbookEntries, set: v => { oldbookEntries = v; } },
-    { key: 'links', get: () => oldbookLinks, set: v => { oldbookLinks = v; } }
+    { key: 'links', get: () => oldbookLinks, set: v => { oldbookLinks = v; } },
+    { key: 'cats', get: () => customCategories, set: v => { customCategories = v; } }
 ];
 
 function getSyncMeta() {
@@ -278,7 +302,7 @@ function saveSyncMeta(meta) {
 }
 
 function scalarsJson() {
-    return JSON.stringify({ savings, limit: manualLimit, goal: priorityGoal, name: profileName });
+    return JSON.stringify({ savings, limit: manualLimit, goal: priorityGoal, name: profileName, sounds: customSoundMeta });
 }
 
 function itemJson(item) {
@@ -331,8 +355,9 @@ function localSnapshot() {
         app: 'my-money', format: 2, savedAt: Date.now(),
         profile: { name: profileName },
         tx: transactions, subs: subscriptions,
-        ob: oldbookEntries, links: oldbookLinks,
+        ob: oldbookEntries, links: oldbookLinks, cats: customCategories,
         savings, limit: manualLimit, goal: priorityGoal,
+        sounds: customSoundMeta,
         scalarsAt: meta.scalarsAt, deleted: meta.deleted
     };
 }
@@ -378,6 +403,7 @@ function mergeSnapshots(local, remote) {
         savings: Number(src.savings) || 0,
         limit: Number(src.limit) || 0,
         goal: src.goal || { name: '', amount: 0, icon: '🎯' },
+        sounds: (src.sounds && typeof src.sounds === 'object') ? src.sounds : {},
         scalarsAt: Math.max(Number(local.scalarsAt) || 0, Number(r.scalarsAt) || 0),
         deleted
     };
@@ -386,7 +412,8 @@ function mergeSnapshots(local, remote) {
 // Сравнение без учёта времени сохранения и порядка записей
 function snapshotKey(s) {
     const byId = list => asList(list).map(i => JSON.stringify(i)).sort();
-    return JSON.stringify([...SYNC_LISTS.map(l => byId(s[l.key])), s.savings, s.limit, s.goal, s.profile && s.profile.name, s.scalarsAt, s.deleted]);
+    return JSON.stringify([...SYNC_LISTS.map(l => byId(s[l.key])), s.savings, s.limit, s.goal, s.profile && s.profile.name,
+        JSON.stringify(s.sounds || {}), s.scalarsAt, s.deleted]);
 }
 
 function applySnapshot(s) {
@@ -395,6 +422,8 @@ function applySnapshot(s) {
     manualLimit = Number(s.limit) || 0;
     priorityGoal = s.goal || { name: '', amount: 0, icon: '🎯' };
     profileName = (s.profile && s.profile.name) || '';
+    customSoundMeta = (s.sounds && typeof s.sounds === 'object') ? s.sounds : {};
+    if (typeof onCustomSoundsChanged === 'function') onCustomSoundsChanged();
     saveSyncMeta({ scalarsAt: Number(s.scalarsAt) || 0, deleted: s.deleted || { tx: {}, subs: {} } });
     initSyncBaseline();
     updateUI(false);
@@ -448,6 +477,13 @@ async function runCloudSync({ manual = false } = {}) {
         } catch (e) {
             if (e.code === 'auth') throw e;
             console.warn('Oldbook: обмен с другими аккаунтами не удался', e);
+        }
+        // Свои звуки: загрузить новые файлы на Диск и скачать те, что выбраны на других устройствах
+        try {
+            if (typeof syncCustomSoundFiles === 'function') await syncCustomSoundFiles();
+        } catch (e) {
+            if (e.code === 'auth') throw e;
+            console.warn('Свои звуки: синхронизация файлов не удалась', e);
         }
         localStorage.setItem(CLOUD_KEYS.lastSync, String(Date.now()));
         setCloudStatus('ok');
