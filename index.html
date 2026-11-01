@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Money</title>
     <link rel="stylesheet" href="css/style.css">
+    <!-- Оформление в стиле Windows 95 (переопределяет style.css) -->
+    <link rel="stylesheet" href="css/win95.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@400;500;700&family=Oswald:wght@400;500;700&family=Caveat:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
-    <meta name="theme-color" content="#1976d2">
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#008080">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="My Money">
@@ -81,9 +83,6 @@
                     <div class="mobile-logo-title">
                         <img src="images/logo.png" alt="Logo" class="app-logo" onerror="this.style.display='none'">
                         <h2 class="mobile-title">Money Pro</h2>
-                    </div>
-                    <div style="display:flex; align-items:center;">
-                        <button type="button" class="theme-toggle" onclick="toggleTheme()"><span class="material-icons" id="theme-icon">dark_mode</span></button>
                     </div>
                 </div>
                 <div class="card balance-card">
@@ -336,49 +335,13 @@
                     </div>
 
                     <div class="card">
-                        <h3><span class="material-icons">palette</span> Глобальное оформление</h3>
-                        <h4 style="font-size: 14px; margin-top: 10px;">Полные темы</h4>
-                        <div class="bg-selector" style="gap: 8px;">
-                            <button type="button" class="btn-secondary" onclick="setFullTheme('light')" style="font-size: 12px; padding: 6px;">Светлая</button>
-                            <button type="button" class="btn-secondary" onclick="setFullTheme('dark')" style="background:#1e293b; color: white; font-size: 12px; padding: 6px;">Темная</button>
-                            <button type="button" class="btn-secondary" onclick="setFullTheme('matrix')" style="background:#000; color:#0f0; border: 1px solid #0f0; font-family:monospace; font-size: 12px; padding: 6px;">Матрица</button>
-                            <button type="button" class="btn-secondary" onclick="setFullTheme('synthwave')" style="background:linear-gradient(45deg, #ff007f, #7928ca); color:white; font-size: 12px; padding: 6px;">Ретро</button>
-                            <button type="button" class="btn-secondary" onclick="setFullTheme('minimal')" style="background:#f5f5f5; color:#333; border: 1px solid #ccc; font-size: 12px; padding: 6px;">Минимум</button>
-                        </div>
-                        
-                        <h4 style="font-size: 14px; margin-top: 15px;">Шрифт приложения</h4>
-                        <select id="app-font" onchange="setFont(this.value)">
-                            <option value="'Inter', sans-serif">Стандартный (Inter)</option>
-                            <option value="'Roboto', sans-serif">Roboto (Классика)</option>
-                            <option value="'Montserrat', sans-serif">Montserrat (Стильный)</option>
-                            <option value="'Oswald', sans-serif">Oswald (Компактный)</option>
-                            <option value="'Caveat', cursive">Caveat (Рукописный)</option>
-                            <option value="'Pacifico', cursive">Pacifico (Праздничный)</option>
-                        </select>
-
-                        <h4 style="font-size: 14px; margin-top: 10px;">Цвет текста</h4>
-                        <input type="color" id="app-text-color" value="#2c3e50" onchange="setTextColor(this.value)" style="padding: 0; height: 40px; cursor: pointer; border: none; background: transparent;">
-                    </div>
-
-                    <div class="card">
-                        <h3>Оформление шапки</h3>
-                        <div class="bg-selector">
-                            <div class="bg-option bg-default" onclick="setHeaderBg('bg-default')"></div>
-                            <div class="bg-option bg-sunset" onclick="setHeaderBg('bg-sunset')"></div>
-                            <div class="bg-option bg-ocean" onclick="setHeaderBg('bg-ocean')"></div>
-                            <div class="bg-option bg-party" onclick="setHeaderBg('bg-party')"></div>
-                            <div class="bg-option bg-mint" onclick="setHeaderBg('bg-mint')"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3>Дневной лимит</h3>
+                        <h3><span class="material-icons">speed</span> Дневной лимит</h3>
                         <input type="number" id="manual-limit" placeholder="Лимит в день (₸)">
                         <button type="button" class="btn-primary" onclick="saveSettings()">Сохранить лимит</button>
                     </div>
                     
                     <div class="card">
-                        <h3>Локальные Данные</h3>
+                        <h3><span class="material-icons">save</span> Локальные данные</h3>
                         <button type="button" class="export-btn" style="background:#546e7a;" onclick="exportBackup()"><span class="material-icons">save</span> Локальная копия (JSON)</button>
                         <div style="margin-top: 15px;">
                             <label class="btn-secondary" style="display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; padding: 10px 20px; background: #757575; color: white; border-radius: 4px; font-weight:500; text-transform:uppercase; box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14);">
@@ -404,7 +367,16 @@
                         <h3><span class="material-icons">history</span> История версий</h3>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>3.0.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>3.1.0 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Новый дизайн в стиле Windows 95: бирюзовый «рабочий стол», серые объёмные окна с синими заголовками и кнопками «_ □ ×», вдавленные поля, «панель задач» внизу на телефоне.</li>
+                                    <li>Пиксельный шрифт в заголовках, кнопках и меню; суммы, даты и время — чётким шрифтом.</li>
+                                    <li>Диаграммы в палитре 16 цветов, доход зелёный, расход красный.</li>
+                                    <li>Убраны прежние настройки оформления (тёмная тема, темы, фон шапки, шрифт, цвет текста) — дизайн теперь один.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>3.0.0</h4>
                                 <ul>
                                     <li>Приложение стало сайтом (GitHub Pages): обновляется само, ставится на телефон с главного экрана, работает без интернета.</li>
                                     <li>Вход через Google, все данные хранятся на вашем Google Диске (папка «My Money») и автоматически синхронизируются между устройствами.</li>

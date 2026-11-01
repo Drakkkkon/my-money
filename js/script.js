@@ -15,8 +15,10 @@ window.onload = function() {
     if (dtInput) dtInput.value = almatyIsoNow();
 
     if (typeof Chart !== 'undefined') {
-        Chart.defaults.color = '#888';
-        Chart.defaults.font.family = "'Inter', sans-serif";
+        // Диаграммы в стиле Windows 95: чёрный текст, серая сетка, без скруглений
+        Chart.defaults.color = '#000';
+        Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.18)';
+        Chart.defaults.font.family = "Tahoma, 'MS Sans Serif', 'Segoe UI', sans-serif";
         Chart.defaults.animation.duration = 400; // все анимации приложения не дольше 0.5 с
     }
 
@@ -80,35 +82,12 @@ function loadData() {
     }
     initSyncBaseline();
     fillProfileInput();
-    
-    if (localStorage.getItem('finance_theme') === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        let icon = document.getElementById('theme-icon');
-        if (icon) icon.innerText = 'light_mode';
-    }
-    
-    if (localStorage.getItem('finance_bg')) setHeaderBg(localStorage.getItem('finance_bg'));
-    
+
+    // Оформление одно (Windows 95, css/win95.css): прежние темы, фон шапки, шрифт и цвет текста больше не применяются
+    ['finance_theme', 'finance_bg', 'finance_full_theme', 'finance_font', 'finance_text_color'].forEach(k => localStorage.removeItem(k));
+
     let mLimit = document.getElementById('manual-limit');
     if (mLimit) mLimit.value = manualLimit > 0 ? manualLimit : '';
-}
-
-function toggleTheme() {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    let icon = document.getElementById('theme-icon');
-    if (icon) icon.innerText = isDark ? 'dark_mode' : 'light_mode';
-    localStorage.setItem('finance_theme', isDark ? 'light' : 'dark');
-    
-    if(myChart) {
-        myChart.update();
-    }
-}
-
-function setHeaderBg(bgClass) {
-    let header = document.getElementById('main-header');
-    if (header) header.className = bgClass;
-    localStorage.setItem('finance_bg', bgClass);
 }
 
 function getTxDateStr(datetimeStr) {
@@ -214,8 +193,8 @@ function renderStatistics() {
                 data: {
                     labels: displayDates,
                     datasets: [
-                        { label: 'Доход', data: incomeData, backgroundColor: STAT_COLORS.income, borderRadius: 4 },
-                        { label: 'Расход', data: expenseData, backgroundColor: STAT_COLORS.expense, borderRadius: 4 }
+                        { label: 'Доход', data: incomeData, backgroundColor: STAT_COLORS.income, borderRadius: 0 },
+                        { label: 'Расход', data: expenseData, backgroundColor: STAT_COLORS.expense, borderRadius: 0 }
                     ]
                 },
                 options: barOptions()
@@ -227,8 +206,9 @@ function renderStatistics() {
 }
 
 // --- РАСШИРЕННАЯ СТАТИСТИКА ---
-const STAT_COLORS = { income: '#4caf50', expense: '#ef5350', balance: '#1976d2' };
-const CATEGORY_PALETTE = ['#ef5350', '#ffa726', '#ffca28', '#66bb6a', '#26a69a', '#42a5f5', '#5c6bc0', '#ab47bc', '#ec407a', '#8d6e63', '#78909c'];
+// Палитра в духе 16-цветной VGA: доход зелёный, расход красный
+const STAT_COLORS = { income: '#008000', expense: '#d00000', balance: '#000080' };
+const CATEGORY_PALETTE = ['#d00000', '#000080', '#008080', '#808000', '#800080', '#008000', '#ff8000', '#0000ff', '#ff00ff', '#800000', '#808080'];
 const statCharts = {};
 
 function shortDate(d) {
@@ -333,8 +313,9 @@ function doughnutConfig(entries) {
             labels: labels.length ? labels : ['Нет данных'],
             datasets: [{
                 data: data.length ? data : [1],
-                backgroundColor: data.length ? labels.map((_, i) => CATEGORY_PALETTE[i % CATEGORY_PALETTE.length]) : ['#cfd8dc'],
-                borderWidth: 0
+                backgroundColor: data.length ? labels.map((_, i) => CATEGORY_PALETTE[i % CATEGORY_PALETTE.length]) : ['#c0c0c0'],
+                borderWidth: 1,
+                borderColor: '#000'
             }]
         },
         options: {
@@ -373,7 +354,7 @@ function renderExtraCharts(todayStr) {
         type: 'line',
         data: {
             labels: days30.map(shortDate),
-            datasets: [{ label: 'Баланс', data: balanceData, borderColor: STAT_COLORS.balance, backgroundColor: 'rgba(25,118,210,0.12)', fill: true, tension: 0.3, pointRadius: 0, pointHitRadius: 8 }]
+            datasets: [{ label: 'Баланс', data: balanceData, borderColor: STAT_COLORS.balance, backgroundColor: 'rgba(0,0,128,0.12)', fill: true, tension: 0, stepped: false, borderWidth: 2, pointRadius: 0, pointHitRadius: 8 }]
         },
         options: barOptions({ plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false }, x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } } } })
     });
@@ -393,8 +374,8 @@ function renderExtraCharts(todayStr) {
         data: {
             labels: months.map(k => monthNames[Number(k.slice(5, 7)) - 1] + ' ' + k.slice(2, 4)),
             datasets: [
-                { label: 'Доход', data: months.map(k => sumMonth(k, 'income')), backgroundColor: STAT_COLORS.income, borderRadius: 4 },
-                { label: 'Расход', data: months.map(k => sumMonth(k, 'expense')), backgroundColor: STAT_COLORS.expense, borderRadius: 4 }
+                { label: 'Доход', data: months.map(k => sumMonth(k, 'income')), backgroundColor: STAT_COLORS.income, borderRadius: 0 },
+                { label: 'Расход', data: months.map(k => sumMonth(k, 'expense')), backgroundColor: STAT_COLORS.expense, borderRadius: 0 }
             ]
         },
         options: barOptions()
@@ -416,7 +397,7 @@ function renderExtraCharts(todayStr) {
         type: 'bar',
         data: {
             labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
-            datasets: [{ label: 'Расход', data: weekday, backgroundColor: STAT_COLORS.expense, borderRadius: 4 }]
+            datasets: [{ label: 'Расход', data: weekday, backgroundColor: STAT_COLORS.expense, borderRadius: 0 }]
         },
         options: barOptions({ plugins: { legend: { display: false } } })
     });
@@ -425,7 +406,7 @@ function renderExtraCharts(todayStr) {
         type: 'doughnut',
         data: {
             labels: ['Ночь (0–6)', 'Утро (6–12)', 'День (12–18)', 'Вечер (18–24)'],
-            datasets: [{ data: hasDayparts ? dayparts : [1, 1, 1, 1], backgroundColor: hasDayparts ? ['#5c6bc0', '#ffca28', '#ffa726', '#ab47bc'] : ['#cfd8dc', '#cfd8dc', '#cfd8dc', '#cfd8dc'], borderWidth: 0 }]
+            datasets: [{ data: hasDayparts ? dayparts : [1, 1, 1, 1], backgroundColor: hasDayparts ? ['#000080', '#808000', '#ff8000', '#800080'] : ['#c0c0c0', '#c0c0c0', '#c0c0c0', '#c0c0c0'], borderWidth: 1, borderColor: '#000' }]
         },
         options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { position: 'bottom' }, tooltip: { enabled: hasDayparts } } }
     });
@@ -2021,26 +2002,7 @@ async function loginWithBiometrics() {
     }
 }
 
-// --- СИСТЕМА ОФОРМЛЕНИЯ И ТЕМ ---
-function setFullTheme(themeName) {
-    document.body.className = ''; 
-    if (themeName !== 'light') {
-        document.body.classList.add(`theme-${themeName}`);
-    }
-    localStorage.setItem('finance_full_theme', themeName);
-}
-
-function setFont(fontStr) {
-    document.documentElement.style.setProperty('--font-family', fontStr);
-    localStorage.setItem('finance_font', fontStr);
-}
-
-function setTextColor(colorHex) {
-    document.documentElement.style.setProperty('--text-main', colorHex);
-    localStorage.setItem('finance_text_color', colorHex);
-}
-
-// Подгрузка настроек темы и ПИНа при запуске
+// Подгрузка ПИНа и меню при запуске
 window.addEventListener('DOMContentLoaded', () => {
     if(localStorage.getItem('finance_pin')) {
         let btn = document.getElementById('remove-pin-btn');
@@ -2049,23 +2011,6 @@ window.addEventListener('DOMContentLoaded', () => {
     refreshBiometricUi();
     renderMenus();
     initMenuDrag();
-    
-    let savedFull = localStorage.getItem('finance_full_theme');
-    if(savedFull) setFullTheme(savedFull);
-    
-    let savedFont = localStorage.getItem('finance_font');
-    if(savedFont) { 
-        document.documentElement.style.setProperty('--font-family', savedFont);
-        let appF = document.getElementById('app-font');
-        if(appF) appF.value = savedFont;
-    }
-    
-    let savedColor = localStorage.getItem('finance_text_color');
-    if(savedColor) {
-        document.documentElement.style.setProperty('--text-main', savedColor);
-        let cPick = document.getElementById('app-text-color');
-        if(cPick) cPick.value = savedColor;
-    }
 
     // Авто-пропуск заставки на ПК
     if (window.innerWidth >= 769) {

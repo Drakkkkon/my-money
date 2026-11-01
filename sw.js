@@ -1,10 +1,11 @@
 // Service worker My Money: свежие файлы сайта из сети (автообновление), без интернета — из кэша.
 // Внешние запросы (Google, курсы, погода, библиотеки) не перехватываются.
-const CACHE = 'my-money-v1';
+const CACHE = 'my-money-v2';
 const CORE = [
     './',
     'index.html',
     'css/style.css',
+    'css/win95.css',
     'js/config.js',
     'js/cloud.js',
     'js/script.js',

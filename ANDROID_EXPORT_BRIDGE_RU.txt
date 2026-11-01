@@ -1,0 +1,144 @@
+СОХРАНЕНИЕ EXCEL / PDF / JSON В APK — НАТИВНЫЙ МОСТ
+===================================================
+
+Зачем это нужно
+---------------
+APK от WebIntoApp — это встроенное окно Android (WebView). В сгенерированном коде нет обработчика
+скачивания файлов (DownloadListener), а меню «Поделиться» (navigator.share) в WebView не существует.
+Поэтому JavaScript в APK не может сохранить файл .xlsx/.pdf: кнопка «скачать» там ничего не делает.
+
+Что уже работает без доработки APK:
+  - кнопки выгрузки показывают таблицу прямо в приложении;
+  - «Скопировать таблицу» → вставить в Excel / Google Таблицы / WPS Office;
+  - в браузере (Chrome, Samsung Internet, Safari, ПК) файлы .xlsx и .pdf скачиваются как обычно.
+
+Чтобы файлы сохранялись и в APK, нужен исходный код Android-приложения (в WebIntoApp он есть в тарифе
+Dedicated App: папка android / android-kotlin) и сборка в Android Studio. Приложение само найдёт мост:
+script.js вызывает window.MoneyNative.saveFile(base64, имяФайла, mimeType).
+
+Ниже код, который нужно добавить. Его не собирали и не запускали на устройстве: проверьте сборку
+в Android Studio и сохранение файла на своём телефоне.
+
+
+1. Новый файл: app/src/main/java/<ваш/пакет>/MoneyNative.kt
+------------------------------------------------------------
+(первую строку замените на package вашего MainActivity.kt)
+
+package com.example.money
+
+import android.app.Activity
+import android.content.ContentValues
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Base64
+import android.webkit.JavascriptInterface
+import android.widget.Toast
+import androidx.core.content.FileProvider
+import java.io.File
+
+class MoneyNative(private val activity: Activity) {
+
+    // Вызывается из JavaScript: сохраняет файл и предлагает открыть / отправить его.
+    @JavascriptInterface
+    fun saveFile(base64: String, fileName: String, mimeType: String): Boolean {
+        return try {
+            val bytes = Base64.decode(base64, Base64.DEFAULT)
+            val safeName = fileName.replace(Regex("[\\\\/:*?\"<>|]"), "_")
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Android 10+: сразу в папку «Загрузки», разрешения не нужны
+                val values = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, safeName)
+                    put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                }
+                val resolver = activity.contentResolver
+                val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return false
+                resolver.openOutputStream(uri)?.use { it.write(bytes) } ?: return false
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "Сохранено в «Загрузки»: $safeName", Toast.LENGTH_LONG).show()
+                    openWith(uri, mimeType, safeName)
+                }
+            } else {
+                // Android 9 и ниже: файл во временную папку и меню «Поделиться» (сохранить в Файлы, Диск, Telegram…)
+                val dir = File(activity.cacheDir, "exports").apply { mkdirs() }
+                val file = File(dir, safeName).apply { writeBytes(bytes) }
+                val uri = FileProvider.getUriForFile(activity, activity.packageName + ".fileprovider", file)
+                activity.runOnUiThread { shareFile(uri, mimeType, safeName) }
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun openWith(uri: Uri, mimeType: String, title: String) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, mimeType)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try { activity.startActivity(Intent.createChooser(intent, title)) } catch (_: Exception) { }
+    }
+
+    private fun shareFile(uri: Uri, mimeType: String, title: String) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = mimeType
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try { activity.startActivity(Intent.createChooser(intent, title)) } catch (_: Exception) { }
+    }
+}
+
+
+2. MainActivity.kt — подключить мост к WebView
+----------------------------------------------
+Там, где настраивается webView (после строк webSettings.javaScriptEnabled = true ...), добавьте:
+
+    webView.addJavascriptInterface(MoneyNative(this), "MoneyNative")
+
+Имя "MoneyNative" менять нельзя: его ищет script.js.
+Мост открыт только страницам внутри этого WebView — загружайте в нём только своё приложение.
+
+
+3. AndroidManifest.xml — внутри <application> ... </application> (нужно для Android 9 и ниже)
+---------------------------------------------------------------------------------------------
+
+    <provider
+        android:name="androidx.core.content.FileProvider"
+        android:authorities="${applicationId}.fileprovider"
+        android:exported="false"
+        android:grantUriPermissions="true">
+        <meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/file_paths" />
+    </provider>
+
+
+4. Новый файл: app/src/main/res/xml/file_paths.xml
+--------------------------------------------------
+
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <cache-path name="exports" path="exports/" />
+</paths>
+
+
+5. build.gradle(.kts) модуля app — если androidx.core ещё не подключён
+-----------------------------------------------------------------------
+
+    implementation("androidx.core:core-ktx:1.13.1")
+
+
+Проверка после сборки
+---------------------
+Отчёты → «Скачать Excel (.xlsx)» и «Скачать PDF (A4)»:
+  - Android 10+: файл появляется в «Загрузках», открывается меню «Открыть с помощью»;
+  - Android 9 и ниже: открывается меню «Поделиться», где файл можно сохранить.
+Настройки → «Локальная копия (JSON)» работает так же.
+
+Не забудьте про обновление поверх старой версии: то же имя пакета, тот же ключ подписи (keystore)
+и номер версии (versionCode) больше прежнего.
