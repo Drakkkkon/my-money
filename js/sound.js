@@ -321,6 +321,19 @@ const SOUND_PACKS = {
             pad(c, [329.63, 493.88, 659.25], { start: 0.45, dur: 1.5, gain: 0.04, type: 'sine', attack: 0.3 });
         }
     },
+    // «Классика 1-бит»: простые прямоугольные «пики», как у компьютеров с однобитным звуком (своя мелодия)
+    beep: {
+        click: c => tone(c, { freq: 1046.5, dur: 0.018, type: 'square', gain: 0.04, attack: 0.001 }),
+        open: c => { tone(c, { freq: 659.25, dur: 0.05, type: 'square', gain: 0.045, attack: 0.001 }); tone(c, { freq: 987.77, start: 0.05, dur: 0.07, type: 'square', gain: 0.045, attack: 0.001 }); },
+        close: c => { tone(c, { freq: 987.77, dur: 0.05, type: 'square', gain: 0.045, attack: 0.001 }); tone(c, { freq: 659.25, start: 0.05, dur: 0.07, type: 'square', gain: 0.04, attack: 0.001 }); },
+        menu: c => tone(c, { freq: 1318.5, dur: 0.025, type: 'square', gain: 0.035, attack: 0.001 }),
+        scroll: c => tone(c, { freq: 2093, dur: 0.008, type: 'square', gain: 0.015, attack: 0.001 }),
+        startup: c => {
+            [392, 523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, { freq: f, start: i * 0.08, dur: 0.075, type: 'square', gain: 0.045, attack: 0.001 }));
+            tone(c, { freq: 783.99, start: 0.5, dur: 0.1, type: 'square', gain: 0.04, attack: 0.001 });
+            tone(c, { freq: 1046.5, start: 0.62, dur: 0.35, type: 'square', gain: 0.045, attack: 0.001 });
+        }
+    },
     neon: {
         click: c => neonZap(c, { dur: 0.05, from: 2400, to: 900, gain: 0.08 }),
         open: c => { neonHum(c, { dur: 0.3 }); neonZap(c, { start: 0.05, dur: 0.14, from: 500, to: 2200, gain: 0.08 }); },

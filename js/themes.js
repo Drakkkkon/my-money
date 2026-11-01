@@ -101,7 +101,19 @@ const W95_THEMES = [
         pattern: 'radial-gradient(ellipse 55% 45% at 16% 10%, rgba(255,255,255,.32), rgba(255,255,255,0) 70%), ' +
             'linear-gradient(160deg, #1f5fc8 0%, #4d9cf2 48%, #1846a8 100%)',
         patternSize: 'cover',
-        fontUi: AQUA_FONT, fontText: AQUA_FONT }
+        fontUi: AQUA_FONT, fontText: AQUA_FONT },
+    // «Классика 1-бит» — по мотивам самых первых чёрно-белых систем Макинтоша (1984): полосатые заголовки,
+    // жёсткие тени, рабочий стол из шахматных точек. Форма — в css/mono.css (только при html[data-w95="mono"]).
+    // Цветные остаются лишь суммы дохода/расхода и диаграммы, чтобы их можно было различать.
+    { id: 'mono', name: 'Классика 1-бит', sounds: 'beep',
+        face: '#ffffff', light: '#ffffff', hilite: '#ffffff', shadow: '#000000', dark: '#000000',
+        field: '#ffffff', text: '#000000', muted: '#333333', titleText: '#ffffff',
+        hover: '#ffffff', grid: '#000000', income: '#006b24', expense: '#a8000e',
+        title: '#000000', title2: '#000000', desktop: '#808080', select: '#000000',
+        pattern: 'repeating-conic-gradient(#000000 0 25%, #ffffff 0 50%)',
+        patternSize: '2px 2px',
+        fontUi: "'Pixelify Sans', 'Courier New', monospace",
+        fontText: "Verdana, Tahoma, 'Segoe UI', Arial, sans-serif" }
 ];
 
 let currentThemeId = 'standard';

@@ -1,4 +1,8 @@
-My Money v3.5.0 — сайт
+My Money v3.6.0 — сайт
+
+Что нового в 3.6.0:
+- Тема «Классика 1-бит» (id mono в js/themes.js, стили css/mono.css — все правила под html[data-w95="mono"],
+  поэтому остальные темы не затронуты). Звуковой пакет beep в js/sound.js. sw.js: кэш my-money-v7.
 
 Что нового в 3.5.0:
 - Тема «Аква» (id aqua в js/themes.js, стили css/aqua.css — все правила под html[data-w95="aqua"],

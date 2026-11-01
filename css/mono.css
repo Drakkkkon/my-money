@@ -1,0 +1,380 @@
+/* =========================================================================
+   ТЕМА «КЛАССИКА 1-БИТ» — по мотивам самых первых чёрно-белых систем Макинтоша (1984)
+   Без логотипов, фирменных значков, шрифтов и звуков Apple: всё нарисовано линиями, точками и простыми SVG.
+   Каждое правило начинается с html[data-w95="mono"], поэтому остальные темы этот файл не затрагивает.
+   Цвета темы (фон, текст, шрифт) задаются в js/themes.js; здесь — форма: рамки 1px, жёсткие тени,
+   полосатые заголовки, «инверсия» выбранного и нажатого.
+   ========================================================================= */
+
+html[data-w95="mono"] body {
+    --mono-stripes: repeating-linear-gradient(to bottom, #000 0 1px, #fff 1px 2px);
+    --mono-dither: repeating-conic-gradient(#000 0 25%, #fff 0 50%);
+    --mono-shadow: 2px 2px 0 #000;
+    /* Квадратик «закрыть» слева в заголовке и «увеличить» справа (белое поле вокруг перекрывает полоски) */
+    --mono-closebox: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='19' height='13' shape-rendering='crispEdges'%3E%3Crect width='19' height='13' fill='%23fff'/%3E%3Crect x='4.5' y='1.5' width='10' height='10' fill='%23fff' stroke='%23000'/%3E%3C/svg%3E");
+    --mono-zoombox: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='19' height='13' shape-rendering='crispEdges'%3E%3Crect width='19' height='13' fill='%23fff'/%3E%3Crect x='4.5' y='1.5' width='10' height='10' fill='%23fff' stroke='%23000'/%3E%3Cpath d='M4.5 7.5h6v-6' fill='none' stroke='%23000'/%3E%3C/svg%3E");
+    /* Стрелка выпадающего списка: чёрный треугольник */
+    --mono-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h12L6 7z' fill='%23000'/%3E%3C/svg%3E");
+}
+
+html[data-w95="mono"] body ::selection { background: #000; color: #fff; }
+html[data-w95="mono"] body img { filter: grayscale(1) contrast(1.3); }
+
+/* ---------- Окна: белые, рамка 1px, жёсткая тень ---------- */
+html[data-w95="mono"] body .card,
+html[data-w95="mono"] body main > .tab > .card,
+html[data-w95="mono"] body .tx-container > .forms,
+html[data-w95="mono"] body .tx-container > .history,
+html[data-w95="mono"] body header,
+html[data-w95="mono"] body header[class],
+html[data-w95="mono"] body .splash-content,
+html[data-w95="mono"] body .export-sheet {
+    background: #fff !important;
+    border: 1px solid #000 !important;
+    box-shadow: var(--mono-shadow) !important;
+    padding: 0 12px 12px !important;
+}
+/* Под диалогом — редкие чёрные точки вместо полупрозрачного затемнения */
+html[data-w95="mono"] body .export-sheet-overlay {
+    background: repeating-conic-gradient(#000 0 25%, transparent 0 100%) 0 0 / 3px 3px !important;
+}
+/* Блок баланса внутри шапки — не отдельное окно */
+html[data-w95="mono"] body header .balance-card { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+
+/* Заголовок окна: шесть горизонтальных полосок, название по центру на белом, квадратики по краям */
+html[data-w95="mono"] body .card > h3,
+html[data-w95="mono"] body .header-top,
+html[data-w95="mono"] body .export-sheet-head {
+    position: relative;
+    display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important;
+    background: #fff !important;
+    color: #000 !important;
+    border-bottom: 1px solid #000;
+    margin: 0 -12px 12px !important;
+    padding: 3px 4px !important;
+    min-height: 21px;
+    font-family: var(--w95-font-ui) !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0;
+    overflow: hidden;
+}
+html[data-w95="mono"] body .header-top { margin-bottom: 10px !important; }
+html[data-w95="mono"] body .card > h3 *,
+html[data-w95="mono"] body .header-top *,
+html[data-w95="mono"] body .export-sheet-head h3,
+html[data-w95="mono"] body .export-sheet-head h3 * { color: #000 !important; }
+html[data-w95="mono"] body .card > h3 .material-icons { display: none !important; }
+html[data-w95="mono"] body .header-top .mobile-title,
+html[data-w95="mono"] body .export-sheet-head h3 {
+    flex: 0 1 auto; margin: 0 !important; font-family: var(--w95-font-ui) !important; font-size: 15px !important; font-weight: 700 !important;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html[data-w95="mono"] body .header-top .mobile-logo-title { flex: 0 1 auto; min-width: 0; gap: 6px; }
+html[data-w95="mono"] body .header-top .app-logo { width: 16px; height: 16px; box-shadow: none; }
+
+html[data-w95="mono"] body .card > h3::before,
+html[data-w95="mono"] body .card > h3::after,
+html[data-w95="mono"] body .header-top::before,
+html[data-w95="mono"] body .header-top::after,
+html[data-w95="mono"] body .export-sheet-head::before,
+html[data-w95="mono"] body .export-sheet-head::after {
+    content: '' !important; display: block !important; position: static !important;
+    flex: 1 1 0; min-width: 24px; height: 13px; margin: 0 !important;
+    filter: none !important;
+}
+html[data-w95="mono"] body .card > h3::before,
+html[data-w95="mono"] body .header-top::before,
+html[data-w95="mono"] body .export-sheet-head::before {
+    background: var(--mono-closebox) no-repeat left center, var(--mono-stripes) center / 100% 11px no-repeat !important;
+}
+html[data-w95="mono"] body .card > h3::after,
+html[data-w95="mono"] body .header-top::after,
+html[data-w95="mono"] body .export-sheet-head::after {
+    background: var(--mono-zoombox) no-repeat right center, var(--mono-stripes) center / 100% 11px no-repeat !important;
+}
+
+/* Настоящая кнопка закрытия диалога лежит поверх левого квадратика */
+html[data-w95="mono"] body .export-sheet-close {
+    position: absolute !important; left: 8px; top: 50%; z-index: 1; transform: translateY(-50%);
+    width: 11px !important; height: 11px !important; min-height: 0 !important; padding: 0 !important;
+    background: transparent !important; box-shadow: none !important; border: none !important;
+}
+html[data-w95="mono"] body .export-sheet-close .material-icons { font-size: 11px !important; color: #000 !important; opacity: 0; }
+html[data-w95="mono"] body .export-sheet-close:active { background: #000 !important; }
+
+/* Настоящие кнопки окна (список Oldbook): справа на белом поле поверх полосок */
+html[data-w95="mono"] body .card > h3.has-controls { padding-right: 4px !important; overflow: visible; }
+html[data-w95="mono"] body .card > h3.has-controls::after { background: var(--mono-stripes) center / 100% 11px no-repeat !important; margin-right: 64px !important; }
+html[data-w95="mono"] body .w95-ctls { right: 4px; gap: 3px; background: #fff; padding: 0 4px; }
+html[data-w95="mono"] body .w95-ctl {
+    width: 18px !important; height: 15px !important; margin: 0 !important;
+    background: #fff !important; border: 1px solid #000 !important; box-shadow: none !important;
+}
+html[data-w95="mono"] body .w95-ctl::before, html[data-w95="mono"] body .w95-ctl::after { background-color: #000; border-color: #000 !important; }
+html[data-w95="mono"] body .w95-ctl-max::after { background: transparent; left: 3px; top: 1px; }
+html[data-w95="mono"] body .w95-ctl-min::after { left: 4px; bottom: 3px; }
+html[data-w95="mono"] body .w95-ctl-close::before, html[data-w95="mono"] body .w95-ctl-close::after { left: 7px; top: 1px; }
+html[data-w95="mono"] body .w95-ctl-max:active { background: #000 !important; }
+html[data-w95="mono"] body .w95-ctl-max:active::after { border-color: #fff !important; }
+html[data-w95="mono"] body .card.is-maximized { box-shadow: none !important; border: none !important; }
+
+/* ---------- Кнопки: белые со скруглением, при нажатии — инверсия ---------- */
+html[data-w95="mono"] body .btn-primary, html[data-w95="mono"] body .btn-secondary,
+html[data-w95="mono"] body .btn-income, html[data-w95="mono"] body .btn-expense,
+html[data-w95="mono"] body .export-btn, html[data-w95="mono"] body .pay-btn,
+html[data-w95="mono"] body label.btn-secondary, html[data-w95="mono"] body #settings button:not(.menu-row-btn),
+html[data-w95="mono"] body #reports .export-btn, html[data-w95="mono"] body #add-btns .btn-income,
+html[data-w95="mono"] body #add-btns .btn-expense, html[data-w95="mono"] body #salary .btn-income,
+html[data-w95="mono"] body .icon-btn, html[data-w95="mono"] body .tx-actions button,
+html[data-w95="mono"] body .sub-actions button, html[data-w95="mono"] body .export-sheet-actions > button,
+html[data-w95="mono"] body .cat-chip, html[data-w95="mono"] body .ob-keypad button, html[data-w95="mono"] body .pin-btn {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #000 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    font-family: var(--w95-font-ui) !important;
+    font-weight: 600 !important;
+}
+html[data-w95="mono"] body .btn-primary:hover, html[data-w95="mono"] body .btn-secondary:hover,
+html[data-w95="mono"] body .btn-income:hover, html[data-w95="mono"] body .btn-expense:hover,
+html[data-w95="mono"] body .export-btn:hover, html[data-w95="mono"] body .pay-btn:hover,
+html[data-w95="mono"] body #settings button:not(.menu-row-btn):hover, html[data-w95="mono"] body #reports .export-btn:hover,
+html[data-w95="mono"] body #add-btns .btn-income:hover, html[data-w95="mono"] body #add-btns .btn-expense:hover,
+html[data-w95="mono"] body #salary .btn-income:hover { background: #fff !important; box-shadow: none !important; }
+html[data-w95="mono"] body .btn-primary *, html[data-w95="mono"] body .btn-secondary *, html[data-w95="mono"] body .export-btn *,
+html[data-w95="mono"] body label.btn-secondary *, html[data-w95="mono"] body #settings button:not(.menu-row-btn) *,
+html[data-w95="mono"] body .icon-btn *, html[data-w95="mono"] body .tx-actions button *, html[data-w95="mono"] body .sub-actions button * { color: #000 !important; }
+/* Главная кнопка — с толстой обводкой, как кнопка «по умолчанию» в старых диалогах */
+html[data-w95="mono"] body .btn-primary, html[data-w95="mono"] body #settings button.btn-primary,
+html[data-w95="mono"] body .export-sheet-actions > .btn-primary {
+    outline: 3px solid #000 !important; outline-offset: 2px !important; border-radius: 8px !important;
+}
+html[data-w95="mono"] body .export-sheet-actions, html[data-w95="mono"] body .btn-group { padding: 5px 5px 2px; }
+/* Сумма дохода/расхода — цветная надпись на белой кнопке */
+html[data-w95="mono"] body .btn-income, html[data-w95="mono"] body .btn-income *,
+html[data-w95="mono"] body #add-btns .btn-income, html[data-w95="mono"] body #add-btns .btn-income *,
+html[data-w95="mono"] body #salary .btn-income, html[data-w95="mono"] body #salary .btn-income * { color: var(--w95-income) !important; font-weight: 700 !important; }
+html[data-w95="mono"] body .btn-expense, html[data-w95="mono"] body .btn-expense *,
+html[data-w95="mono"] body #add-btns .btn-expense, html[data-w95="mono"] body #add-btns .btn-expense * { color: var(--w95-expense) !important; font-weight: 700 !important; }
+/* Выбранная кнопка и нажатие — чёрная с белым текстом */
+html[data-w95="mono"] body .icon-btn.selected,
+html[data-w95="mono"] body .btn-primary:active, html[data-w95="mono"] body .btn-secondary:active,
+html[data-w95="mono"] body .btn-income:active, html[data-w95="mono"] body .btn-expense:active,
+html[data-w95="mono"] body .export-btn:active, html[data-w95="mono"] body .pay-btn:active,
+html[data-w95="mono"] body label.btn-secondary:active, html[data-w95="mono"] body #settings button:not(.menu-row-btn):active,
+html[data-w95="mono"] body #add-btns .btn-income:active, html[data-w95="mono"] body #add-btns .btn-expense:active,
+html[data-w95="mono"] body #salary .btn-income:active,
+html[data-w95="mono"] body .icon-btn:active, html[data-w95="mono"] body .tx-actions button:active,
+html[data-w95="mono"] body .sub-actions button:active, html[data-w95="mono"] body .export-sheet-actions > button:active,
+html[data-w95="mono"] body .ob-keypad button:active, html[data-w95="mono"] body .pin-btn:active {
+    background: #000 !important; color: #fff !important; box-shadow: none !important;
+}
+html[data-w95="mono"] body .btn-primary:active { padding: 6px 14px !important; }
+html[data-w95="mono"] body .icon-btn.selected *, html[data-w95="mono"] body button:active:not(:disabled) *,
+html[data-w95="mono"] body label.btn-secondary:active * { color: #fff !important; }
+html[data-w95="mono"] body button:focus-visible, html[data-w95="mono"] body label.btn-secondary:focus-visible {
+    outline: 1px dotted #000 !important; outline-offset: 2px !important;
+}
+html[data-w95="mono"] body .btn-primary:focus-visible { outline: 3px solid #000 !important; outline-offset: 2px !important; }
+
+/* Клавиатура Oldbook, ПИН-код, кнопка синхронизации (цифры — чётким шрифтом: в пиксельном 5 похожа на S) */
+html[data-w95="mono"] body .ob-keypad button, html[data-w95="mono"] body .pin-btn { font-family: var(--w95-font-text) !important; font-weight: 700 !important; }
+html[data-w95="mono"] body .ob-keypad button:active { padding: 0 !important; }
+html[data-w95="mono"] body .pin-btn { border-radius: 10px !important; box-shadow: var(--mono-shadow) !important; }
+html[data-w95="mono"] body .pin-btn:active { padding: 0 !important; box-shadow: none !important; transform: translate(2px, 2px) !important; }
+html[data-w95="mono"] body .pin-screen h2 {
+    display: inline-block; color: #000 !important; text-shadow: none; background: #fff; border: 1px solid #000;
+    box-shadow: var(--mono-shadow); padding: 4px 14px;
+}
+html[data-w95="mono"] body .pin-dots .dot { border-radius: 50% !important; background: #fff !important; box-shadow: none !important; border: 1px solid #000 !important; }
+html[data-w95="mono"] body .pin-dots .dot.filled { background: #000 !important; }
+html[data-w95="mono"] body .fab-sync {
+    background: #fff !important; border: 1px solid #000 !important; border-radius: 10px !important; box-shadow: var(--mono-shadow) !important;
+}
+html[data-w95="mono"] body .fab-sync .material-icons { color: #000 !important; }
+html[data-w95="mono"] body .fab-sync:active { background: #000 !important; box-shadow: none !important; }
+html[data-w95="mono"] body .fab-sync:active .material-icons { color: #fff !important; }
+
+/* ---------- Поля ввода: белые, рамка 1px ---------- */
+html[data-w95="mono"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-w95="mono"] body textarea {
+    background: #fff !important; color: #000 !important;
+    border: 1px solid #000 !important; box-shadow: none !important;
+}
+html[data-w95="mono"] body select {
+    background: #fff var(--mono-select-arrow) no-repeat right 10px center / 12px 7px !important;
+    color: #000 !important; border: 1px solid #000 !important; box-shadow: var(--mono-shadow) !important;
+    padding-right: 30px !important;
+}
+html[data-w95="mono"] body input:focus, html[data-w95="mono"] body textarea:focus {
+    outline: none !important; box-shadow: inset 0 0 0 1px #000 !important;
+}
+html[data-w95="mono"] body select:focus { outline: none !important; box-shadow: var(--mono-shadow), inset 0 0 0 1px #000 !important; }
+html[data-w95="mono"] body input::placeholder { color: #555 !important; }
+/* Галочки: квадрат с крестиком; переключатели: круг с точкой */
+html[data-w95="mono"] body input[type="checkbox"], html[data-w95="mono"] body input[type="radio"] {
+    -webkit-appearance: none; appearance: none; width: 14px; height: 14px; padding: 0 !important; margin: 0 6px 0 0 !important;
+    vertical-align: middle; border: 1px solid #000 !important; background: #fff !important; box-shadow: none !important; position: relative;
+}
+html[data-w95="mono"] body input[type="radio"] { border-radius: 50% !important; }
+html[data-w95="mono"] body input[type="checkbox"]:checked {
+    background: linear-gradient(45deg, transparent 45%, #000 45% 55%, transparent 55%),
+                linear-gradient(-45deg, transparent 45%, #000 45% 55%, transparent 55%), #fff !important;
+}
+html[data-w95="mono"] body input[type="radio"]:checked::after { content: ''; position: absolute; left: 3px; top: 3px; width: 6px; height: 6px; border-radius: 50% !important; background: #000; }
+html[data-w95="mono"] body input[type="range"] {
+    -webkit-appearance: none; appearance: none; height: 6px; padding: 0 !important;
+    border: 1px solid #000 !important; background: var(--mono-dither) 0 0 / 2px 2px !important; box-shadow: none !important;
+}
+html[data-w95="mono"] body input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 12px; height: 18px; background: #fff; border: 1px solid #000;
+}
+
+/* ---------- Вдавленные панели и списки: просто белые с рамкой ---------- */
+html[data-w95="mono"] body .balance-main, html[data-w95="mono"] body .balance-info,
+html[data-w95="mono"] body #tx-list, html[data-w95="mono"] body #subs-list, html[data-w95="mono"] body #salary-list,
+html[data-w95="mono"] body .table-scroll, html[data-w95="mono"] body .export-sheet-table,
+html[data-w95="mono"] body .kpi, html[data-w95="mono"] body .chart-box, html[data-w95="mono"] body .cat-list,
+html[data-w95="mono"] body .changelog, html[data-w95="mono"] body .ob-amount-display, html[data-w95="mono"] body .ob-list,
+html[data-w95="mono"] body .custom-categories, html[data-w95="mono"] body .sound-slots, html[data-w95="mono"] body #splash-weather,
+html[data-w95="mono"] body .ob-share-row, html[data-w95="mono"] body .stats-summary .stat-value, html[data-w95="mono"] body .goal-progress,
+html[data-w95="mono"] body .google-avatar {
+    background: #fff !important;
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+}
+html[data-w95="mono"] body .balance-main .limits, html[data-w95="mono"] body .balance-info .info-lines { border-top: 1px dotted #000; }
+html[data-w95="mono"] body .date-group-header {
+    background: #fff !important; box-shadow: none !important;
+    border: none !important; border-top: 1px solid #000 !important; border-bottom: 1px solid #000 !important;
+}
+html[data-w95="mono"] body .tx-item, html[data-w95="mono"] body .sub-item {
+    border-bottom: 1px dotted #000 !important; border-left: 3px solid #000 !important;
+}
+html[data-w95="mono"] body .tx-item.income { border-left-style: double !important; }
+html[data-w95="mono"] body .tx-item:active, html[data-w95="mono"] body .sub-item:active { background: #000 !important; }
+html[data-w95="mono"] body .tx-item:active *, html[data-w95="mono"] body .sub-item:active * { color: #fff !important; }
+html[data-w95="mono"] body .analytics-table th {
+    background: #fff !important; box-shadow: none !important; border: 1px solid #000 !important; font-weight: 700;
+}
+html[data-w95="mono"] body .analytics-table td { border: 1px solid #000 !important; }
+html[data-w95="mono"] body .export-sheet .export-table th { background: #fff !important; color: #000 !important; }
+html[data-w95="mono"] body .ob-person { background: #fff !important; color: #000 !important; border: 1px solid #000 !important; }
+html[data-w95="mono"] body .app-wrapper .cl-tag { background: #000 !important; color: #fff !important; }
+html[data-w95="mono"] body .cl-version { border-left: 2px solid #000 !important; }
+html[data-w95="mono"] body .menu-row-icon { color: #000 !important; }
+html[data-w95="mono"] body .menu-row { background: #fff !important; border: 1px solid #000 !important; box-shadow: none !important; }
+html[data-w95="mono"] body .menu-row.is-hidden { background: var(--mono-dither) 0 0 / 2px 2px !important; }
+html[data-w95="mono"] body .menu-row.is-hidden .menu-row-label { background: #fff; padding: 0 4px; }
+html[data-w95="mono"] body .menu-row.is-dragging { box-shadow: var(--mono-shadow) !important; }
+html[data-w95="mono"] body .cat-dot { border: 1px solid #000; }
+html[data-w95="mono"] body .theme-swatch { background: #fff !important; border: 1px solid #000 !important; border-radius: 6px !important; box-shadow: none !important; }
+html[data-w95="mono"] body .theme-swatch.is-active { outline: 3px solid #000 !important; outline-offset: 1px; }
+html[data-w95="mono"] body .theme-swatch-desk { box-shadow: none !important; border: 1px solid #000; }
+
+/* Выпадающий список: выбранный пункт — инверсия */
+html[data-w95="mono"] body .custom-dropdown { border: 1px solid #000 !important; box-shadow: var(--mono-shadow) !important; }
+html[data-w95="mono"] body .dropdown-item:hover { background: #000 !important; color: #fff !important; }
+html[data-w95="mono"] body .dropdown-item:hover * { color: #fff !important; }
+
+/* ---------- Прогресс цели: заполнение сплошным чёрным ---------- */
+html[data-w95="mono"] body .goal-progress { padding: 2px; height: 18px !important; }
+html[data-w95="mono"] body .goal-bar { background: #000 !important; }
+
+/* ---------- Подсказки ---------- */
+html[data-w95="mono"] body .app-toast {
+    background: #fff !important; color: #000 !important; border: 1px solid #000 !important; box-shadow: var(--mono-shadow) !important;
+}
+
+/* ---------- Заставка ---------- */
+html[data-w95="mono"] body .splash-content::before {
+    background: linear-gradient(#fff, #fff) center / 11em 100% no-repeat,
+                var(--mono-closebox) no-repeat 4px center,
+                var(--mono-stripes) center / calc(100% - 8px) 11px no-repeat, #fff !important;
+    color: #000 !important; text-align: center;
+    margin: 0 -12px 14px !important; padding: 4px 8px !important; border-bottom: 1px solid #000;
+    font-family: var(--w95-font-ui) !important; font-size: 15px !important; font-weight: 700 !important;
+}
+html[data-w95="mono"] body .splash-content::after { display: none !important; }
+html[data-w95="mono"] body #splash-greeting { font-family: var(--w95-font-ui) !important; }
+html[data-w95="mono"] body #splash-time { background: #fff !important; color: #000 !important; border: 1px solid #000; box-shadow: none !important; }
+html[data-w95="mono"] body .slider-container { background: #fff !important; border: 1px solid #000; border-radius: 10px !important; box-shadow: none !important; }
+html[data-w95="mono"] body .slider-text { -webkit-text-fill-color: #000 !important; color: #000 !important; }
+html[data-w95="mono"] body .slider-thumb {
+    background: #000 !important; border-radius: 8px !important; box-shadow: none !important; top: 3px; left: 3px;
+}
+html[data-w95="mono"] body .slider-thumb .material-icons { color: #fff !important; }
+
+/* ---------- Полоса прокрутки: точечный жёлоб, белый квадратный ползунок, стрелки в рамках ---------- */
+html[data-w95="mono"] body .w95-sb { border: 1px solid #000; background: #fff; }
+html[data-w95="mono"] body .w95-sb-btn { background: #fff !important; box-shadow: none !important; }
+html[data-w95="mono"] body .w95-sb-up { border-bottom: 1px solid #000; }
+html[data-w95="mono"] body .w95-sb-down { border-top: 1px solid #000; }
+html[data-w95="mono"] body .w95-sb-btn:active { background: #000 !important; }
+html[data-w95="mono"] body .w95-sb-up:active::after { border-bottom-color: #fff; }
+html[data-w95="mono"] body .w95-sb-down:active::after { border-top-color: #fff; }
+html[data-w95="mono"] body .w95-sb-track {
+    background-color: #fff !important; background-image: var(--mono-dither) !important; background-size: 2px 2px !important;
+}
+html[data-w95="mono"] body .w95-sb-thumb { background: #fff !important; box-shadow: none !important; border-top: 1px solid #000; border-bottom: 1px solid #000; }
+@media (hover: hover) and (pointer: fine) {
+    html[data-w95="mono"] body ::-webkit-scrollbar-track {
+        background-color: #fff !important; background-image: var(--mono-dither) !important; background-size: 2px 2px !important;
+        box-shadow: inset 1px 0 #000;
+    }
+    html[data-w95="mono"] body ::-webkit-scrollbar-thumb { background: #fff !important; box-shadow: inset 0 0 0 1px #000 !important; }
+    html[data-w95="mono"] body ::-webkit-scrollbar-corner { background: #fff !important; }
+}
+
+/* ---------- Навигация на ПК: строка меню вверху экрана ---------- */
+@media (min-width: 769px) {
+    html[data-w95="mono"] body .app-wrapper { flex-direction: column !important; }
+    html[data-w95="mono"] body .sidebar {
+        width: 100% !important; height: auto !important; flex: 0 0 auto; flex-direction: row !important; align-items: stretch;
+        background: #fff !important; border: none !important; border-bottom: 1px solid #000 !important; box-shadow: none !important;
+        padding: 0 8px !important; z-index: 20;
+    }
+    html[data-w95="mono"] body .sidebar-header {
+        background: #fff !important; border: none !important; padding: 0 12px 0 4px !important; flex: 0 0 auto;
+    }
+    html[data-w95="mono"] body .sidebar-header .app-logo { display: none; }
+    html[data-w95="mono"] body .sidebar-header h2 { color: #000 !important; font-family: var(--w95-font-ui) !important; font-size: 15px !important; font-weight: 700; white-space: nowrap; }
+    html[data-w95="mono"] body .sidebar-nav {
+        flex-direction: row !important; flex: 1 1 auto; gap: 0 !important; padding: 0 !important;
+        overflow-x: auto; scrollbar-width: none;
+    }
+    html[data-w95="mono"] body .sidebar-nav::-webkit-scrollbar { display: none; }
+    html[data-w95="mono"] body .sidebar-nav button {
+        width: auto !important; flex: 0 0 auto; padding: 4px 11px !important; gap: 0 !important;
+        background: #fff !important; box-shadow: none !important; white-space: nowrap;
+        font-family: var(--w95-font-ui) !important; font-size: 15px !important;
+    }
+    html[data-w95="mono"] body .sidebar-nav button .material-icons { display: none !important; }
+    html[data-w95="mono"] body .sidebar-nav button:hover,
+    html[data-w95="mono"] body .sidebar-nav button.active { background: #000 !important; }
+    html[data-w95="mono"] body .sidebar-nav button:hover, html[data-w95="mono"] body .sidebar-nav button:hover *,
+    html[data-w95="mono"] body .sidebar-nav button.active, html[data-w95="mono"] body .sidebar-nav button.active * { color: #fff !important; }
+    html[data-w95="mono"] body .main-wrapper { flex: 1 1 auto !important; height: auto !important; min-height: 0; }
+}
+
+/* ---------- Навигация на телефоне: белая полоса, выбранный раздел — инверсия ---------- */
+@media (max-width: 768px) {
+    html[data-w95="mono"] body .mobile-nav {
+        background: #fff !important; border-top: 1px solid #000 !important; box-shadow: none !important;
+    }
+    html[data-w95="mono"] body .mobile-nav button {
+        background: #fff !important; box-shadow: none !important; border: 1px solid #000 !important; border-radius: 6px !important;
+        font-family: var(--w95-font-ui) !important;
+    }
+    html[data-w95="mono"] body .mobile-nav button.active { background: #000 !important; box-shadow: none !important; }
+    html[data-w95="mono"] body .mobile-nav button.active * { color: #fff !important; }
+    html[data-w95="mono"] body .card > h3 { font-size: 14px !important; }
+}
+
+/* Мини-превью темы в настройках (видно при любой теме): точечный стол, полосатый заголовок */
+html body .theme-swatch-mono .theme-swatch-desk { background-size: 2px 2px !important; }
+html body .theme-swatch-mono .theme-swatch-win { box-shadow: 0 0 0 1px #000, 2px 2px 0 1px #000 !important; }
+html body .theme-swatch-mono .theme-swatch-title { background: repeating-linear-gradient(to bottom, #000 0 1px, #fff 1px 2px) !important; border-bottom: 1px solid #000; }
+html body .theme-swatch-mono .theme-swatch-field { box-shadow: inset 0 0 0 1px #000 !important; }
