@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="css/aqua.css">
     <link rel="stylesheet" href="css/mono.css">
     <link rel="stylesheet" href="css/vista.css">
+    <!-- 3.8: котировки, цели, чек по фото, картинки категорий, кнопки окон у блоков, «Мои звуки» -->
+    <link rel="stylesheet" href="css/v38.css">
     <!-- Свои темы: цвета из редактора (только при флагах data-c-*) -->
     <link rel="stylesheet" href="css/custom.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -38,6 +40,8 @@
             <div class="splash-center" style="margin-top: 60px;">
                 <div id="splash-time" style="font-size: 64px; font-weight: bold; letter-spacing: 2px;">00:00</div>
                 <div id="splash-date" style="font-size: 18px; opacity: 0.8; margin-top: 5px;">1 января, Понедельник</div>
+                <!-- Пара котировок акций (выбираются в разделе «Котировки», js/quotes.js) -->
+                <div id="splash-quotes" class="splash-quotes" aria-label="Котировки акций"></div>
             </div>
         </div>
         
@@ -109,9 +113,11 @@
                             <div class="info-lines">
                                 <p id="hdr-weather"><span class="material-icons" aria-hidden="true">thermostat</span> загрузка…</p>
                                 <p id="hdr-rates" class="rates"><span class="rate-note">курсы загружаются…</span></p>
+                                <p id="hdr-quote" class="hdr-quote"></p>
                             </div>
                         </div>
                     </div>
+                    <button type="button" class="hdr-edit-btn" onclick="openHeaderSettings()" title="Настроить этот блок" aria-label="Настроить блок баланса"><span class="material-icons">tune</span></button>
                 </div>
             </header>
 
@@ -119,6 +125,24 @@
                 <!-- ТРАНЗАКЦИИ -->
                 <div id="transactions" class="tab active">
                     <div class="tx-container">
+                        <!-- Чек по фото (js/receipt.js) -->
+                        <div class="card receipt-card" id="receipt-card">
+                            <h3><span class="material-icons">photo_camera</span> Чек по фото</h3>
+                            <div class="receipt-bar">
+                                <label class="receipt-cam-btn" title="Сфотографировать чек">
+                                    <span class="material-icons">photo_camera</span>
+                                    <input type="file" accept="image/*" capture="environment" onchange="receiptFromInput(event)">
+                                </label>
+                                <div class="receipt-bar-text">
+                                    <b>Сфотографируйте чек</b>
+                                    <span>Сумма и покупки запишутся сами</span>
+                                </div>
+                                <label class="btn-secondary receipt-gallery-btn" title="Выбрать фото из галереи">
+                                    <span class="material-icons">image</span>
+                                    <input type="file" accept="image/*" onchange="receiptFromInput(event)">
+                                </label>
+                            </div>
+                        </div>
                         <div class="forms card">
                             <h3><span class="material-icons">edit_note</span> Новая запись</h3>
                             <input type="hidden" id="edit-id">
@@ -130,6 +154,8 @@
                                 <input type="text" id="category" placeholder="Категория" oninput="filterCategories()" onfocus="showCategories()" onblur="hideCategories()" autocomplete="off">
                                 <div id="category-dropdown" class="custom-dropdown" style="display:none;"></div>
                             </div>
+                            <!-- Категории картинками (js/emoji.js; вид — Настройки → «Картинки категорий») -->
+                            <div class="cat-tiles" id="cat-tiles" role="group" aria-label="Категории"></div>
                             <input type="hidden" id="tx-comment">
                             <button type="button" class="btn-secondary comment-btn" id="tx-comment-btn" onclick="openCommentDialog('tx')"><span class="material-icons">chat_bubble_outline</span> <span class="comment-btn-text">Комментарий</span></button>
                             <div class="btn-group" id="add-btns">
@@ -335,26 +361,39 @@
                     </div>
                 </div>
 
-                <!-- ЦЕЛИ -->
+                <!-- ЦЕЛИ: приоритетные вещи (js/goals.js) -->
                 <div id="wishlist" class="tab" style="display:none;">
-                    <div class="card">
-                        <h3><span class="material-icons">flag</span> Приоритетная цель</h3>
-                        <div class="icon-selector" id="icon-selector">
-                            <button type="button" class="icon-btn selected" data-icon="🏖️" onclick="selectGoalIcon(this)">🏖️ Отпуск</button>
-                            <button type="button" class="icon-btn" data-icon="📱" onclick="selectGoalIcon(this)">📱 Техника</button>
-                            <button type="button" class="icon-btn" data-icon="🏠" onclick="selectGoalIcon(this)">🏠 Дом</button>
-                            <button type="button" class="icon-btn" data-icon="🚗" onclick="selectGoalIcon(this)">🚗 Авто</button>
-                            <button type="button" class="icon-btn" data-icon="🍔" onclick="selectGoalIcon(this)">🍔 Еда</button>
-                            <button type="button" class="icon-btn" data-icon="🎯" onclick="selectGoalIcon(this)">🎯 Другое</button>
+                    <div class="card goal-new-card" id="goal-new-card">
+                        <h3><span class="material-icons">add_link</span> Новая приоритетная цель</h3>
+                        <p class="hint">Вставьте ссылку на товар (Kaspi, Wildberries, Ozon, любой магазин) — картинка, название и цена подтянутся сами. Потом нажимайте <b>$</b>, чтобы откладывать деньги или включить автосписание.</p>
+                        <div class="goal-url-row">
+                            <input type="url" id="goal-url" placeholder="https://kaspi.kz/shop/p/…" autocomplete="off" inputmode="url">
+                            <button type="button" class="btn-primary" onclick="loadGoalFromLink()"><span class="material-icons">download</span> Загрузить</button>
                         </div>
-                        <input type="text" id="goal-name" placeholder="Название цели">
-                        <input type="number" id="goal-amount" placeholder="Нужная сумма (₸)">
-                        <button type="button" class="btn-primary" onclick="setPriorityGoal()"><span class="material-icons">check</span> Установить цель</button>
+                        <button type="button" class="btn-secondary btn-block" onclick="startManualGoal()"><span class="material-icons">edit</span> Без ссылки, вручную</button>
+                        <p class="hint goal-load-status" id="goal-load-status" aria-live="polite"></p>
+                        <div id="goal-draft"></div>
                     </div>
-                    <div class="card">
-                        <h3><span class="material-icons">savings</span> Прогресс</h3>
-                        <div id="current-goal-display"><p class="hint">Цель пока не установлена.</p></div>
+                    <div class="card card-wide goals-card" id="goals-card">
+                        <h3><span class="material-icons">star</span> Приоритетные цели</h3>
+                        <p class="hint goals-total" id="goals-total"></p>
+                        <div class="goals-list" id="goals-list"></div>
                     </div>
+                </div>
+
+                <!-- КОТИРОВКИ АКЦИЙ (js/quotes.js) -->
+                <div id="quotes" class="tab" style="display:none;">
+                    <div class="card card-wide quotes-info-card" id="quotes-info-card">
+                        <h3><span class="material-icons">candlestick_chart</span> Котировки акций</h3>
+                        <p class="hint">Цены акций популярных компаний и ваших компаний. <span class="material-icons inline-icon">push_pin</span> — показывать в блоке баланса, <span class="material-icons inline-icon">wb_twilight</span> — на заставке (до 3). Кнопка «+ Добавить компанию» ищет любую компанию мира.</p>
+                        <p class="hint quotes-status" id="quotes-status" aria-live="polite"></p>
+                        <div class="btn-group">
+                            <button type="button" class="btn-primary" onclick="fetchQuotes(undefined, { force: true })"><span class="material-icons">refresh</span> Обновить</button>
+                            <button type="button" class="btn-secondary" onclick="openQuoteSearch()"><span class="material-icons">add</span> Добавить компанию</button>
+                        </div>
+                        <button type="button" class="btn-secondary btn-block" id="quotes-show-hidden" style="display:none;" onclick="showHiddenQuotes()"><span class="material-icons">visibility</span> Показать скрытые</button>
+                    </div>
+                    <!-- Здесь js/quotes.js рисует окна: «Мои котировки», «Технологии США», «Казахстан», «Мировые компании» -->
                 </div>
 
                 <!-- OLDBOOK: семейная книга (Катя, Папа, Саша) с обменом между аккаунтами -->
@@ -563,7 +602,26 @@
                         <button type="button" class="btn-secondary btn-block" id="sound-ui-btn" onclick="toggleUiSound()">Звуки интерфейса</button>
                         <button type="button" class="btn-secondary btn-block" id="sound-startup-btn" onclick="toggleStartupSound()">Мелодия при запуске</button>
                         <button type="button" class="btn-secondary btn-block" onclick="previewStartupChime()"><span class="material-icons">play_arrow</span> Прослушать мелодию</button>
-                        <button type="button" class="btn-primary btn-block" onclick="openSoundPicker()"><span class="material-icons">library_music</span> Выбрать звуки</button>
+                        <button type="button" class="btn-primary btn-block" onclick="openSoundPicker()"><span class="material-icons">tune</span> Выбрать звуки</button>
+                        <button type="button" class="btn-secondary btn-block" onclick="openSoundLibrary()"><span class="material-icons">library_music</span> Мои звуки <span id="sound-lib-count"></span></button>
+                    </div>
+
+                    <div class="card header-settings-card" id="header-settings-card">
+                        <h3><span class="material-icons">dashboard_customize</span> Блок «Текущий баланс»</h3>
+                        <p class="hint">Что показывать в верхнем блоке с балансом, временем, погодой и курсами, и какого размера цифры и надписи. Сохраняется в аккаунте Google.</p>
+                        <div id="header-settings"></div>
+                    </div>
+
+                    <div class="card icon-settings-card" id="icon-settings-form-card">
+                        <h3><span class="material-icons">emoji_emotions</span> Картинки категорий</h3>
+                        <p class="hint">Как выбирать категорию в «Новой записи»: картинками, текстом или картинками с подписью. Нажмите на картинку категории, чтобы выбрать другую.</p>
+                        <div id="icon-settings-form"></div>
+                    </div>
+
+                    <div class="card icon-settings-card" id="icon-settings-history-card">
+                        <h3><span class="material-icons">format_list_bulleted</span> Картинки в истории операций</h3>
+                        <p class="hint">Картинка слева от названия в «Истории операций»: только картинка, только текст или картинка и текст. Нажмите на картинку, чтобы выбрать другую.</p>
+                        <div id="icon-settings-history"></div>
                     </div>
 
                     <div class="card categories-card">
@@ -591,7 +649,20 @@
                         <h3><span class="material-icons">history</span> История версий</h3>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>3.7.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>3.8.0 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Новый раздел «Котировки»: акции популярных компаний (США, Казахстан, мировые) с ценой, изменением за день и мини-графиком; «+ Добавить компанию» ищет любую компанию мира.</li>
+                                    <li>Котировка акции в блоке баланса и пара котировок на заставке.</li>
+                                    <li>Блок «Текущий баланс» настраивается: какие строки показывать и размер цифр и надписей (Настройки или кнопка в самом блоке).</li>
+                                    <li>Цели переделаны: несколько приоритетных вещей по ссылке на товар (картинка, название и цена подгружаются), кнопка «$» — отложить сумму или списывать каждый день / неделю / месяц. Отложенное видно в «Записях» как «Приоритетная вещь: …».</li>
+                                    <li>Чек по фото: камера над «Новой записью» распознаёт итог и покупки и сохраняет одну запись, покупки — в комментарии.</li>
+                                    <li>Картинки категорий: выбор категории картинками в «Новой записи» и картинки в истории операций; в настройках — свои картинки и вид (картинки, текст или оба).</li>
+                                    <li>У всех блоков работают кнопки окна: «_» сворачивает блок, «□» разворачивает его на весь экран с прокруткой. Длинные списки прокручиваются внутри блока.</li>
+                                    <li>Звуки: кнопка «Мои звуки» со всеми добавленными звуками; звук можно выбрать для конкретной темы или для всех тем, всё хранится на Google Диске.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>3.7.0</h4>
                                 <ul>
                                     <li>Новая тема «Аэро» в стиле Windows Vista: стеклянные окна с размытием и бликами, глянцевые кнопки, чёрная стеклянная панель задач, свои «воздушные» звуки.</li>
                                     <li>Темы разложены по папкам (Windows 95, Windows Vista, Mac OS и ваши папки). Папки нарисованы в стиле текущей темы и открываются с анимацией.</li>
@@ -745,6 +816,11 @@
     <script src="js/oldbook.js"></script>
     <script src="js/extras.js"></script>
     <script src="js/importer.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/emoji.js"></script>
+    <script src="js/quotes.js"></script>
+    <script src="js/goals.js"></script>
+    <script src="js/receipt.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>

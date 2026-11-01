@@ -289,7 +289,12 @@ const SYNC_LISTS = [
     { key: 'links', get: () => oldbookLinks, set: v => { oldbookLinks = v; } },
     { key: 'cats', get: () => customCategories, set: v => { customCategories = v; } },
     // свои темы оформления (js/themes.js)
-    { key: 'themes', get: () => customThemes, set: v => { customThemes = v; if (typeof onCustomThemesChanged === 'function') onCustomThemesChanged(); } }
+    { key: 'themes', get: () => customThemes, set: v => { customThemes = v; if (typeof onCustomThemesChanged === 'function') onCustomThemesChanged(); } },
+    // «Мои звуки»: библиотека своих звуков (файлы — отдельно на Диске, js/soundpicker.js)
+    { key: 'soundlib', get: () => soundLibrary, set: v => { soundLibrary = v; } },
+    // приоритетные цели (js/goals.js) и свои котировки (js/quotes.js)
+    { key: 'goals', get: () => goalsList, set: v => { goalsList = v; } },
+    { key: 'quotes', get: () => userQuotes, set: v => { userQuotes = v; } }
 ];
 
 function getSyncMeta() {
@@ -304,7 +309,7 @@ function saveSyncMeta(meta) {
 }
 
 function scalarsJson() {
-    return JSON.stringify({ savings, limit: manualLimit, goal: priorityGoal, name: profileName, sounds: customSoundMeta });
+    return JSON.stringify({ savings, limit: manualLimit, goal: priorityGoal, name: profileName, sounds: customSoundMeta, themeSounds: themeSoundMeta, ui: uiPrefs });
 }
 
 function itemJson(item) {
@@ -358,8 +363,9 @@ function localSnapshot() {
         profile: { name: profileName },
         tx: transactions, subs: subscriptions,
         ob: oldbookEntries, links: oldbookLinks, cats: customCategories, themes: customThemes,
+        soundlib: soundLibrary, goals: goalsList, quotes: userQuotes,
         savings, limit: manualLimit, goal: priorityGoal,
-        sounds: customSoundMeta,
+        sounds: customSoundMeta, themeSounds: themeSoundMeta, ui: uiPrefs,
         scalarsAt: meta.scalarsAt, deleted: meta.deleted
     };
 }
@@ -406,6 +412,9 @@ function mergeSnapshots(local, remote) {
         limit: Number(src.limit) || 0,
         goal: src.goal || { name: '', amount: 0, icon: '🎯' },
         sounds: (src.sounds && typeof src.sounds === 'object') ? src.sounds : {},
+        themeSounds: (src.themeSounds && typeof src.themeSounds === 'object') ? src.themeSounds : ((remoteNewer ? local.themeSounds : r.themeSounds) || {}),
+        // настройки вида (шапка, котировки, картинки категорий): если их ещё нет в более новом снимке — берём из другого
+        ui: (src.ui && typeof src.ui === 'object') ? src.ui : ((remoteNewer ? local.ui : r.ui) || {}),
         scalarsAt: Math.max(Number(local.scalarsAt) || 0, Number(r.scalarsAt) || 0),
         deleted
     };
@@ -415,7 +424,7 @@ function mergeSnapshots(local, remote) {
 function snapshotKey(s) {
     const byId = list => asList(list).map(i => JSON.stringify(i)).sort();
     return JSON.stringify([...SYNC_LISTS.map(l => byId(s[l.key])), s.savings, s.limit, s.goal, s.profile && s.profile.name,
-        JSON.stringify(s.sounds || {}), s.scalarsAt, s.deleted]);
+        JSON.stringify(s.sounds || {}), JSON.stringify(s.themeSounds || {}), JSON.stringify(s.ui || {}), s.scalarsAt, s.deleted]);
 }
 
 function applySnapshot(s) {
@@ -425,6 +434,8 @@ function applySnapshot(s) {
     priorityGoal = s.goal || { name: '', amount: 0, icon: '🎯' };
     profileName = (s.profile && s.profile.name) || '';
     customSoundMeta = (s.sounds && typeof s.sounds === 'object') ? s.sounds : {};
+    themeSoundMeta = (s.themeSounds && typeof s.themeSounds === 'object') ? s.themeSounds : {};
+    if (s.ui && typeof s.ui === 'object') setUiPrefs(s.ui);
     if (typeof onCustomSoundsChanged === 'function') onCustomSoundsChanged();
     saveSyncMeta({ scalarsAt: Number(s.scalarsAt) || 0, deleted: s.deleted || { tx: {}, subs: {} } });
     initSyncBaseline();

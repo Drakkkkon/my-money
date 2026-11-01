@@ -1,4 +1,19 @@
-My Money v3.7.0 — сайт
+My Money v3.8.0 — сайт
+
+Что нового в 3.8.0:
+- Котировки (js/quotes.js): раздел «Котировки», тикер в блоке баланса (#hdr-quote) и на заставке (#splash-quotes).
+  Данные Yahoo Finance через бесплатный посредник r.jina.ai (Yahoo не даёт CORS). Свои котировки — список userQuotes (синхронизация 'quotes').
+- Цели (js/goals.js): goalsList [{id, title, price, url, image, priority, plan:{amount, period, start, lastRun, active}}] (синхронизация 'goals').
+  Товар по ссылке — страница магазина через r.jina.ai (og:image, og:title, product:price:amount, JSON-LD). Откладывание = расход
+  с goalId и категорией «Приоритетная вещь: …»; автосписание — записи с id 'ga'+цель+дата (без дублей между устройствами).
+  Старая цель (priorityGoal) переносится в goalsList один раз.
+- Чек по фото (js/receipt.js): Tesseract.js 5 (rus+eng) с jsdelivr, распознавание на устройстве; одна запись-расход, позиции — в комментарии.
+- Картинки категорий (js/emoji.js): uiPrefs.catIcons.form / .history и uiPrefs.iconMode (icon | text | both).
+- Вид (js/layout.js): uiPrefs (header, quotes, catIcons, iconMode) синхронизируется как скаляр 'ui'; кнопки «_» и «□» у всех окон
+  (свёрнутые блоки — finance_collapsed, только на устройстве); настройка блока «Текущий баланс».
+- «Мои звуки» (js/soundpicker.js): библиотека soundLibrary (синхронизация 'soundlib', файлы на Диске), выбор для всех тем
+  (customSoundMeta) или для темы (themeSoundMeta, скаляр 'themeSounds'). Старый формат звуков переводится автоматически.
+- css/v38.css — стили новых блоков; service worker my-money-v9.
 
 Что нового в 3.7.0:
 - Тема «Аэро» (id aero, css/vista.css — правила только под html[data-w95="aero"]), звуки aero в js/sound.js.

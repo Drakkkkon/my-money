@@ -1,0 +1,347 @@
+/* --- 3.8: котировки, цели, чек по фото, картинки категорий, кнопки окон у блоков, «Мои звуки», настройка шапки ---
+   Базовый вид — в стиле Windows 95 на переменных темы (--w95-*), поэтому подходит всем темам.
+   Поправки для «Аквы», «1-бит» и «Аэро» — в конце файла (только html[data-w95="..."]). */
+
+html body .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Кнопки окна у всех блоков: «_» свернуть, «□» развернуть ---------- */
+html body .w95-ctl-min { cursor: pointer; }
+html body button.w95-ctl-min:active { box-shadow: var(--w95-pressed) !important; }
+html body button.w95-ctl:focus-visible { outline: 1px dotted var(--w95-title-text); outline-offset: -3px; }
+html body .card.is-collapsed:not(.is-maximized) > :not(h3) { display: none !important; }
+html body .card.is-collapsed:not(.is-maximized) { padding-bottom: 3px !important; min-height: 0 !important; height: auto !important; }
+html body .card.is-collapsed:not(.is-maximized) > h3 { margin-bottom: 0 !important; }
+html body .history.is-collapsed { min-height: 0 !important; }
+/* окно на весь экран прокручивается целиком, длинные списки внутри — без ограничения высоты */
+html body .card.is-maximized { overflow-y: auto; overscroll-behavior: contain; }
+html body .card.is-maximized > h3 { position: sticky; top: 0; z-index: 2; flex: 0 0 auto; }
+html body .card.is-maximized #tx-list, html body .card.is-maximized #subs-list, html body .card.is-maximized #salary-list,
+html body .card.is-maximized .calc-tape, html body .card.is-maximized .goals-list, html body .card.is-maximized .q-list,
+html body .card.is-maximized .table-scroll, html body .card.is-maximized .changelog, html body .card.is-maximized .icon-cat-list {
+    max-height: none !important;
+}
+html body .card.is-maximized .chart-box { height: min(60vh, 520px) !important; }
+html body.has-maximized .mobile-nav { z-index: 10 !important; }
+
+/* Длинные списки прокручиваются внутри своего блока */
+html body #subs-list, html body #salary-list { max-height: min(60vh, 520px); overflow-y: auto; overscroll-behavior: contain; }
+@media (max-width: 768px) {
+    html body #tx-list { max-height: min(68vh, 600px); overflow-y: auto; overscroll-behavior: contain; }
+}
+html body .table-scroll { max-height: min(65vh, 560px); overflow: auto; overscroll-behavior: contain; }
+
+/* ---------- Блок «Текущий баланс»: настройка ---------- */
+html body .hdr-off { display: none !important; }
+html body #main-header .balance-card { position: relative; }
+html body .balance-grid.hdr-one-col { grid-template-columns: minmax(0, 1fr) !important; }
+html body .balance-grid.hdr-one-col > .balance-info { border-left: none !important; padding-left: 0 !important; text-align: left; }
+html body .hdr-edit-btn {
+    position: absolute; right: 4px; bottom: 4px; z-index: 3;
+    width: 26px; height: 26px; min-height: 0 !important; padding: 0 !important;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--w95-face) !important; color: var(--w95-text) !important;
+    border: none !important; box-shadow: var(--w95-raised) !important; cursor: pointer; opacity: .75;
+}
+html body .hdr-edit-btn:hover, html body .hdr-edit-btn:focus-visible { opacity: 1; }
+html body .hdr-edit-btn:active { box-shadow: var(--w95-pressed) !important; }
+html body .hdr-edit-btn .material-icons { font-size: 16px !important; color: inherit !important; }
+html body .hdr-quote { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+html body .hdr-quote:empty { display: none; }
+html body .hdr-quote .material-icons { font-size: 15px !important; }
+html body .q-change.is-up { color: var(--w95-income) !important; }
+html body .q-change.is-down { color: var(--w95-expense) !important; }
+html body #main-header .q-change { font-weight: 700; }
+
+html body .hdr-parts { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 4px 10px; margin: 6px 0 12px; }
+html body .hdr-part { display: flex; align-items: center; gap: 6px; font-size: 14px; font-family: var(--w95-font-text); cursor: pointer; }
+html body .hdr-part input { width: auto !important; margin: 0 !important; flex: 0 0 auto; }
+html body .hdr-slider { display: block; margin-bottom: 10px; font-size: 14px; font-family: var(--w95-font-text); }
+html body .hdr-slider span { display: block; margin-bottom: 2px; }
+html body .hdr-slider input[type="range"] { width: 100%; margin: 0 !important; }
+
+/* ---------- Сегментные кнопки (вид картинок, вкладки окна «$») ---------- */
+html body .seg-buttons { display: flex; gap: 0; margin: 4px 0 12px; flex-wrap: wrap; }
+html body .seg-buttons .seg-btn {
+    flex: 1 1 auto; width: auto; min-height: 32px; padding: 4px 10px !important;
+    background: var(--w95-face) !important; color: var(--w95-text) !important; border: none !important;
+    box-shadow: var(--w95-raised) !important; font-family: var(--w95-font-ui) !important; font-size: 14px !important; cursor: pointer;
+}
+html body .seg-buttons .seg-btn.is-on,
+html body #settings .seg-buttons .seg-btn.is-on { box-shadow: var(--w95-pressed) !important; background: var(--w95-face-pressed, var(--w95-face)) !important; font-weight: 700; }
+html body #settings .seg-buttons .seg-btn { flex: 1 1 auto; width: auto; }
+html body #settings .icon-cat-btn { width: 36px; height: 36px; min-height: 0 !important; padding: 0 !important; font-size: 20px !important; }
+
+/* ---------- Картинки категорий ---------- */
+html body .cat-tiles {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 5px;
+    max-height: 196px; overflow-y: auto; overscroll-behavior: contain;
+    margin: -6px 0 12px; padding: 5px; background: var(--w95-field); box-shadow: var(--w95-sunken);
+}
+html body .cat-tiles.is-icons { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); max-height: 140px; }
+html body .cat-tiles:empty { display: none; }
+html body .cat-tile {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    min-height: 54px; width: auto; padding: 4px 2px !important; margin: 0;
+    background: var(--w95-face) !important; color: var(--w95-text) !important; border: none !important;
+    box-shadow: var(--w95-raised) !important; cursor: pointer; font-family: var(--w95-font-text) !important;
+}
+html body .cat-tiles.is-icons .cat-tile { min-height: 40px; }
+html body .cat-tile:active { box-shadow: var(--w95-pressed) !important; }
+html body .cat-tile.is-selected { box-shadow: var(--w95-pressed) !important; outline: 2px solid var(--w95-select); outline-offset: -4px; }
+html body .cat-tile-emoji { font-size: 22px; line-height: 1.1; font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif; }
+html body .cat-tile-name { font-size: 11px; line-height: 1.15; text-align: center; overflow-wrap: anywhere; max-width: 100%;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+html body .cat-emoji { display: inline-block; margin-right: 5px; font-size: 1.15em; line-height: 1; vertical-align: -1px;
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif; font-style: normal; }
+html body .tx-cat { display: inline; }
+html body .tx-cat > .cat-emoji:only-child { font-size: 1.7em; margin-right: 0; }
+
+html body .icon-cat-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px;
+    max-height: 280px; overflow-y: auto; overscroll-behavior: contain; margin-bottom: 10px;
+    padding: 4px; background: var(--w95-field); box-shadow: var(--w95-sunken);
+}
+html body .icon-cat-row { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 2px; }
+html body .icon-cat-row.is-changed .icon-cat-name { font-weight: 700; }
+html body .icon-cat-btn {
+    flex: 0 0 auto; width: 36px; height: 36px; min-height: 0 !important; padding: 0 !important;
+    display: flex; align-items: center; justify-content: center; font-size: 20px !important;
+    background: var(--w95-face) !important; border: none !important; box-shadow: var(--w95-raised) !important; cursor: pointer;
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif !important;
+}
+html body .icon-cat-btn:active { box-shadow: var(--w95-pressed) !important; }
+html body .icon-cat-btn .material-icons { font-size: 18px !important; color: var(--w95-muted) !important; }
+html body .icon-cat-name { font-size: 13px; font-family: var(--w95-font-text); min-width: 0; overflow-wrap: anywhere; }
+html body .icon-settings-card .btn-block { margin-bottom: 6px; }
+
+html body .emoji-picker { width: min(560px, 100%); }
+html body .emoji-picker .emoji-group-title { margin: 8px 0 4px; font-size: 13px; }
+html body .emoji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 3px; }
+html body .emoji-cell {
+    height: 40px; min-height: 0 !important; padding: 0 !important; font-size: 22px !important;
+    background: var(--w95-face) !important; border: none !important; box-shadow: var(--w95-raised) !important; cursor: pointer;
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif !important;
+}
+html body .emoji-cell:active, html body .emoji-cell.is-on { box-shadow: var(--w95-pressed) !important; outline: 2px solid var(--w95-select); outline-offset: -4px; }
+html body .emoji-own { display: flex; gap: 6px; margin: 12px 0 6px; }
+html body .emoji-own input { flex: 1 1 auto; margin: 0 !important; min-width: 0; }
+html body .emoji-own button { flex: 0 0 auto; width: auto; }
+
+/* ---------- Чек по фото ---------- */
+html body .receipt-bar { display: flex; align-items: center; gap: 10px; }
+html body .receipt-cam-btn {
+    flex: 0 0 auto; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    background: var(--w95-face); color: var(--w95-text); box-shadow: var(--w95-raised); border-radius: 0;
+}
+html body .receipt-cam-btn:active { box-shadow: var(--w95-pressed); }
+html body .receipt-cam-btn .material-icons { font-size: 30px !important; color: var(--w95-text) !important; }
+html body .receipt-cam-btn input, html body .receipt-gallery-btn input { display: none; }
+html body .receipt-bar-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+html body .receipt-bar-text b { font-family: var(--w95-font-ui); font-size: 15px; font-weight: 600; }
+html body .receipt-bar-text span { font-size: 12.5px; color: var(--w95-muted); }
+html body .receipt-gallery-btn { flex: 0 0 auto; width: 44px !important; min-height: 44px !important; padding: 0 !important; display: flex !important; align-items: center; justify-content: center; }
+@media (min-width: 769px) {
+    /* колонка слева: «Чек по фото» над «Новой записью», история справа на всю высоту */
+    html body .tx-container {
+        display: grid !important; grid-template-columns: minmax(250px, 320px) minmax(0, 1fr); gap: 14px; align-items: start;
+    }
+    html body .tx-container > .receipt-card { grid-column: 1; grid-row: 1; margin: 0 !important; width: auto; }
+    html body .tx-container > .forms { grid-column: 1; grid-row: 2; width: auto !important; margin: 0 !important; position: static; }
+    html body .tx-container > .history { grid-column: 2; grid-row: 1 / span 2; margin: 0 !important; }
+}
+@media (max-width: 768px) {
+    html body .tx-container > .receipt-card { margin-bottom: 12px; }
+}
+
+html body .receipt-dialog { width: min(820px, 100%); }
+html body .receipt-layout { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 12px; align-items: start; }
+@media (max-width: 600px) { html body .receipt-layout { grid-template-columns: minmax(0, 1fr); } html body .receipt-photo { max-height: 180px; } }
+html body .receipt-photo { background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 3px; max-height: 60vh; overflow: auto; }
+html body .receipt-photo img { display: block; width: 100%; height: auto; }
+html body .receipt-progress { height: 16px; background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 2px; margin: 4px 0 8px; }
+html body .receipt-progress > div { height: 100%; width: 0; background: var(--w95-select); transition: width .3s; }
+html body .receipt-fields .field-inline { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+html body .receipt-fields .field-inline span { flex: 0 0 110px; font-size: 13px; }
+html body .receipt-fields .field-inline input { flex: 1 1 auto; min-width: 0; margin: 0 !important; }
+html body .receipt-items { max-height: 200px; overflow-y: auto; background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 4px; margin: 8px 0; }
+html body .receipt-items:empty { display: none; }
+html body .receipt-item { display: flex; align-items: center; gap: 6px; padding: 3px 2px; font-size: 13px; font-family: var(--w95-font-text); border-bottom: 1px dotted var(--w95-grid); cursor: pointer; }
+html body .receipt-item:last-child { border-bottom: none; }
+html body .receipt-item input { width: auto !important; margin: 0 !important; }
+html body .receipt-item span { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+html body .receipt-item b { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+html body .receipt-comment-label { display: block; font-size: 13px; margin: 6px 0 3px; }
+html body .receipt-fields textarea { width: 100%; resize: vertical; min-height: 70px; margin-bottom: 8px; font-family: var(--w95-font-text); font-size: 13px; }
+html body .receipt-raw { white-space: pre-wrap; font-size: 11.5px; max-height: 200px; overflow: auto; background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 6px; margin-top: 6px; }
+html body .receipt-raw-btn { margin-top: 8px; }
+
+/* ---------- Цели ---------- */
+html body .goal-url-row { display: flex; gap: 6px; margin-bottom: 8px; }
+html body .goal-url-row input { flex: 1 1 auto; min-width: 0; margin: 0 !important; }
+html body .goal-url-row button { flex: 0 0 auto; width: auto; }
+html body .goal-load-status:empty { display: none; }
+html body .goal-draft { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0 10px; }
+html body .goal-draft.is-loading { opacity: .7; }
+html body .goal-draft-img, html body .goal-img {
+    flex: 0 0 auto; width: 84px; height: 84px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+    background: #fff; box-shadow: var(--w95-sunken);
+}
+html body .goal-draft-img img, html body .goal-img img { width: 100%; height: 100%; object-fit: contain; }
+html body .goal-emoji { font-size: 40px; line-height: 1; font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif; }
+html body .goal-draft-fields { flex: 1 1 auto; min-width: 0; }
+html body .goal-draft-fields input { margin-bottom: 6px !important; }
+html body .goals-total:empty { display: none; }
+html body .goals-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 8px; max-height: min(75vh, 900px); overflow-y: auto; overscroll-behavior: contain; padding: 2px; }
+html body .goal-item {
+    display: flex; gap: 10px; align-items: flex-start; padding: 8px; min-width: 0;
+    background: var(--w95-face); box-shadow: var(--w95-raised);
+}
+html body .goal-item.is-top { outline: 2px solid var(--w95-select); outline-offset: -2px; }
+html body .goal-item.is-done .goal-bar { background: var(--w95-income) !important; }
+html body .goal-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+html body .goal-title-row { display: flex; align-items: flex-start; gap: 6px; }
+html body .goal-rank {
+    flex: 0 0 auto; min-width: 22px; padding: 0 4px; text-align: center; font-size: 12px; font-weight: 700; line-height: 18px;
+    background: var(--w95-title); color: var(--w95-title-text);
+}
+html body .goal-title { font-family: var(--w95-font-text); font-size: 14px; line-height: 1.25; overflow-wrap: anywhere;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+html body .goal-link { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; color: var(--w95-select); text-decoration: underline; width: fit-content; }
+html body .goal-link .material-icons { font-size: 13px !important; }
+html body .goal-nums { font-size: 13px; font-variant-numeric: tabular-nums; }
+html body .goal-pct { float: right; font-weight: 700; }
+html body .goal-item .goal-progress { height: 14px; margin: 2px 0; }
+html body .goal-plan { font-size: 12px; color: var(--w95-muted); display: flex; align-items: center; gap: 3px; min-height: 0; }
+html body .goal-plan:empty { display: none; }
+html body .goal-plan .material-icons { font-size: 14px !important; }
+html body .goal-actions { flex: 0 0 auto; display: flex; flex-direction: column; gap: 4px; }
+html body .goal-actions .btn-secondary { width: 34px; min-height: 28px !important; padding: 0 !important; display: flex; align-items: center; justify-content: center; }
+html body .goal-actions .btn-secondary .material-icons { font-size: 17px !important; }
+html body .goal-actions .btn-secondary:disabled { opacity: .4; }
+html body .goal-dollar {
+    width: 34px; height: 34px; min-height: 0 !important; padding: 0 !important; cursor: pointer;
+    font: 700 19px/1 var(--w95-font-text) !important; color: #fff !important;
+    background: var(--w95-income) !important; border: none !important; box-shadow: var(--w95-raised) !important;
+}
+html body .goal-dollar:active { box-shadow: var(--w95-pressed) !important; }
+html body .goal-money { width: min(460px, 100%); }
+html body .goal-money input, html body .goal-money select { margin-bottom: 8px !important; }
+html body .goal-money .field-inline { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+html body .goal-money .field-inline span { flex: 0 0 auto; font-size: 13px; }
+html body .goal-money .field-inline input { flex: 1 1 auto; margin: 0 !important; }
+html body .gm-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+html body .gm-chips .btn-secondary { width: auto; min-height: 30px !important; padding: 2px 10px !important; font-size: 13px !important; }
+html body .goal-plan-now { display: flex; align-items: center; gap: 4px; font-size: 13px; margin-bottom: 8px; }
+html body .goal-money .btn-block { margin-bottom: 6px; }
+
+/* ---------- Котировки ---------- */
+html body .quotes-status.is-error { color: var(--w95-expense) !important; }
+html body .q-list { display: flex; flex-direction: column; max-height: min(62vh, 520px); overflow-y: auto; overscroll-behavior: contain;
+    background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 2px 4px; }
+html body .q-row {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) 60px auto auto; align-items: center; gap: 8px;
+    padding: 6px 2px; border-bottom: 1px dotted var(--w95-grid);
+}
+html body .q-row:last-child { border-bottom: none; }
+html body .q-badge {
+    width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font: 700 11px/1 var(--w95-font-text); color: #fff; letter-spacing: -.3px;
+    background: hsl(var(--q-hue, 210), 55%, 38%); box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+}
+html body .q-name { display: flex; flex-direction: column; min-width: 0; }
+html body .q-name b { font-family: var(--w95-font-text); font-size: 14px; }
+html body .q-name span { font-size: 12px; color: var(--w95-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html body .q-name .q-ex { font-size: 11px; }
+html body .q-spark { width: 60px; height: 22px; display: block; }
+html body .q-spark.is-up { color: var(--w95-income); }
+html body .q-spark.is-down { color: var(--w95-expense); }
+html body .q-price { display: flex; flex-direction: column; align-items: flex-end; text-align: right; font-variant-numeric: tabular-nums; }
+html body .q-price b { font-family: var(--w95-font-text); font-size: 14px; white-space: nowrap; }
+html body .q-price .q-change { font-size: 12px; font-weight: 700; white-space: nowrap; }
+html body .q-kzt { font-size: 11px; color: var(--w95-muted); white-space: nowrap; }
+html body .q-kzt:empty { display: none; }
+html body .q-actions { display: flex; gap: 2px; }
+html body .q-act {
+    width: 28px; height: 28px; min-height: 0 !important; padding: 0 !important; display: flex; align-items: center; justify-content: center;
+    background: var(--w95-face) !important; border: none !important; box-shadow: var(--w95-raised) !important; cursor: pointer; color: var(--w95-text) !important;
+}
+html body .q-act .material-icons { font-size: 16px !important; color: inherit !important; opacity: .45; }
+html body .q-act.is-on { box-shadow: var(--w95-pressed) !important; }
+html body .q-act.is-on .material-icons { opacity: 1; color: var(--w95-select) !important; }
+html body .q-add-btn { margin-top: 8px; }
+@media (max-width: 480px) {
+    html body .q-row { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "b n p" "b s a"; row-gap: 3px; }
+    html body .q-row > .q-badge { grid-area: b; }
+    html body .q-row > .q-name { grid-area: n; }
+    html body .q-row > .q-spark { grid-area: s; width: 100%; max-width: 120px; }
+    html body .q-row > .q-price { grid-area: p; }
+    html body .q-row > .q-actions { grid-area: a; justify-self: end; }
+}
+html body .quote-search { width: min(560px, 100%); }
+html body .quote-search-row { display: flex; gap: 6px; margin-bottom: 8px; }
+html body .quote-search-row input { flex: 1 1 auto; min-width: 0; margin: 0 !important; }
+html body .quote-search-row button { flex: 0 0 auto; width: auto; }
+html body .quote-results { max-height: 50vh; overflow-y: auto; background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 2px 4px; margin-bottom: 8px; }
+html body .quote-results:empty { display: none; }
+html body .quote-result { display: flex; align-items: center; gap: 8px; padding: 6px 2px; border-bottom: 1px dotted var(--w95-grid); }
+html body .quote-result:last-child { border-bottom: none; }
+html body .quote-result .q-name { flex: 1 1 auto; }
+html body .quote-result .btn-secondary { flex: 0 0 auto; width: 38px; min-height: 32px !important; padding: 0 !important; display: flex; align-items: center; justify-content: center; }
+
+/* Заставка (телефон) */
+html body .splash-quotes { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
+html body .splash-quotes:empty { display: none; }
+html body .splash-quote {
+    padding: 5px 10px; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap;
+    background: var(--w95-field); color: var(--w95-text); box-shadow: var(--w95-sunken);
+}
+html body .splash-quote b { font-family: var(--w95-font-text); }
+html body .splash-quote .q-change { font-weight: 700; }
+
+/* ---------- «Мои звуки» ---------- */
+html body .sound-scope { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 2px 0 8px; }
+html body .sound-scope-opt { display: flex; align-items: center; gap: 5px; font-size: 14px; cursor: pointer; }
+html body .sound-scope-opt input { width: auto !important; margin: 0 !important; }
+html body .sound-slot-status.is-inherited { font-style: italic; }
+html body .sound-library { width: min(640px, 100%); }
+html body .sound-lib-list {
+    flex: 1 1 auto; min-height: 0; max-height: 55vh; overflow-y: auto; overscroll-behavior: contain; margin: 4px 0 12px;
+    background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 4px;
+}
+html body .sound-lib-item { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 6px; border-bottom: 1px dotted var(--w95-grid); }
+html body .sound-lib-item:last-child { border-bottom: none; }
+html body .sound-lib-icon { font-size: 22px !important; color: var(--w95-muted); }
+html body .sound-lib-info { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+html body .sound-lib-info b { font-family: var(--w95-font-ui); font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+html body .sound-lib-empty { padding: 10px; }
+html body .sound-library .export-sheet-actions label.btn-secondary { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+html body .sound-lib-btn { min-width: 0; }
+
+/* ---------- Нижнее меню: 9–10 пунктов — 5 колонок ---------- */
+@media (max-width: 768px) {
+    html body .mobile-nav.nav-wide { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+    html body .mobile-nav.nav-wide button .nav-label { font-size: 10px; }
+}
+
+/* =================== Поправки для тем =================== */
+/* Аква и Аэро: скругления у новых элементов */
+html:is([data-w95="aqua"], [data-w95="aero"]) body :is(.cat-tile, .icon-cat-btn, .emoji-cell, .q-act, .goal-item, .seg-btn, .hdr-edit-btn, .receipt-cam-btn) { border-radius: 8px !important; }
+html:is([data-w95="aqua"], [data-w95="aero"]) body :is(.cat-tiles, .q-list, .icon-cat-list, .receipt-items, .goal-img, .goal-draft-img, .sound-lib-list) { border-radius: 6px; }
+html:is([data-w95="aqua"], [data-w95="aero"]) body .goal-dollar { border-radius: 50% !important; }
+html:is([data-w95="aqua"], [data-w95="aero"]) body .receipt-cam-btn { border-radius: 50% !important; }
+html:is([data-w95="aqua"], [data-w95="aero"]) body .seg-buttons { gap: 4px; }
+html[data-w95="aqua"] body .goal-rank, html[data-w95="aero"] body .goal-rank { border-radius: 9px; }
+/* Аэро: глянец на кнопке камеры и «$» */
+html[data-w95="aero"] body .receipt-cam-btn, html[data-w95="aero"] body .goal-dollar {
+    background-image: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.08) 50%, rgba(0,0,0,.06)) !important;
+}
+html[data-w95="aero"] body .goal-dollar { background-color: #2e9e3e !important; }
+/* 1-бит: только чёрное и белое */
+html[data-w95="mono"] body .q-badge { background: #000 !important; box-shadow: none; }
+html[data-w95="mono"] body .goal-dollar { background: #000 !important; color: #fff !important; }
+html[data-w95="mono"] body .goal-item.is-top { outline-color: #000; }
+html[data-w95="mono"] body .splash-quote { background: #fff; color: #000; border: 2px solid #000; }
+html[data-w95="mono"] body .splash-quote .q-change.is-up, html[data-w95="mono"] body .splash-quote .q-change.is-down { color: #000 !important; }
+html[data-w95="mono"] body .receipt-progress > div { background: #000; }
+html[data-w95="mono"] body .cat-tile-emoji, html[data-w95="mono"] body .cat-emoji, html[data-w95="mono"] body .icon-cat-btn,
+html[data-w95="mono"] body .emoji-cell { filter: grayscale(1) contrast(1.4); }

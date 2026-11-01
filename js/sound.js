@@ -11,8 +11,11 @@ let masterGain = null;
 let startupPlayed = false;
 let soundPack = 'classic';
 
-// Свои звуки пользователя (js/soundpicker.js): { слот: { name, mime, size, updatedAt, driveId } или { muted: true } }.
-// Синхронизируются через Google Диск вместе с остальными данными.
+// Свои звуки пользователя (js/soundpicker.js). Все загруженные файлы лежат в библиотеке soundLibrary
+// ([{ id, name, mime, size, duration, addedAt, driveId }]), а выбор для событий хранится так:
+//   customSoundMeta — для всех тем: { слот: { soundId } или { muted: true } };
+//   themeSoundMeta — для отдельной темы: { idТемы: { слот: { soundId } или { muted: true } } } (важнее общего выбора).
+// Всё это синхронизируется через Google Диск вместе с остальными данными.
 const SOUND_SLOTS = [
     { id: 'startup', name: 'Открытие приложения' },
     { id: 'appclose', name: 'Закрытие приложения' },
@@ -24,7 +27,20 @@ const SOUND_SLOTS = [
 ];
 let customSoundMeta = {};
 try { customSoundMeta = JSON.parse(localStorage.getItem('finance_custom_sounds') || '{}') || {}; } catch (e) { customSoundMeta = {}; }
-const customSoundBuffers = {}; // слот → { updatedAt, buffer } — уже декодированные файлы
+let themeSoundMeta = {};
+try { themeSoundMeta = JSON.parse(localStorage.getItem('finance_theme_sounds') || '{}') || {}; } catch (e) { themeSoundMeta = {}; }
+let soundLibrary = [];
+try { soundLibrary = JSON.parse(localStorage.getItem('finance_sound_lib') || '[]') || []; } catch (e) { soundLibrary = []; }
+if (!Array.isArray(soundLibrary)) soundLibrary = [];
+const customSoundBuffers = {}; // id звука из библиотеки → декодированный AudioBuffer
+
+// Выбор для события с учётом текущей темы: сначала звук темы, затем общий для всех тем
+function effectiveSoundMeta(slot) {
+    const themeId = typeof currentThemeId !== 'undefined' ? currentThemeId : '';
+    const own = themeSoundMeta[themeId];
+    if (own && own[slot]) return own[slot];
+    return customSoundMeta[slot] || null;
+}
 
 function soundEnabled() {
     return localStorage.getItem(SOUND_KEY) !== 'off';
@@ -376,13 +392,14 @@ const DEFAULT_EXTRA = {
 
 // Проиграть свой звук пользователя, если он выбран и уже готов. true — если звук обработан (сыгран или выключен).
 function playCustomSound(slot, ctx) {
-    const meta = customSoundMeta[slot];
+    const meta = effectiveSoundMeta(slot);
     if (!meta) return false;
     if (meta.muted) return true;
-    const cached = customSoundBuffers[slot];
-    if (cached && cached.updatedAt === meta.updatedAt && cached.buffer) {
+    if (!meta.soundId) return false;
+    const buffer = customSoundBuffers[meta.soundId];
+    if (buffer) {
         const src = ctx.createBufferSource();
-        src.buffer = cached.buffer;
+        src.buffer = buffer;
         const g = ctx.createGain();
         g.gain.value = 1.4; // свои файлы обычно тише синтезированных — немного громче
         src.connect(g);
@@ -390,7 +407,7 @@ function playCustomSound(slot, ctx) {
         src.start();
         return true;
     }
-    if (typeof prepareCustomSound === 'function') prepareCustomSound(slot); // загрузится к следующему разу
+    if (typeof prepareCustomSound === 'function') prepareCustomSound(meta.soundId); // загрузится к следующему разу
     return false;
 }
 

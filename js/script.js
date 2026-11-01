@@ -3,8 +3,10 @@
 // Заглушки на случай, если какой-то из файлов js/*.js не загрузился (нет сети, старая копия страницы):
 // приложение должно запуститься в любом случае, просто без этой части.
 ['playSound', 'playStartupChime', 'renderOldbook', 'onOldbookTabShown', 'renderSoundSettings', 'applySavedTheme',
-    'openSoundPicker', 'initW95Scrollbars']
+    'openSoundPicker', 'initW95Scrollbars', 'renderGoals', 'migrateLegacyGoal', 'runGoalAutoSave', 'renderAllQuotes',
+    'onQuotesTabShown', 'renderAllIconSettings', 'renderCategoryTiles', 'enhanceCards', 'applyHeaderPrefs', 'renderSoundLibrary']
     .forEach(name => { if (typeof window[name] !== 'function') window[name] = function () {}; });
+if (typeof window.historyCategoryHtml !== 'function') window.historyCategoryHtml = name => `<strong>${escapeHtml(name || 'Без категории')}</strong>`;
 if (typeof window.getFormComment !== 'function') window.getFormComment = function () { return ''; };
 if (typeof window.setFormComment !== 'function') window.setFormComment = function () {};
 
@@ -32,7 +34,9 @@ window.onload = function() {
     // Слайдер разблокировки — первым: заставка не должна «зависнуть», даже если что-то ниже сломается
     safeStep('слайдер', initSlider);
     safeStep('данные', loadData);
+    safeStep('старая цель', migrateLegacyGoal);
     safeStep('перенос лимита', checkDailyRollover);
+    safeStep('автосписание на цели', () => runGoalAutoSave(false));
 
     let dtInput = document.getElementById('tx-datetime');
     if (dtInput) dtInput.value = almatyIsoNow();
@@ -144,7 +148,7 @@ function checkDailyRollover() {
             
         let saved = manualLimit - dayExpenses;
         
-        if (saved > 0 && priorityGoal.amount > 0) {
+        if (saved > 0 && (priorityGoal.amount > 0 || (typeof goalsList !== 'undefined' && goalsList.length > 0))) {
             savings += saved;
             transactions.push({
                 id: Date.now().toString(),
@@ -176,11 +180,15 @@ function updateUI(pushToCloud = false) {
     renderTransactions();
     renderSubscriptions();
     if(typeof renderSalaryList === "function") renderSalaryList();
-    renderGoal();
+    renderGoals();
     generateReport();
     renderStatistics();
     renderOldbook();
     renderCategorySettings();
+    renderAllIconSettings();
+    renderAllQuotes();
+    applyHeaderPrefs();
+    renderSoundLibrary();
 
     // Если флаг pushToCloud true, изменения отправляются на Google Диск (с небольшой задержкой, пачкой)
     if (pushToCloud) scheduleCloudSync();
@@ -501,7 +509,7 @@ function renderTransactions() {
             div.className = `tx-item ${tx.type}`;
             div.innerHTML = `
                 <div class="tx-info">
-                    <strong>${escapeHtml(tx.category || 'Без категории')}</strong><br>${timeStr}${commentStr}
+                    <span class="tx-cat">${historyCategoryHtml(tx.category)}</span><br>${timeStr}${commentStr}
                 </div>
                 <strong class="tx-amount ${tx.type === 'income' ? 'amount-income' : 'amount-expense'}" style="font-size: 15px;">${sign}${tx.amount} ₸</strong>
                 ${tx.isSystem ? '' : `
@@ -640,6 +648,7 @@ function editTx(id) {
         if (amountEl) amountEl.value = tx.amount;
         if (catEl) catEl.value = tx.category;
         setFormComment('tx', tx.comment || '');
+        renderCategoryTiles();
 
         if (addBtns) addBtns.style.display = 'none';
         if (saveEditBtn) saveEditBtn.style.display = 'flex';
@@ -695,6 +704,7 @@ function clearForm() {
     if (dtEl) {
         dtEl.value = almatyIsoNow();
     }
+    renderCategoryTiles();
 }
 
 function generateReport() {
@@ -1173,47 +1183,7 @@ async function exportPdf() {
 
 
 
-function selectGoalIcon(btn) {
-    document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-}
-
-function setPriorityGoal() {
-    let nameEl = document.getElementById('goal-name');
-    let amountEl = document.getElementById('goal-amount');
-    let selBtn = document.querySelector('.icon-btn.selected');
-
-    if (!nameEl || !amountEl) return;
-
-    const name = nameEl.value.trim();
-    const amount = parseFloat(amountEl.value);
-    const icon = selBtn ? selBtn.getAttribute('data-icon') : '🎯';
-    
-    if (!name || !amount) {
-        alert('Заполните название и сумму цели!');
-        return;
-    }
-    priorityGoal = { name, amount, icon };
-    updateUI(true);
-    alert('Цель установлена!');
-}
-
-function renderGoal() {
-    const gd = document.getElementById('current-goal-display');
-    if (!gd) return;
-    if (priorityGoal.name && priorityGoal.amount > 0) {
-        let percent = Math.min(100, (savings / priorityGoal.amount) * 100);
-        gd.innerHTML = `
-            <h4>${priorityGoal.icon} ${priorityGoal.name}</h4>
-            <p>Собрано: ${savings.toFixed(0)} ₸ из ${priorityGoal.amount} ₸ (${percent.toFixed(1)}%)</p>
-            <div class="goal-progress">
-                <div class="goal-bar" style="width: ${percent}%"></div>
-            </div>
-        `;
-    } else {
-        gd.innerHTML = '<p class="hint">Цель пока не установлена.</p>';
-    }
-}
+// Цели (приоритетные вещи) — js/goals.js
 
 function saveSettings() {
     let mLimitEl = document.getElementById('manual-limit');
@@ -1230,7 +1200,10 @@ function saveDataLocally() {
         localStorage.setItem('finance_ob_links', JSON.stringify(oldbookLinks));
         localStorage.setItem('finance_categories', JSON.stringify(customCategories));
         if (typeof saveCustomThemesLocal === 'function') saveCustomThemesLocal(); // свои темы (updatedAt ставит stampLocalChanges)
-        localStorage.setItem('finance_custom_sounds', JSON.stringify(customSoundMeta));
+        if (typeof persistSoundState === 'function') persistSoundState(); // свои звуки, звуки тем, «Мои звуки»
+        if (typeof saveGoalsLocal === 'function') saveGoalsLocal();
+        if (typeof saveUserQuotesLocal === 'function') saveUserQuotesLocal();
+        if (typeof saveUiPrefsLocal === 'function') saveUiPrefsLocal();
         localStorage.setItem('finance_tx', JSON.stringify(transactions));
         localStorage.setItem('finance_subs', JSON.stringify(subscriptions));
         localStorage.setItem('finance_savings', savings.toString());
@@ -1309,6 +1282,9 @@ function clearAllData() {
         customCategories = [];
         if (typeof onCustomThemesChanged === 'function') { customThemes = []; onCustomThemesChanged(); }
         if (typeof clearCustomSoundsLocal === 'function') clearCustomSoundsLocal();
+        if (typeof goalsList !== 'undefined') goalsList = [];
+        if (typeof userQuotes !== 'undefined') userQuotes = [];
+        if (typeof setUiPrefs === 'function') setUiPrefs(null);
         renderMenus();
         updateUI(true);
     }
@@ -1337,6 +1313,7 @@ function showTab(tabId, btn) {
     }
     
     if (tabId === 'oldbook' && typeof onOldbookTabShown === 'function') onOldbookTabShown();
+    if (tabId === 'quotes') onQuotesTabShown();
 
     // Подсвечиваем пункт в обоих меню (боковом и нижнем)
     currentTabId = tabId;
@@ -1355,6 +1332,7 @@ const MENU_ITEMS = [
     { id: 'statistics', icon: 'pie_chart', label: 'Статистика' },
     { id: 'reports', icon: 'bar_chart', label: 'Отчёты' },
     { id: 'wishlist', icon: 'star', label: 'Цели' },
+    { id: 'quotes', icon: 'candlestick_chart', label: 'Котировки' },
     { id: 'oldbook', icon: 'menu_book', label: 'Oldbook' },
     { id: 'settings', icon: 'settings', label: 'Настройки', locked: true }
 ];
@@ -1391,7 +1369,11 @@ function renderMenus() {
     const sidebar = document.getElementById('sidebar-nav');
     const mobile = document.getElementById('mobile-nav');
     if (sidebar) sidebar.innerHTML = navHtml;
-    if (mobile) mobile.innerHTML = navHtml;
+    if (mobile) {
+        mobile.innerHTML = navHtml;
+        // 9–10 пунктов — 5 колонок, чтобы нижнее меню осталось в два ряда
+        mobile.classList.toggle('nav-wide', visible.length > 8);
+    }
     updateMobileNavHeight();
     renderMenuEditor(state);
 }
@@ -2319,4 +2301,5 @@ function filterCategories() {
     }
 
     drop.style.display = drop.children.length ? 'block' : 'none';
+    renderCategoryTiles(); // подсветка выбранной плитки-картинки
 }

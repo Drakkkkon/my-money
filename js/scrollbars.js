@@ -7,7 +7,9 @@
 // Блоки с прокруткой внутри (полоса появляется, только когда содержимое не помещается)
 const W95_SCROLL_SELECTORS = [
     '#tx-list', '#ob-list', '.changelog', '.export-sheet-table', '.custom-dropdown',
-    '.sound-slots', '.custom-categories'
+    '.sound-slots', '.custom-categories',
+    // 3.8: длинные списки прокручиваются внутри своих блоков
+    '#subs-list', '#salary-list', '.calc-tape', '.goals-list', '.q-list', '.sound-lib-list', '.icon-cat-list', '.cat-tiles'
 ].join(', ');
 const SB_ARROW = 14;   // высота кнопки-стрелки
 const SB_INSET = 2;    // отступ от рамки блока
