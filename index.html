@@ -122,6 +122,8 @@
                                 <input type="text" id="category" placeholder="Категория" oninput="filterCategories()" onfocus="showCategories()" onblur="hideCategories()" autocomplete="off">
                                 <div id="category-dropdown" class="custom-dropdown" style="display:none;"></div>
                             </div>
+                            <input type="hidden" id="tx-comment">
+                            <button type="button" class="btn-secondary comment-btn" id="tx-comment-btn" onclick="openCommentDialog('tx')"><span class="material-icons">chat_bubble_outline</span> <span class="comment-btn-text">Комментарий</span></button>
                             <div class="btn-group" id="add-btns">
                                 <button type="button" class="btn-income" onclick="saveTx('income')"><span class="material-icons" style="font-size:18px;">add</span> Доход</button>
                                 <button type="button" class="btn-expense" onclick="saveTx('expense')"><span class="material-icons" style="font-size:18px;">remove</span> Расход</button>
@@ -280,6 +282,135 @@
                     </div>
                 </div>
 
+                <!-- OLDBOOK: семейная книга (Катя, Папа, Саша) с обменом между аккаунтами -->
+                <div id="oldbook" class="tab" style="display:none;">
+                    <div class="card ob-form-card" id="ob-form-card">
+                        <h3><span class="material-icons">menu_book</span> Новая запись — Oldbook</h3>
+                        <input type="datetime-local" id="ob-datetime">
+
+                        <div class="ob-label">Кто</div>
+                        <div class="ob-persons" id="ob-persons">
+                            <button type="button" class="icon-btn" data-person="Катя" onclick="selectObPerson(this)"><span class="material-icons">person</span> Катя</button>
+                            <button type="button" class="icon-btn" data-person="Папа" onclick="selectObPerson(this)"><span class="material-icons">person</span> Папа</button>
+                            <button type="button" class="icon-btn" data-person="Саша" onclick="selectObPerson(this)"><span class="material-icons">person</span> Саша</button>
+                        </div>
+
+                        <div class="ob-label">Сумма</div>
+                        <div class="ob-amount-display is-empty" id="ob-amount-display" aria-live="polite">0 ₸</div>
+                        <div class="ob-keypad" role="group" aria-label="Цифровая клавиатура">
+                            <button type="button" onclick="obKey('1')">1</button>
+                            <button type="button" onclick="obKey('2')">2</button>
+                            <button type="button" onclick="obKey('3')">3</button>
+                            <button type="button" onclick="obKey('back')" aria-label="Стереть"><span class="material-icons">backspace</span></button>
+                            <button type="button" onclick="obKey('4')">4</button>
+                            <button type="button" onclick="obKey('5')">5</button>
+                            <button type="button" onclick="obKey('6')">6</button>
+                            <button type="button" onclick="obKey('clear')" aria-label="Очистить">C</button>
+                            <button type="button" onclick="obKey('7')">7</button>
+                            <button type="button" onclick="obKey('8')">8</button>
+                            <button type="button" onclick="obKey('9')">9</button>
+                            <button type="button" onclick="obKey('000')">000</button>
+                            <button type="button" class="ob-key-wide" onclick="obKey('0')">0</button>
+                            <button type="button" class="ob-key-wide" onclick="obKey('00')">00</button>
+                        </div>
+
+                        <div class="ob-label">На что</div>
+                        <input type="text" id="ob-category" list="ob-category-list" placeholder="Категория (продукты, кружок, проезд…)" maxlength="60" autocomplete="off">
+                        <datalist id="ob-category-list">
+                            <option value="Продукты"></option>
+                            <option value="Еда вне дома"></option>
+                            <option value="Проезд"></option>
+                            <option value="Одежда"></option>
+                            <option value="Учёба"></option>
+                            <option value="Кружки и секции"></option>
+                            <option value="Развлечения"></option>
+                            <option value="Подарки"></option>
+                            <option value="Здоровье"></option>
+                            <option value="Карманные деньги"></option>
+                            <option value="Зарплата"></option>
+                            <option value="Другое"></option>
+                        </datalist>
+
+                        <input type="hidden" id="ob-comment">
+                        <button type="button" class="btn-secondary comment-btn" id="ob-comment-btn" onclick="openCommentDialog('ob')"><span class="material-icons">chat_bubble_outline</span> <span class="comment-btn-text">Комментарий</span></button>
+
+                        <div class="btn-group" id="ob-add-btns">
+                            <button type="button" class="btn-income" onclick="saveObEntry('income')"><span class="material-icons">add</span> Доход</button>
+                            <button type="button" class="btn-expense" onclick="saveObEntry('expense')"><span class="material-icons">remove</span> Расход</button>
+                        </div>
+                        <div class="btn-group" id="ob-save-edit" style="display:none;">
+                            <button type="button" class="btn-primary" onclick="saveObEdit()"><span class="material-icons">save</span> Сохранить</button>
+                            <button type="button" class="btn-secondary" onclick="resetObForm()">Отмена</button>
+                        </div>
+                    </div>
+
+                    <div class="card card-wide ob-history-card" id="ob-history-card">
+                        <h3 class="has-controls"><span class="material-icons">receipt_long</span> Расходы и доходы
+                            <span class="w95-ctls">
+                                <span class="w95-ctl w95-ctl-min" aria-hidden="true"></span>
+                                <button type="button" class="w95-ctl w95-ctl-max" onclick="toggleMaximize(this)" title="Развернуть" aria-label="Развернуть на весь экран"></button>
+                                <span class="w95-ctl w95-ctl-close" aria-hidden="true"></span>
+                            </span>
+                        </h3>
+                        <div class="ob-list-toolbar">
+                            <select id="ob-filter-person" onchange="renderObList()" aria-label="Чьи записи показать">
+                                <option value="">Все</option>
+                                <option value="Катя">Катя</option>
+                                <option value="Папа">Папа</option>
+                                <option value="Саша">Саша</option>
+                            </select>
+                            <div class="ob-totals" id="ob-totals"></div>
+                        </div>
+                        <div class="ob-list" id="ob-list"></div>
+                    </div>
+
+                    <div class="card card-wide ob-stats-card">
+                        <h3><span class="material-icons">insights</span> Кто, на что и зачем</h3>
+                        <select id="ob-stats-period" onchange="renderObStats()" aria-label="Период статистики">
+                            <option value="7">Последние 7 дней</option>
+                            <option value="30">Последние 30 дней</option>
+                            <option value="month" selected>Этот месяц</option>
+                            <option value="year">Этот год</option>
+                            <option value="all">Всё время</option>
+                        </select>
+                        <div class="ob-charts">
+                            <div class="ob-chart">
+                                <h4>Кто сколько потратил</h4>
+                                <div class="chart-box chart-box-round"><canvas id="ob-person-chart"></canvas></div>
+                            </div>
+                            <div class="ob-chart">
+                                <h4>На что тратил каждый</h4>
+                                <div class="chart-box"><canvas id="ob-category-chart"></canvas></div>
+                            </div>
+                            <div class="ob-chart">
+                                <h4>Доходы и расходы по людям</h4>
+                                <div class="chart-box"><canvas id="ob-balance-chart"></canvas></div>
+                            </div>
+                        </div>
+                        <h4 class="ob-why-title">Зачем: самые крупные траты</h4>
+                        <div class="ob-why-list cat-list" id="ob-why-list"></div>
+                    </div>
+
+                    <div class="card card-wide ob-share-card">
+                        <h3><span class="material-icons">group</span> Совместный доступ</h3>
+                        <p class="hint">Записи других членов семьи попадают к вам только с согласия обеих сторон: владелец открывает доступ к своей книге, а получатель подтверждает его у себя. Делятся только записи Oldbook — остальные ваши финансы никто не видит.</p>
+
+                        <h4>1. Поделиться своей книгой</h4>
+                        <p class="hint">Введите email аккаунта Google человека. Google пришлёт ему письмо со ссылкой.</p>
+                        <div class="ob-share-form">
+                            <input type="email" id="ob-share-email" placeholder="email, например katya@gmail.com" autocomplete="email">
+                            <button type="button" class="btn-primary" onclick="shareOldbookWith()"><span class="material-icons">person_add</span> Открыть доступ</button>
+                        </div>
+                        <p class="hint" id="ob-share-status"></p>
+                        <div id="ob-shares"></div>
+
+                        <h4>2. Принять книгу другого пользователя</h4>
+                        <p class="hint">Когда с вами поделились, нажмите кнопку и выберите файл <b>my_money_oldbook.json</b> в окне Google Диска — это и есть ваше подтверждение.</p>
+                        <button type="button" class="btn-primary" onclick="acceptOldbook()"><span class="material-icons">how_to_reg</span> Принять книгу другого пользователя</button>
+                        <div id="ob-links"></div>
+                    </div>
+                </div>
+
                 <!-- НАСТРОЙКИ -->
                 <div id="settings" class="tab" style="display:none;">
                     <div class="card sync-card" id="auth-section">
@@ -352,6 +483,14 @@
                         <button type="button" class="export-btn" style="background:#d32f2f; margin-top: 15px;" onclick="clearAllData()"><span class="material-icons">delete_forever</span> Сбросить всё</button>
                     </div>
 
+                    <div class="card sound-card">
+                        <h3><span class="material-icons">volume_up</span> Звуки</h3>
+                        <p class="hint">Щелчки кнопок, звуки открытия и закрытия окон и короткая мелодия при запуске. Все звуки создаются самим приложением.</p>
+                        <button type="button" class="btn-secondary btn-block" id="sound-ui-btn" onclick="toggleUiSound()">Звуки интерфейса</button>
+                        <button type="button" class="btn-secondary btn-block" id="sound-startup-btn" onclick="toggleStartupSound()">Мелодия при запуске</button>
+                        <button type="button" class="btn-secondary btn-block" onclick="previewStartupChime()"><span class="material-icons">play_arrow</span> Прослушать мелодию</button>
+                    </div>
+
                     <div class="card menu-editor-card">
                         <h3><span class="material-icons">menu_open</span> Пункты меню</h3>
                         <p class="hint">Перетащите пункт за <span class="material-icons inline-icon">drag_indicator</span>, чтобы поменять порядок. <span class="material-icons inline-icon">remove_circle_outline</span> убирает пункт из меню, <span class="material-icons inline-icon">add_circle_outline</span> возвращает. «Настройки» убрать нельзя.</p>
@@ -367,7 +506,18 @@
                         <h3><span class="material-icons">history</span> История версий</h3>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>3.1.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>3.2.0 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Комментарий к записи (до 100 символов): кнопка «Комментарий» в форме, текст курсивом под временем записи, колонка «Комментарий» в Excel и PDF.</li>
+                                    <li>Новый раздел Oldbook: записи с выбором «Кто» (Катя, Папа, Саша), цифровая клавиатура для суммы без системной клавиатуры.</li>
+                                    <li>Oldbook: список доходов и расходов с ограниченной высотой и кнопкой □ «развернуть на весь экран».</li>
+                                    <li>Oldbook: статистика — кто сколько потратил, на что тратил каждый, доходы и расходы по людям, крупные траты с комментариями.</li>
+                                    <li>Oldbook: совместный доступ между аккаунтами Google — владелец открывает доступ по email, получатель подтверждает; записи обновляются при синхронизации.</li>
+                                    <li>Звуки интерфейса (щелчки, открытие и закрытие окон) и собственная мелодия при запуске, с выключением в настройках.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>3.1.0</h4>
                                 <ul>
                                     <li>Новый дизайн в стиле Windows 95: бирюзовый «рабочий стол», серые объёмные окна с синими заголовками и кнопками «_ □ ×», вдавленные поля, «панель задач» внизу на телефоне.</li>
                                     <li>Пиксельный шрифт в заголовках, кнопках и меню; суммы, даты и время — чётким шрифтом.</li>
@@ -458,7 +608,9 @@
         <nav class="mobile-nav tabs" id="mobile-nav"></nav>
     </div>
     <script src="js/config.js"></script>
+    <script src="js/sound.js"></script>
     <script src="js/cloud.js"></script>
+    <script src="js/oldbook.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>

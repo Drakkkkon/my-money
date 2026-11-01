@@ -5,6 +5,8 @@ let priorityGoal = { name: '', amount: 0, icon: '🎯' };
 let manualLimit = 0;
 let savings = 0;
 let profileName = '';
+let oldbookEntries = [];   // свои записи Oldbook
+let oldbookLinks = [];     // книги Oldbook других пользователей, которыми с вами поделились
 let myChart = null;
 
 window.onload = function() {
@@ -77,6 +79,8 @@ function loadData() {
         if (localStorage.getItem('finance_limit')) manualLimit = parseFloat(localStorage.getItem('finance_limit')) || 0;
         if (localStorage.getItem('finance_savings')) savings = parseFloat(localStorage.getItem('finance_savings')) || 0;
         profileName = localStorage.getItem('finance_profile_name') || '';
+        if (localStorage.getItem('finance_oldbook')) oldbookEntries = JSON.parse(localStorage.getItem('finance_oldbook')) || [];
+        if (localStorage.getItem('finance_ob_links')) oldbookLinks = JSON.parse(localStorage.getItem('finance_ob_links')) || [];
     } catch(e) {
         console.error("Error loading local storage:", e);
     }
@@ -144,9 +148,10 @@ function updateUI(pushToCloud = false) {
     renderSubscriptions();
     if(typeof renderSalaryList === "function") renderSalaryList();
     renderGoal();
-    generateReport(); 
+    generateReport();
     renderStatistics();
-    
+    renderOldbook();
+
     // Если флаг pushToCloud true, изменения отправляются на Google Диск (с небольшой задержкой, пачкой)
     if (pushToCloud) scheduleCloudSync();
 }
@@ -461,11 +466,12 @@ function renderTransactions() {
         g.items.reverse().forEach(tx => {
             let sign = tx.type === 'income' ? '+' : '-';
             let timeStr = (tx.date && tx.date.includes('T')) ? ` <span style="font-size:12px;color:var(--text-muted);">${tx.date.split('T')[1]}</span>` : '';
+            let commentStr = tx.comment ? `<span class="tx-comment">${escapeHtml(tx.comment)}</span>` : '';
             let div = document.createElement('div');
             div.className = `tx-item ${tx.type}`;
             div.innerHTML = `
                 <div class="tx-info">
-                    <strong>${tx.category || 'Без категории'}</strong><br>${timeStr}
+                    <strong>${escapeHtml(tx.category || 'Без категории')}</strong><br>${timeStr}${commentStr}
                 </div>
                 <strong class="tx-amount ${tx.type === 'income' ? 'amount-income' : 'amount-expense'}" style="font-size: 15px;">${sign}${tx.amount} ₸</strong>
                 ${tx.isSystem ? '' : `
@@ -574,7 +580,10 @@ function saveTx(type) {
         return;
     }
     
-    transactions.push({ id: Date.now().toString(), type, amount, category, date: datetime });
+    const comment = getFormComment('tx');
+    const tx = { id: Date.now().toString(), type, amount, category, date: datetime };
+    if (comment) tx.comment = comment;
+    transactions.push(tx);
     clearForm();
     updateUI(true);
 }
@@ -600,7 +609,8 @@ function editTx(id) {
         if (dtEl) dtEl.value = (tx.date && tx.date.includes('T')) ? tx.date : (tx.date + 'T00:00');
         if (amountEl) amountEl.value = tx.amount;
         if (catEl) catEl.value = tx.category;
-        
+        setFormComment('tx', tx.comment || '');
+
         if (addBtns) addBtns.style.display = 'none';
         if (saveEditBtn) saveEditBtn.style.display = 'flex';
         
@@ -629,6 +639,8 @@ function saveEdit() {
         tx.amount = amount;
         tx.category = category;
         tx.date = datetime;
+        const comment = getFormComment('tx');
+        if (comment) tx.comment = comment; else delete tx.comment;
     }
     
     clearForm();
@@ -646,6 +658,7 @@ function clearForm() {
     if (amountEl) amountEl.value = '';
     if (categoryEl) categoryEl.value = '';
     if (editIdEl) editIdEl.value = '';
+    setFormComment('tx', '');
     if (addBtns) addBtns.style.display = 'flex';
     if (saveEditBtn) saveEditBtn.style.display = 'none';
     
@@ -713,7 +726,8 @@ function generateReport() {
 }
 
 // --- ВЫГРУЗКА ФАЙЛОВ (Excel / JSON) ---
-const EXPORT_COLUMNS = ['Дата', 'Время', 'Тип', 'Категория', 'Сумма', 'ИТОГО ЗА ВСЁ ВРЕМЯ'];
+const EXPORT_COLUMNS = ['Дата', 'Время', 'Тип', 'Категория', 'Комментарий', 'Сумма', 'ИТОГО ЗА ВСЁ ВРЕМЯ'];
+const EXPORT_AMOUNT_COLS = [5, 6]; // номера числовых колонок (Сумма, Итого)
 
 function isMobileDevice() {
     const ua = navigator.userAgent || '';
@@ -734,7 +748,7 @@ function buildExportRows() {
         const txDate = parts[0];
 
         if (currentDate !== null && txDate !== currentDate) {
-            rows.push({ kind: 'day', cells: ['ИТОГО ЗА ДЕНЬ', '', '', '', dailyTotal, ''] });
+            rows.push({ kind: 'day', cells: ['ИТОГО ЗА ДЕНЬ', '', '', '', '', dailyTotal, ''] });
             dailyTotal = 0;
         }
         currentDate = txDate;
@@ -746,14 +760,14 @@ function buildExportRows() {
 
         rows.push({
             kind: isIncome ? 'income' : 'expense',
-            cells: [txDate, parts[1] || '', isIncome ? 'Доход' : 'Расход', t.category || '', amount, '']
+            cells: [txDate, parts[1] || '', isIncome ? 'Доход' : 'Расход', t.category || '', t.comment || '', amount, '']
         });
     });
 
     if (currentDate !== null) {
-        rows.push({ kind: 'day', cells: ['ИТОГО ЗА ДЕНЬ', '', '', '', dailyTotal, ''] });
-        // Общий чистый итог за всё время находится в отдельном столбце F.
-        rows.push({ kind: 'total', cells: ['ИТОГО ЗА ВСЁ ВРЕМЯ', '', '', '', '', allTimeTotal] });
+        rows.push({ kind: 'day', cells: ['ИТОГО ЗА ДЕНЬ', '', '', '', '', dailyTotal, ''] });
+        // Общий чистый итог за всё время находится в отдельном последнем столбце.
+        rows.push({ kind: 'total', cells: ['ИТОГО ЗА ВСЁ ВРЕМЯ', '', '', '', '', '', allTimeTotal] });
     }
     return rows;
 }
@@ -761,7 +775,7 @@ function buildExportRows() {
 async function buildExcelBlob(rows) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Записи');
-    const widths = [15, 10, 15, 25, 15, 23];
+    const widths = [15, 10, 12, 25, 34, 15, 23];
     worksheet.columns = EXPORT_COLUMNS.map((header, i) => ({ header, width: widths[i] }));
 
     worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
@@ -778,7 +792,7 @@ async function buildExcelBlob(rows) {
     });
 
     worksheet.views = [{ state: 'frozen', ySplit: 1 }];
-    worksheet.autoFilter = { from: 'A1', to: 'F1' };
+    worksheet.autoFilter = { from: 'A1', to: 'G1' };
     const buffer = await workbook.xlsx.writeBuffer();
     return new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 }
@@ -910,7 +924,7 @@ function showExportSheet({ title, note, tableHtml, copyText, retry, actions = []
             </div>
         </div>`;
     overlay.addEventListener('click', async (e) => {
-        if (e.target === overlay || e.target.closest('.export-sheet-close')) { closeExportSheet(); return; }
+        if (e.target === overlay || e.target.closest('.export-sheet-close')) { closeExportSheet(); playSound('close'); return; }
         const btn = e.target.closest('button[data-act]');
         if (!btn) return;
         if (btn.dataset.act === 'copy') {
@@ -924,6 +938,7 @@ function showExportSheet({ title, note, tableHtml, copyText, retry, actions = []
         }
     });
     document.body.appendChild(overlay);
+    playSound('open');
 }
 
 function closeExportSheet() {
@@ -1032,14 +1047,15 @@ function buildPdfDefinition(rows) {
     rows.forEach(r => {
         const st = styles[r.kind];
         const cells = r.cells.map((c, i) => ({
-            text: (i === 4 || i === 5) && c !== '' ? fmtMoney(c) : String(c),
-            alignment: (i === 4 || i === 5) ? 'right' : 'left',
+            text: EXPORT_AMOUNT_COLS.includes(i) && c !== '' ? fmtMoney(c) : String(c),
+            alignment: EXPORT_AMOUNT_COLS.includes(i) ? 'right' : 'left',
+            italics: i === 4,
             ...st
         }));
         // Итоговые строки: подпись на 4 колонки, чтобы «ИТОГО ЗА ДЕНЬ» не переносилось
         if (r.kind === 'day' || r.kind === 'total') {
-            cells[0].colSpan = 4;
-            cells[1] = {}; cells[2] = {}; cells[3] = {};
+            cells[0].colSpan = 5;
+            cells[1] = {}; cells[2] = {}; cells[3] = {}; cells[4] = {};
         }
         body.push(cells);
     });
@@ -1065,7 +1081,7 @@ function buildPdfDefinition(rows) {
                 margin: [0, 0, 0, 12]
             },
             {
-                table: { headerRows: 1, widths: [58, 34, 42, '*', 62, 74], body },
+                table: { headerRows: 1, widths: [52, 30, 38, '*', '*', 58, 66], body },
                 layout: {
                     hLineWidth: () => 0.5, vLineWidth: () => 0.5,
                     hLineColor: () => '#bdbdbd', vLineColor: () => '#bdbdbd',
@@ -1180,6 +1196,8 @@ function saveDataLocally() {
     stampLocalChanges(); // отметки изменений для слияния с Google Диском (cloud.js)
     try {
         localStorage.setItem('finance_profile_name', profileName);
+        localStorage.setItem('finance_oldbook', JSON.stringify(oldbookEntries));
+        localStorage.setItem('finance_ob_links', JSON.stringify(oldbookLinks));
         localStorage.setItem('finance_tx', JSON.stringify(transactions));
         localStorage.setItem('finance_subs', JSON.stringify(subscriptions));
         localStorage.setItem('finance_savings', savings.toString());
@@ -1253,6 +1271,8 @@ function clearAllData() {
         savings = 0;
         manualLimit = 0;
         priorityGoal = { name: '', amount: 0, icon: '🎯' };
+        oldbookEntries = [];
+        oldbookLinks = [];
         renderMenus();
         updateUI(true);
     }
@@ -1280,6 +1300,8 @@ function showTab(tabId, btn) {
         if (mainWrapper) mainWrapper.scrollTop = 0;
     }
     
+    if (tabId === 'oldbook' && typeof onOldbookTabShown === 'function') onOldbookTabShown();
+
     // Подсвечиваем пункт в обоих меню (боковом и нижнем)
     currentTabId = tabId;
     document.querySelectorAll('.sidebar-nav button, .mobile-nav button').forEach(b => {
@@ -1297,6 +1319,7 @@ const MENU_ITEMS = [
     { id: 'statistics', icon: 'pie_chart', label: 'Статистика' },
     { id: 'reports', icon: 'bar_chart', label: 'Отчёты' },
     { id: 'wishlist', icon: 'star', label: 'Цели' },
+    { id: 'oldbook', icon: 'menu_book', label: 'Oldbook' },
     { id: 'settings', icon: 'settings', label: 'Настройки', locked: true }
 ];
 const MENU_KEY = 'finance_menu';
@@ -1800,6 +1823,7 @@ let savedPin = localStorage.getItem('finance_pin');
 let bioEnabled = localStorage.getItem('finance_bio') === 'true';
 
 function proceedFromSplash() {
+    playStartupChime(); // собственная мелодия запуска (звучит после жеста разблокировки)
     document.getElementById('splash-screen').style.opacity = '0';
     setTimeout(() => {
         document.getElementById('splash-screen').style.display = 'none';
@@ -1837,9 +1861,11 @@ function updatePinDots() {
 
 function checkPin() {
     if (currentPinInput === savedPin) {
+        playSound('success');
         document.getElementById('pin-screen').style.opacity = '0';
         setTimeout(() => { document.getElementById('pin-screen').style.display = 'none'; }, 400);
     } else {
+        playSound('error');
         alert('Неверный ПИН-код!');
         currentPinInput = "";
         updatePinDots();
