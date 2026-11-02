@@ -1,4 +1,12 @@
-My Money v3.9.0 — сайт
+My Money v3.10.0 — сайт
+
+Что нового в 3.10.0:
+- Ползунок прокрутки всей страницы (.main-wrapper, класс .w95-sb-page, position: fixed) и всех длинных блоков —
+  js/scrollbars.js; высота стрелок берётся из темы, зона захвата пальцем шире ползунка (css/v38.css). Стиль — из темы.
+- Тема «Метро» (css/metro.css, только html[data-w95="metro"]): 10 вариантов в js/themes.js (METRO_VARIANTS, у всех cssId 'metro'),
+  особые варианты — html[data-w95-variant="light|neon|leopard"]. Папка «Windows 8 Метро». Звуки — набор 'metro' в js/sound.js
+  (неон и леопард — звуки 'neon' и 'leopard'). Огромный заголовок раздела — main > .tab::before из data-title (script.js renderMenus).
+  Шрифт Open Sans с Google Fonts. service worker my-money-v11.
 
 Что нового в 3.9.0:
 - Уведомления (js/notify.js): подписки — sub.time и sub.remind (['1w','3d','1d','3h','1h','0']), утро 9:00 с целями,

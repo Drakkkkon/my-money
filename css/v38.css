@@ -446,3 +446,16 @@ html body #subs-list .sub-item { flex-wrap: wrap; row-gap: 8px; }
 html body #subs-list .sub-item .sub-info { flex: 1 1 0; min-width: 0; }
 html body #subs-list .sub-item .sub-actions { flex: 1 0 100%; justify-content: flex-end; margin-left: 0; display: flex; gap: 6px; }
 html body #subs-list .pay-btn { white-space: nowrap; width: auto; }
+
+/* =================== 3.10: ползунок прокрутки по всей программе =================== */
+/* Полоса всей страницы — закреплена у правого края экрана (js/scrollbars.js, .w95-sb-page) */
+html body .w95-sb-page { position: fixed !important; z-index: 60; }
+/* Ползунок тонкий, но ловится пальцем: невидимая зона захвата шире самого ползунка */
+html body .w95-sb-thumb::before { content: ''; position: absolute; top: -8px; bottom: -8px; left: -14px; right: -4px; }
+html body .w95-sb-thumb { touch-action: none; }
+html body .w95-sb-thumb.is-dragging { filter: brightness(.9); }
+html body .tx-currency-hint[hidden] { display: none !important; }
+@media (min-width: 769px) {
+    /* «Чек по фото» по высоте содержимого, остальное место — «Новой записи» (история справа на две строки) */
+    html body .tx-container { grid-template-rows: auto 1fr; }
+}

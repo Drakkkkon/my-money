@@ -25,6 +25,52 @@ const LEOPARD_SPOT = (x, y, w, h) =>
     `radial-gradient(ellipse ${w}px ${h}px at ${x}px ${y}px, #9a6424 40%, #2b1a0b 42% 70%, transparent 72%)`;
 const LEOPARD_DOT = (x, y, r) => `radial-gradient(circle ${r}px at ${x}px ${y}px, #2b1a0b 85%, transparent 100%)`;
 
+// Шрифт темы «Метро»: тонкий гротеск с Google Fonts (без шрифтов Microsoft)
+const METRO_FONT = "'Open Sans', 'Noto Sans', 'Segoe UI', Roboto, Arial, sans-serif";
+const METRO_DARK = {
+    face: '#171717', light: '#3a3a3a', hilite: '#2a2a2a', shadow: '#000000', darkEdge: '#000000',
+    field: '#262626', text: '#ffffff', muted: '#a6a6a6', titleText: '#ffffff',
+    hover: '#2e2e2e', grid: '#3a3a3a', income: '#7ad151', expense: '#ff5a4a', desktop: '#000000'
+};
+// accent — цвет плиток; variant — особые правила в css/metro.css (light, neon, leopard)
+const METRO_VARIANTS = [
+    { id: 'metro', name: 'Метро: кобальт', accent: '#0050ef' },
+    { id: 'metro-lime', name: 'Метро: лайм', accent: '#8cb000' },
+    { id: 'metro-magenta', name: 'Метро: пурпур', accent: '#d80073' },
+    { id: 'metro-crimson', name: 'Метро: малиновый', accent: '#c1002b' },
+    { id: 'metro-emerald', name: 'Метро: изумруд', accent: '#008a00' },
+    { id: 'metro-mango', name: 'Метро: манго', accent: '#e08a00' },
+    { id: 'metro-teal', name: 'Метро: бирюза', accent: '#00a3a1' },
+    { id: 'metro-light', name: 'Метро: светлая', accent: '#1ba1e2', variant: 'light', dark: false,
+        face: '#f2f2f2', light: '#ffffff', hilite: '#e6e6e6', shadow: '#bdbdbd', darkEdge: '#9e9e9e',
+        field: '#ffffff', text: '#000000', muted: '#5c5c5c', hover: '#e6e6e6', grid: '#d6d6d6',
+        income: '#1b7a2b', expense: '#c4231a', desktop: '#ffffff' },
+    { id: 'metro-neon', name: 'Метро: неон', accent: '#b13cff', accent2: '#00e5ff', variant: 'neon', sounds: 'neon',
+        face: '#0e0820', field: '#160d2e', text: '#f2ecff', muted: '#b8a9e0', hover: '#1f1440', grid: '#2e2152',
+        income: '#4fe39b', expense: '#ff5c8a', desktop: '#05010d',
+        pattern: 'linear-gradient(rgba(177,60,255,.10) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,.08) 1px, transparent 1px)',
+        patternSize: '32px 32px' },
+    { id: 'metro-leopard', name: 'Метро: леопард', accent: '#c47a1c', accent2: '#e0a040', variant: 'leopard', sounds: 'leopard',
+        face: '#1e1309', field: '#2a1b0d', text: '#fff6e6', muted: '#d8bf98', hover: '#352211', grid: '#4a3218',
+        income: '#8fd16a', expense: '#ff7a5c', desktop: '#2b1a0b',
+        pattern: [
+            LEOPARD_SPOT(18, 22, 14, 11), LEOPARD_SPOT(70, 15, 11, 13), LEOPARD_SPOT(46, 58, 13, 10),
+            LEOPARD_SPOT(98, 50, 10, 12), LEOPARD_SPOT(20, 92, 12, 11), LEOPARD_SPOT(78, 96, 14, 10),
+            LEOPARD_DOT(52, 28, 4), LEOPARD_DOT(108, 82, 3), LEOPARD_DOT(36, 76, 3), LEOPARD_DOT(8, 60, 3)
+        ].join(', '),
+        patternSize: '120px 120px' }
+];
+
+function metroTheme(v) {
+    const { accent, accent2, ...rest } = v;
+    return {
+        sounds: 'metro', folder: 'metro', cssId: 'metro', dark: true, ...METRO_DARK,
+        title: accent, title2: accent2 || accent, select: accent,
+        fontUi: METRO_FONT, fontText: METRO_FONT,
+        ...rest
+    };
+}
+
 const W95_THEMES = [
     { id: 'standard', name: 'Windows (стандартная)', sounds: 'classic',
         face: '#c0c0c0', title: '#000080', title2: '#1084d0', desktop: '#008080', select: '#000080' },
@@ -129,7 +175,11 @@ const W95_THEMES = [
             'radial-gradient(ellipse 42% 22% at 55% 82%, rgba(200,255,225,.35), rgba(200,255,225,0) 70%), ' +
             'linear-gradient(160deg, #06303f 0%, #0b5a63 45%, #0a2f52 100%)',
         patternSize: 'cover',
-        fontUi: AERO_FONT, fontText: AERO_FONT }
+        fontUi: AERO_FONT, fontText: AERO_FONT },
+    // «Метро» — по мотивам плиточного интерфейса мобильной Windows 8: плоские цветные плитки вместо меню,
+    // огромные строчные заголовки разделов на полэкрана, тонкий шрифт, никаких рамок и теней.
+    // Форма — в css/metro.css (только при html[data-w95="metro"]); 10 вариантов отличаются цветом акцента и фона.
+    ...METRO_VARIANTS.map(v => metroTheme(v))
 ];
 
 let currentThemeId = 'standard';
@@ -138,7 +188,8 @@ let currentThemeId = 'standard';
 const THEME_FOLDERS = [
     { id: 'win95', name: 'Windows 95' },
     { id: 'vista', name: 'Windows Vista' },
-    { id: 'mac', name: 'Mac OS' }
+    { id: 'mac', name: 'Mac OS' },
+    { id: 'metro', name: 'Windows 8 Метро' }
 ];
 const CUSTOM_FOLDER_DEFAULT = 'Мои темы';
 
@@ -194,7 +245,7 @@ function cleanThemeColors(colors) {
 function resolveCustomTheme(c) {
     const base = themeById(c.base);
     const colors = cleanThemeColors(c.colors);
-    const t = { ...THEME_DEFAULTS, ...base, ...colors, id: c.id, name: c.name || 'Своя тема', cssId: base.id,
+    const t = { ...THEME_DEFAULTS, ...base, ...colors, id: c.id, name: c.name || 'Своя тема', cssId: base.cssId || base.id,
         folder: c.folder || CUSTOM_FOLDER_DEFAULT, custom: true, overrides: colors };
     if (c.patternOff) t.pattern = 'none';
     return t;
@@ -204,7 +255,7 @@ function resolveTheme(id) {
     const c = customThemes.find(x => x.id === id);
     if (c) return resolveCustomTheme(c);
     const b = themeById(id);
-    return { ...THEME_DEFAULTS, ...b, cssId: b.id, folder: b.folder || 'win95', overrides: {} };
+    return { ...THEME_DEFAULTS, ...b, cssId: b.cssId || b.id, folder: b.folder || 'win95', overrides: {} };
 }
 
 // Чуть затемнить цвет (для «нажатой» кнопки)
@@ -244,6 +295,8 @@ function applyResolvedTheme(t, { save = true, preview = false, render = true } =
     const root = document.documentElement;
     root.setAttribute('data-w95', t.cssId || t.id);
     root.setAttribute('data-w95-mode', t.dark === true ? 'dark' : 'light');
+    // вариант оформления внутри стиля (у «Метро»: light, neon, leopard)
+    if (t.variant) root.setAttribute('data-w95-variant', t.variant); else root.removeAttribute('data-w95-variant');
     const flags = new Set(Object.keys(t.overrides || {}).map(k => THEME_COLOR_FLAGS[k]).filter(Boolean));
     [...new Set(Object.values(THEME_COLOR_FLAGS))].forEach(f => {
         if (flags.has(f)) root.setAttribute(f, ''); else root.removeAttribute(f);

@@ -1393,6 +1393,8 @@ function renderMenus() {
         return `<button type="button" data-tab="${id}" class="${id === currentTabId ? 'active' : ''}" onclick="showTab('${id}', this)">` +
             `<span class="material-icons">${it.icon}</span><span class="nav-label">${it.label}</span></button>`;
     }).join('');
+    // Название раздела для огромного заголовка в теме «Метро» (css/metro.css, attr(data-title))
+    MENU_ITEMS.forEach(it => { const tab = document.getElementById(it.id); if (tab) tab.dataset.title = it.label.toLowerCase(); });
     const sidebar = document.getElementById('sidebar-nav');
     const mobile = document.getElementById('mobile-nav');
     if (sidebar) sidebar.innerHTML = navHtml;

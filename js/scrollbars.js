@@ -10,11 +10,12 @@ const W95_SCROLL_SELECTORS = [
     '.sound-slots', '.custom-categories',
     // 3.8: длинные списки прокручиваются внутри своих блоков
     '#subs-list', '#salary-list', '.calc-tape', '.goals-list', '.q-list', '.sound-lib-list', '.icon-cat-list', '.cat-tiles',
-    '.shop-list', '.pr-list', '.notify-log'
+    '.shop-list', '.pr-list', '.notify-log',
+    // 3.10: вся страница приложения — ползунок справа во весь рост экрана
+    '.main-wrapper'
 ].join(', ');
-const SB_ARROW = 14;   // высота кнопки-стрелки
 const SB_INSET = 2;    // отступ от рамки блока
-const SB_MIN_THUMB = 20;
+const SB_MIN_THUMB = 34; // не меньше подушечки пальца
 const sbRegistry = new Map(); // блок → { bar, thumb, ro }
 
 function attachW95Scrollbar(el) {
@@ -23,14 +24,15 @@ function attachW95Scrollbar(el) {
     if (getComputedStyle(parent).position === 'static') parent.style.position = 'relative';
 
     const bar = document.createElement('div');
-    bar.className = 'w95-sb';
+    const isPage = el.classList.contains('main-wrapper');
+    bar.className = 'w95-sb' + (isPage ? ' w95-sb-page' : '');
     bar.setAttribute('aria-hidden', 'true');
     bar.innerHTML = '<div class="w95-sb-btn w95-sb-up"></div><div class="w95-sb-track"><div class="w95-sb-thumb"></div></div><div class="w95-sb-btn w95-sb-down"></div>';
     el.insertAdjacentElement('afterend', bar);
     const thumb = bar.querySelector('.w95-sb-thumb');
     const track = bar.querySelector('.w95-sb-track');
 
-    const state = { bar, thumb, track, raf: 0 };
+    const state = { bar, thumb, track, raf: 0, isPage, up: bar.querySelector('.w95-sb-up') };
     const update = () => {
         state.raf = 0;
         updateW95Scrollbar(el, state);
@@ -92,14 +94,29 @@ function updateW95Scrollbar(el, st) {
     st.bar.style.display = need ? '' : 'none';
     if (!need) return;
 
-    // Положение полосы — у правого края блока, внутри его рамки
-    const top = el.offsetTop + SB_INSET;
-    const height = el.offsetHeight - SB_INSET * 2;
-    st.bar.style.top = top + 'px';
-    st.bar.style.left = (el.offsetLeft + el.offsetWidth - SB_INSET - st.bar.offsetWidth) + 'px';
+    let height;
+    if (st.isPage) {
+        // Страница целиком: полоса закреплена у правого края экрана и не заходит под нижнее меню / панель задач
+        const r = el.getBoundingClientRect();
+        let bottom = Math.min(r.bottom, window.innerHeight);
+        document.querySelectorAll('.mobile-nav, .sidebar').forEach(b => {
+            const br = b.getBoundingClientRect();
+            if (getComputedStyle(b).display !== 'none' && br.height > 0 && br.top > window.innerHeight / 2 && br.width > window.innerWidth / 2) bottom = Math.min(bottom, br.top);
+        });
+        height = Math.max(60, bottom - r.top - SB_INSET * 2);
+        st.bar.style.top = (r.top + SB_INSET) + 'px';
+        st.bar.style.left = (r.right - SB_INSET - st.bar.offsetWidth) + 'px';
+    } else {
+        // Положение полосы — у правого края блока, внутри его рамки
+        height = el.offsetHeight - SB_INSET * 2;
+        st.bar.style.top = (el.offsetTop + SB_INSET) + 'px';
+        st.bar.style.left = (el.offsetLeft + el.offsetWidth - SB_INSET - st.bar.offsetWidth) + 'px';
+    }
     st.bar.style.height = height + 'px';
 
-    const trackH = Math.max(0, height - SB_ARROW * 2);
+    // высота стрелок берётся из темы (в «Метро» их нет)
+    const arrow = st.up.offsetHeight || 0;
+    const trackH = Math.max(0, height - arrow * 2);
     const ratio = el.clientHeight / el.scrollHeight;
     const thumbH = Math.max(SB_MIN_THUMB, Math.round(trackH * ratio));
     const maxScroll = el.scrollHeight - el.clientHeight;

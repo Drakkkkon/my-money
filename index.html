@@ -15,10 +15,13 @@
     <link rel="stylesheet" href="css/vista.css">
     <!-- 3.8: котировки, цели, чек по фото, картинки категорий, кнопки окон у блоков, «Мои звуки» -->
     <link rel="stylesheet" href="css/v38.css">
+    <!-- Тема «Метро» (плитки, огромные заголовки): действует только при html[data-w95="metro"] -->
+    <link rel="stylesheet" href="css/metro.css">
     <!-- Свои темы: цвета из редактора (только при флагах data-c-*) -->
     <link rel="stylesheet" href="css/custom.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <meta name="theme-color" content="#008080">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -747,7 +750,15 @@
                         <h3><span class="material-icons">history</span> История версий</h3>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>3.9.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>3.10.0 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Ползунок прокрутки справа по всей программе: у всей страницы и у всех длинных блоков. Тонкий, но легко ловится пальцем; в каждой теме — в её стиле.</li>
+                                    <li>Новая папка тем «Windows 8 Метро»: плитки вместо меню, огромные тонкие заголовки разделов на полэкрана, плоские окна без рамок, экран блокировки с крупным временем, «поворот» плиток при переходе, свои звуки.</li>
+                                    <li>10 вариантов «Метро»: кобальт, лайм, пурпур, малиновый, изумруд, манго, бирюза, светлая, неон (светящиеся плитки и заголовки) и леопард (пятнистый фон, звуки леопарда). Прежние темы не изменены.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>3.9.0</h4>
                                 <ul>
                                     <li>Уведомления: напоминания о списании подписок (за неделю, 3 дня, день, 3 часа, час или в момент списания) — настраиваются у каждой подписки кнопкой 🔔; каждое утро в 9:00 «Доброе утро» с вашими целями.</li>
                                     <li>В 23:00 Excel и PDF с записями за день сохраняются в выбранную папку (Chrome/Edge на ПК) или в «Загрузки».</li>

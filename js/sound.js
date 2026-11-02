@@ -359,6 +359,19 @@ const SOUND_PACKS = {
             noise(c, { start: 0.1, dur: 1.6, type: 'bandpass', freq: 3200, q: 0.7, gain: 0.015, attack: 0.6 });
         }
     },
+    // «Метро»: короткие чистые «тапы» и мягкие свайпы, как у плиточного интерфейса (своя мелодия, не звуки телефона)
+    metro: {
+        click: c => { tone(c, { freq: 1318.5, dur: 0.028, type: 'triangle', gain: 0.06, attack: 0.001 }); noise(c, { dur: 0.01, type: 'highpass', freq: 5000, gain: 0.035 }); },
+        open: c => { noise(c, { dur: 0.16, type: 'bandpass', freq: 900, endFreq: 3600, q: 1.2, gain: 0.05, attack: 0.02 }); tone(c, { freq: 880, start: 0.06, dur: 0.09, gain: 0.05 }); },
+        close: c => { noise(c, { dur: 0.14, type: 'bandpass', freq: 3200, endFreq: 800, q: 1.2, gain: 0.045, attack: 0.02 }); tone(c, { freq: 659.25, start: 0.04, dur: 0.08, gain: 0.045 }); },
+        menu: c => { tone(c, { freq: 987.77, dur: 0.04, type: 'triangle', gain: 0.06, attack: 0.001 }); tone(c, { freq: 1975.5, start: 0.02, dur: 0.03, gain: 0.02 }); },
+        scroll: c => tone(c, { freq: 2637, dur: 0.01, type: 'triangle', gain: 0.018 }),
+        startup: c => {
+            [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, { freq: f, start: i * 0.11, dur: 0.5, type: 'triangle', gain: 0.06, attack: 0.004 }));
+            pad(c, [261.63, 392, 523.25], { start: 0.42, dur: 1.2, gain: 0.035, type: 'sine', attack: 0.15 });
+            noise(c, { start: 0.38, dur: 0.4, type: 'bandpass', freq: 1200, endFreq: 5200, q: 0.9, gain: 0.025, attack: 0.05 });
+        }
+    },
     // «Классика 1-бит»: простые прямоугольные «пики», как у компьютеров с однобитным звуком (своя мелодия)
     beep: {
         click: c => tone(c, { freq: 1046.5, dur: 0.018, type: 'square', gain: 0.04, attack: 0.001 }),

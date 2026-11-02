@@ -1,0 +1,439 @@
+/* =========================================================================
+   ТЕМА «МЕТРО» — по мотивам плиточного интерфейса мобильной Windows 8
+   Плоские цветные плитки вместо меню, огромные тонкие строчные заголовки разделов (на полэкрана,
+   уходят за край, как в панорамах телефона), чёрный фон, никаких рамок, теней и скруглений.
+   10 вариантов (js/themes.js → METRO_VARIANTS): акцент — --w95-select / --w95-title,
+   особые: html[data-w95-variant="light" | "neon" | "leopard"].
+   Без логотипов, значков и шрифтов Microsoft: шрифт Open Sans с Google Fonts.
+   Каждое правило начинается с html[data-w95="metro"], остальные темы файл не затрагивает.
+   ========================================================================= */
+
+html[data-w95="metro"] body {
+    --m-accent: var(--w95-select);
+    --m-accent-2: var(--w95-title-2);
+    --m-on-accent: #ffffff;
+    --m-line: var(--w95-grid);
+    /* объём Windows 95 превращается в плоские контуры */
+    --w95-raised: inset 0 0 0 2px var(--w95-muted);
+    --w95-pressed: inset 0 0 0 2px var(--m-accent);
+    --w95-sunken: none;
+    --w95-window: none;
+    --w95-face-pressed: var(--m-accent);
+    --m-turn: cubic-bezier(.1, .9, .2, 1);
+    font-family: var(--w95-font-text) !important;
+}
+html[data-w95="metro"] body ::selection { background: var(--m-accent); color: #fff; }
+html[data-w95="metro"] body .app-wrapper * { letter-spacing: 0; }
+
+/* ---------- Окна (карточки): плоские панели без рамок ---------- */
+html[data-w95="metro"] body .card,
+html[data-w95="metro"] body main > .tab > .card,
+html[data-w95="metro"] body .tx-container > .forms,
+html[data-w95="metro"] body .tx-container > .history,
+html[data-w95="metro"] body .export-sheet,
+html[data-w95="metro"] body .theme-folder-panel {
+    background: var(--w95-face) !important;
+    border: none !important; box-shadow: none !important;
+    padding: 4px 14px 16px !important;
+}
+/* Заголовок окна: строчные тонкие буквы, без полосы и иконки */
+html[data-w95="metro"] body .card > h3,
+html[data-w95="metro"] body .export-sheet-head,
+html[data-w95="metro"] body .tf-panel-head {
+    background: transparent !important; border: none !important; box-shadow: none !important;
+    margin: 0 -2px 10px !important; padding: 6px 70px 2px 0 !important; min-height: 40px;
+    font-family: var(--w95-font-text) !important; font-size: 25px !important; font-weight: 300 !important;
+    text-transform: lowercase; letter-spacing: -.3px !important; line-height: 1.15;
+    color: var(--w95-text) !important;
+}
+html[data-w95="metro"] body .card > h3, html[data-w95="metro"] body .card > h3.has-controls {
+    padding-right: 64px !important; overflow: hidden !important; white-space: nowrap; text-overflow: ellipsis; display: block !important;
+}
+@media (max-width: 768px) { html[data-w95="metro"] body .card > h3 { font-size: 22px !important; } }
+html[data-w95="metro"] body .card > h3 *, html[data-w95="metro"] body .export-sheet-head h3,
+html[data-w95="metro"] body .export-sheet-head h3 * { color: var(--w95-text) !important; }
+html[data-w95="metro"] body .export-sheet-head h3 {
+    font-family: var(--w95-font-text) !important; font-size: 25px !important; font-weight: 300 !important; text-transform: lowercase; margin: 0 !important;
+}
+html[data-w95="metro"] body .card > h3 > .material-icons { display: none !important; }
+html[data-w95="metro"] body .card > h3::after, html[data-w95="metro"] body .header-top::after,
+html[data-w95="metro"] body .splash-content::before, html[data-w95="metro"] body .splash-content::after { display: none !important; content: none !important; }
+html[data-w95="metro"] body .card h4 { font-family: var(--w95-font-text) !important; font-weight: 600; text-transform: lowercase; }
+
+/* Кнопки окна «_ □ ×» — тонкие значки без рамок */
+html[data-w95="metro"] body .w95-ctls { right: 0; top: 10px; transform: none; gap: 2px; }
+html[data-w95="metro"] body .w95-ctl {
+    width: 26px !important; height: 26px !important; background: transparent !important; box-shadow: none !important; border: none !important;
+}
+html[data-w95="metro"] body .w95-ctl-close { display: none !important; }
+html[data-w95="metro"] body .w95-ctl::before, html[data-w95="metro"] body .w95-ctl::after { border-color: var(--w95-muted) !important; }
+html[data-w95="metro"] body .w95-ctl-min::after { background: var(--w95-muted) !important; left: 7px; bottom: 7px; width: 12px; height: 2px; }
+html[data-w95="metro"] body .w95-ctl-max::after { left: 6px; top: 6px; width: 14px; height: 13px; border: 2px solid var(--w95-muted) !important; }
+html[data-w95="metro"] body .card.is-maximized .w95-ctl-max::before { display: none; }
+html[data-w95="metro"] body .w95-ctl:active { background: var(--m-accent) !important; }
+html[data-w95="metro"] body .card.is-maximized { background: var(--w95-desktop) !important; }
+
+/* ---------- Огромный заголовок раздела (панорама): «записи», «цели», «цены»… ---------- */
+html[data-w95="metro"] body main > .tab::before {
+    content: attr(data-title);
+    grid-column: 1 / -1; display: block;
+    font-family: var(--w95-font-text); font-weight: 300; text-transform: lowercase;
+    font-size: clamp(76px, 25vw, 190px); line-height: .82; letter-spacing: -.045em;
+    white-space: nowrap; overflow: hidden;
+    margin: 4px 0 6px -.06em; padding-bottom: .08em;
+    color: var(--w95-text); opacity: .95;
+    pointer-events: none;
+}
+html[data-w95="metro"] body main > .tab.tab-enter::before { animation: metroTitleIn .5s var(--m-turn) both; }
+@keyframes metroTitleIn { from { transform: translateX(28%); opacity: 0; } to { transform: none; opacity: .95; } }
+/* Переход между разделами — «поворот» плиток */
+html[data-w95="metro"] body main > .tab.tab-enter > * { animation: metroTurn .42s var(--m-turn) both; transform-origin: left center; }
+html[data-w95="metro"] body main > .tab.tab-enter > *:nth-child(2) { animation-delay: .03s; }
+html[data-w95="metro"] body main > .tab.tab-enter > *:nth-child(3) { animation-delay: .06s; }
+html[data-w95="metro"] body main > .tab.tab-enter > *:nth-child(n+4) { animation-delay: .09s; }
+@keyframes metroTurn { from { transform: perspective(900px) rotateY(-70deg) translateX(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+    html[data-w95="metro"] body main > .tab.tab-enter > *, html[data-w95="metro"] body main > .tab.tab-enter::before { animation: none !important; }
+}
+
+/* ---------- Фон ---------- */
+html[data-w95="metro"] body .main-wrapper { background-color: var(--w95-desktop) !important; background-image: var(--w95-pattern) !important; }
+html[data-w95="metro"] body main { padding-top: 6px !important; }
+
+/* ---------- Шапка: название приложения мелкими заглавными, баланс — большая плитка ---------- */
+html[data-w95="metro"] body header, html[data-w95="metro"] body header[class] {
+    background: transparent !important; box-shadow: none !important; border: none !important; margin: 8px 12px 0 !important; padding: 0 !important;
+}
+html[data-w95="metro"] body .header-top {
+    background: transparent !important; margin: 0 0 6px !important; padding: 2px 0 !important; min-height: 0;
+}
+html[data-w95="metro"] body .header-top .app-logo { display: none; }
+html[data-w95="metro"] body .header-top .mobile-title {
+    font-family: var(--w95-font-text) !important; font-size: 13px !important; font-weight: 600 !important;
+    text-transform: uppercase; letter-spacing: 1px !important; color: var(--w95-text) !important;
+}
+html[data-w95="metro"] body .balance-card { background: transparent !important; }
+html[data-w95="metro"] body .balance-grid { gap: 6px !important; }
+html[data-w95="metro"] body .balance-main, html[data-w95="metro"] body .balance-info {
+    background: var(--m-accent) !important; box-shadow: none !important; border: none !important; padding: 10px 12px !important;
+}
+html[data-w95="metro"] body .balance-info { background: var(--w95-face) !important; }
+html[data-w95="metro"] body .balance-main *, html[data-w95="metro"] body .balance-main .balance-label { color: var(--m-on-accent) !important; }
+html[data-w95="metro"] body .balance-card h3 { font-family: var(--w95-font-text) !important; font-weight: 300 !important; }
+html[data-w95="metro"] body #balance { font-size: 44px !important; letter-spacing: -1px; line-height: 1.05; }
+html[data-w95="metro"] body #hdr-time { font-size: 40px !important; letter-spacing: -1px; }
+html[data-w95="metro"] body .balance-card .balance-label { text-transform: lowercase; font-size: 14px !important; }
+html[data-w95="metro"] body .balance-main .limits, html[data-w95="metro"] body .balance-info .info-lines { border-top: 1px solid rgba(255, 255, 255, .35) !important; }
+html[data-w95="metro"] body .balance-info .info-lines { border-top-color: var(--m-line) !important; }
+html[data-w95="metro"] body .hdr-edit-btn { background: transparent !important; box-shadow: none !important; }
+
+/* ---------- Плитки меню ---------- */
+html[data-w95="metro"] body .sidebar {
+    background: var(--w95-desktop) !important; box-shadow: none !important; border: none !important; padding: 10px 8px !important;
+}
+html[data-w95="metro"] body .sidebar-header { background: transparent !important; padding: 4px 4px 10px !important; }
+html[data-w95="metro"] body .sidebar-header .app-logo { display: none; }
+html[data-w95="metro"] body .sidebar-header h2 {
+    font-family: var(--w95-font-text) !important; font-size: 13px !important; font-weight: 600 !important; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--w95-text) !important;
+}
+html[data-w95="metro"] body .sidebar-nav {
+    display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: max-content;
+    align-content: start !important; gap: 6px !important; padding: 0 !important; flex: 0 0 auto !important;
+}
+html[data-w95="metro"] body .sidebar-nav button,
+html[data-w95="metro"] body .mobile-nav button {
+    position: relative; display: flex !important; flex-direction: column !important; align-items: flex-start !important; justify-content: space-between !important;
+    background: var(--m-accent) !important; box-shadow: none !important; border: none !important;
+    font-family: var(--w95-font-text) !important; font-weight: 400 !important; text-transform: lowercase;
+    transition: transform .12s ease-out, filter .12s !important;
+}
+html[data-w95="metro"] body .sidebar-nav button { aspect-ratio: 1 / 1; height: auto !important; padding: 8px !important; font-size: 13px !important; }
+html[data-w95="metro"] body .sidebar-nav button .material-icons { font-size: 30px !important; align-self: center; margin-top: 10%; }
+html[data-w95="metro"] body .sidebar-nav button, html[data-w95="metro"] body .sidebar-nav button *,
+html[data-w95="metro"] body .mobile-nav button, html[data-w95="metro"] body .mobile-nav button * { color: var(--m-on-accent) !important; }
+/* «живые» плитки разной яркости, как на стартовом экране */
+html[data-w95="metro"] body :is(.sidebar-nav, .mobile-nav) button:nth-child(3n+2) { filter: brightness(.82); }
+html[data-w95="metro"] body :is(.sidebar-nav, .mobile-nav) button:nth-child(4n) { filter: brightness(1.15) saturate(.9); }
+html[data-w95="metro"] body :is(.sidebar-nav, .mobile-nav) button:nth-child(5n+3) { filter: brightness(.68); }
+html[data-w95="metro"] body :is(.sidebar-nav, .mobile-nav) button.active { filter: none; outline: 3px solid var(--w95-text); outline-offset: -3px; }
+html[data-w95="metro"] body :is(.sidebar-nav, .mobile-nav) button:active { transform: scale(.94) perspective(400px) rotateX(6deg); }
+html[data-w95="metro"] body .mobile-nav {
+    background: var(--w95-desktop) !important; box-shadow: none !important; border: none !important; gap: 4px !important;
+}
+html[data-w95="metro"] body .mobile-nav button { padding: 4px 5px !important; font-size: 10.5px !important; }
+html[data-w95="metro"] body .mobile-nav button .material-icons { font-size: 22px !important; align-self: center; }
+html[data-w95="metro"] body .mobile-nav button .nav-label { align-self: flex-start; line-height: 1; overflow: hidden; white-space: nowrap; max-width: 100%; }
+
+/* ---------- Кнопки: прямоугольник с контуром, нажатие — заливка акцентом ---------- */
+html[data-w95="metro"] body .btn-primary, html[data-w95="metro"] body .btn-secondary,
+html[data-w95="metro"] body .btn-income, html[data-w95="metro"] body .btn-expense,
+html[data-w95="metro"] body .export-btn, html[data-w95="metro"] body .pay-btn,
+html[data-w95="metro"] body label.btn-secondary, html[data-w95="metro"] body #settings button:not(.menu-row-btn),
+html[data-w95="metro"] body #reports .export-btn, html[data-w95="metro"] body #add-btns .btn-income,
+html[data-w95="metro"] body #add-btns .btn-expense, html[data-w95="metro"] body #salary .btn-income,
+html[data-w95="metro"] body .icon-btn, html[data-w95="metro"] body .tx-actions button,
+html[data-w95="metro"] body .sub-actions button, html[data-w95="metro"] body .export-sheet-actions > button,
+html[data-w95="metro"] body .ob-keypad button, html[data-w95="metro"] body .pin-btn {
+    background: transparent !important; color: var(--w95-text) !important;
+    border: 2px solid var(--w95-text) !important; box-shadow: none !important;
+    font-family: var(--w95-font-text) !important; font-weight: 600 !important; text-transform: lowercase;
+    transition: transform .1s ease-out !important;
+}
+html[data-w95="metro"] body :is(.btn-primary, .btn-secondary, .export-btn, label.btn-secondary, .icon-btn, .tx-actions button, .sub-actions button, .pay-btn, .ob-keypad button, .pin-btn) * { color: var(--w95-text) !important; }
+html[data-w95="metro"] body .btn-primary, html[data-w95="metro"] body #settings button.btn-primary,
+html[data-w95="metro"] body .export-sheet-actions > .btn-primary {
+    background: var(--m-accent) !important; border-color: var(--m-accent) !important; color: #fff !important;
+}
+html[data-w95="metro"] body .btn-primary *, html[data-w95="metro"] body #settings button.btn-primary * { color: #fff !important; }
+html[data-w95="metro"] body .btn-income, html[data-w95="metro"] body #add-btns .btn-income, html[data-w95="metro"] body #salary .btn-income {
+    background: var(--w95-income) !important; border-color: var(--w95-income) !important;
+}
+html[data-w95="metro"] body .btn-expense, html[data-w95="metro"] body #add-btns .btn-expense {
+    background: var(--w95-expense) !important; border-color: var(--w95-expense) !important;
+}
+html[data-w95="metro"] body :is(.btn-income, .btn-expense, #add-btns .btn-income, #add-btns .btn-expense, #salary .btn-income),
+html[data-w95="metro"] body :is(.btn-income, .btn-expense) * { color: #fff !important; }
+html[data-w95="metro"] body :is(.btn-primary, .btn-secondary, .btn-income, .btn-expense, .export-btn, .pay-btn, label.btn-secondary, .icon-btn, .tx-actions button, .sub-actions button, .export-sheet-actions > button, .ob-keypad button, .pin-btn, #settings button:not(.menu-row-btn)):active {
+    background: var(--m-accent) !important; border-color: var(--m-accent) !important; transform: scale(.97); padding: inherit;
+}
+html[data-w95="metro"] body :is(.btn-secondary, .export-btn, label.btn-secondary, .icon-btn, .tx-actions button, .sub-actions button, .ob-keypad button, .pin-btn):active * { color: #fff !important; }
+html[data-w95="metro"] body .icon-btn.selected { background: var(--m-accent) !important; border-color: var(--m-accent) !important; }
+html[data-w95="metro"] body button:focus-visible, html[data-w95="metro"] body label.btn-secondary:focus-visible { outline: 2px dashed var(--m-accent) !important; outline-offset: 2px !important; }
+html[data-w95="metro"] body .ob-keypad button { font-size: 22px !important; font-weight: 300 !important; border-width: 2px !important; }
+@media (pointer: coarse) {
+    html[data-w95="metro"] body :is(.btn-primary, .btn-secondary, .export-btn, .icon-btn, #add-btns .btn-income, #add-btns .btn-expense) { min-height: 44px; }
+}
+
+/* ---------- Поля ввода ---------- */
+html[data-w95="metro"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-w95="metro"] body textarea, html[data-w95="metro"] body select {
+    background-color: var(--w95-field) !important; color: var(--w95-text) !important;
+    border: 2px solid var(--w95-muted) !important; box-shadow: none !important;
+    font-family: var(--w95-font-text) !important; outline: none !important;
+}
+html[data-w95="metro"] body input:focus, html[data-w95="metro"] body textarea:focus, html[data-w95="metro"] body select:focus {
+    background-color: #ffffff !important; color: #000000 !important; border-color: var(--m-accent) !important;
+}
+html[data-w95="metro"] body input::placeholder, html[data-w95="metro"] body textarea::placeholder { color: var(--w95-muted) !important; font-style: normal; }
+html[data-w95="metro"] body select {
+    background-image: linear-gradient(45deg, transparent 50%, var(--w95-text) 50%), linear-gradient(135deg, var(--w95-text) 50%, transparent 50%) !important;
+    background-position: calc(100% - 17px) 55%, calc(100% - 11px) 55% !important;
+    background-size: 6px 6px, 6px 6px !important; background-repeat: no-repeat !important;
+}
+html[data-w95="metro"] body select:focus {
+    background-image: linear-gradient(45deg, transparent 50%, #000 50%), linear-gradient(135deg, #000 50%, transparent 50%) !important;
+}
+html[data-w95="metro"] body select option { background: var(--w95-face); color: var(--w95-text); }
+html[data-w95="metro"] body input[type="checkbox"], html[data-w95="metro"] body input[type="radio"] {
+    -webkit-appearance: none; appearance: none; width: 22px !important; height: 22px; padding: 0 !important; margin: 0 6px 0 0 !important;
+    position: relative; flex: 0 0 auto; vertical-align: middle;
+    border: 2px solid var(--w95-text) !important; background: transparent !important; box-shadow: none !important;
+}
+html[data-w95="metro"] body input[type="radio"] { border-radius: 50% !important; }
+html[data-w95="metro"] body input[type="checkbox"]:checked { background: var(--m-accent) !important; border-color: var(--m-accent) !important; }
+html[data-w95="metro"] body input[type="checkbox"]:checked::after {
+    content: ''; position: absolute; left: 6px; top: 1px; width: 6px; height: 12px;
+    border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg);
+}
+html[data-w95="metro"] body input[type="radio"]:checked::after { content: ''; position: absolute; inset: 4px; border-radius: 50% !important; background: var(--m-accent); }
+html[data-w95="metro"] body input[type="range"] {
+    -webkit-appearance: none; appearance: none; height: 6px; padding: 0 !important; border: none !important; box-shadow: none !important;
+    background: linear-gradient(var(--m-accent), var(--m-accent)) 0 / var(--range-fill, 0%) 100% no-repeat, var(--m-line) !important;
+}
+html[data-w95="metro"] body input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 26px; background: var(--w95-text); border: none; }
+html[data-w95="metro"] body input[type="range"]::-moz-range-thumb { width: 12px; height: 26px; background: var(--w95-text); border: none; border-radius: 0; }
+
+/* ---------- Списки и панели ---------- */
+html[data-w95="metro"] body #tx-list, html[data-w95="metro"] body #subs-list, html[data-w95="metro"] body #salary-list,
+html[data-w95="metro"] body .table-scroll, html[data-w95="metro"] body .export-sheet-table, html[data-w95="metro"] body .chart-box,
+html[data-w95="metro"] body .cat-list, html[data-w95="metro"] body .changelog, html[data-w95="metro"] body .ob-list,
+html[data-w95="metro"] body .custom-categories, html[data-w95="metro"] body .sound-slots, html[data-w95="metro"] body .tx-keypad-box,
+html[data-w95="metro"] body .calc-tape, html[data-w95="metro"] body .import-preview, html[data-w95="metro"] body .q-list,
+html[data-w95="metro"] body .goals-list, html[data-w95="metro"] body .shop-list, html[data-w95="metro"] body .pr-list,
+html[data-w95="metro"] body .icon-cat-list, html[data-w95="metro"] body .cat-tiles, html[data-w95="metro"] body .sound-lib-list,
+html[data-w95="metro"] body .notify-log, html[data-w95="metro"] body .receipt-items, html[data-w95="metro"] body .quote-results {
+    background: transparent !important; box-shadow: none !important; border: none !important;
+}
+html[data-w95="metro"] body .date-group-header {
+    background: transparent !important; box-shadow: none !important; border: none !important; padding: 10px 0 2px !important;
+}
+html[data-w95="metro"] body .date-group-header h4 {
+    font-family: var(--w95-font-text) !important; font-size: 20px !important; font-weight: 300 !important; color: var(--m-accent) !important;
+}
+html[data-w95="metro"] body .tx-item, html[data-w95="metro"] body .sub-item {
+    background: transparent !important; border: none !important; border-left: 4px solid var(--m-line) !important;
+    margin: 0 0 6px !important; padding: 6px 4px 6px 10px !important;
+}
+html[data-w95="metro"] body .tx-item.income { border-left-color: var(--w95-income) !important; }
+html[data-w95="metro"] body .tx-item.expense, html[data-w95="metro"] body #subs-list .sub-item { border-left-color: var(--w95-expense) !important; }
+html[data-w95="metro"] body .tx-item:active, html[data-w95="metro"] body .sub-item:active { background: var(--w95-hover) !important; }
+html[data-w95="metro"] body .tx-info strong { font-size: 17px; font-weight: 400; }
+html[data-w95="metro"] body .tx-amount { font-family: var(--w95-font-text) !important; font-size: 20px !important; font-weight: 300 !important; }
+html[data-w95="metro"] body .tx-actions button { width: 38px; height: 38px; min-height: 0 !important; padding: 0 !important; border-radius: 50% !important; }
+html[data-w95="metro"] body .tx-actions button .material-icons { color: var(--w95-text) !important; }
+
+/* Плитки: показатели, итоги, категории, ключи калькулятора */
+html[data-w95="metro"] body .kpi { background: var(--w95-field) !important; border: none !important; box-shadow: none !important; padding: 10px !important; }
+html[data-w95="metro"] body .kpi-label { text-transform: lowercase; color: var(--w95-muted) !important; }
+html[data-w95="metro"] body .kpi-value { font-family: var(--w95-font-text) !important; font-weight: 300 !important; font-size: 22px; }
+html[data-w95="metro"] body main > .tab > .card.stats-summary { background: var(--m-accent) !important; }
+html[data-w95="metro"] body .stats-summary *, html[data-w95="metro"] body .stats-summary .stat-value { color: #fff !important; }
+html[data-w95="metro"] body .stats-summary .stat-value { background: transparent !important; box-shadow: none !important; font-family: var(--w95-font-text) !important; font-weight: 300; font-size: 48px !important; padding: 0 !important; }
+html[data-w95="metro"] body .cat-tile, html[data-w95="metro"] body .emoji-cell, html[data-w95="metro"] body .icon-cat-btn,
+html[data-w95="metro"] body .q-act, html[data-w95="metro"] body .shop-del, html[data-w95="metro"] body .seg-btn, html[data-w95="metro"] body #settings .seg-btn {
+    background: var(--w95-field) !important; box-shadow: none !important; border: none !important; color: var(--w95-text) !important;
+}
+html[data-w95="metro"] body .cat-tile.is-selected, html[data-w95="metro"] body .seg-btn.is-on, html[data-w95="metro"] body #settings .seg-btn.is-on,
+html[data-w95="metro"] body .q-act.is-on, html[data-w95="metro"] body .emoji-cell.is-on { background: var(--m-accent) !important; outline: none !important; }
+html[data-w95="metro"] body :is(.cat-tile.is-selected, .seg-btn.is-on, .q-act.is-on) * { color: #fff !important; }
+html[data-w95="metro"] body .cat-tile-name { text-transform: lowercase; }
+html[data-w95="metro"] body .calc-display { background: transparent !important; box-shadow: none !important; border-bottom: 2px solid var(--m-line); }
+html[data-w95="metro"] body .calc-value { font-family: var(--w95-font-text) !important; font-weight: 300 !important; font-size: 48px !important; }
+html[data-w95="metro"] body .calc-keys .calc-op, html[data-w95="metro"] body .calc-keys .calc-eq { background: var(--m-accent) !important; border-color: var(--m-accent) !important; }
+html[data-w95="metro"] body .calc-keys .calc-op, html[data-w95="metro"] body .calc-keys .calc-eq, html[data-w95="metro"] body .calc-keys .calc-op * { color: #fff !important; }
+
+/* Таблицы */
+html[data-w95="metro"] body .analytics-table th, html[data-w95="metro"] body .export-sheet .export-table th {
+    background: var(--m-accent) !important; color: #fff !important; box-shadow: none !important; border: none !important;
+    font-family: var(--w95-font-text) !important; font-weight: 600; text-transform: lowercase;
+}
+html[data-w95="metro"] body .analytics-table td { background: transparent !important; border: none !important; border-bottom: 1px solid var(--m-line) !important; }
+
+/* Цели, котировки, покупки */
+html[data-w95="metro"] body .goal-item { background: var(--w95-field) !important; box-shadow: none !important; }
+html[data-w95="metro"] body .goal-item.is-top { outline: none; border-left: 6px solid var(--m-accent); }
+html[data-w95="metro"] body .goal-rank { background: var(--m-accent) !important; }
+html[data-w95="metro"] body .goal-progress { background: var(--m-line) !important; box-shadow: none !important; height: 6px !important; padding: 0 !important; }
+html[data-w95="metro"] body .goal-bar { background: var(--m-accent) !important; }
+html[data-w95="metro"] body .goal-dollar { border-radius: 50% !important; box-shadow: none !important; border: 2px solid #fff !important; }
+html[data-w95="metro"] body .q-row, html[data-w95="metro"] body .shop-item, html[data-w95="metro"] body .pr-row,
+html[data-w95="metro"] body .sound-slot, html[data-w95="metro"] body .sound-lib-item { border-bottom: 1px solid var(--m-line) !important; }
+html[data-w95="metro"] body .q-badge { border-radius: 0 !important; background: var(--m-accent) !important; box-shadow: none; }
+html[data-w95="metro"] body .goal-img, html[data-w95="metro"] body .goal-draft-img { box-shadow: none !important; }
+
+/* Настройки */
+html[data-w95="metro"] body .menu-row { background: var(--w95-field) !important; box-shadow: none !important; }
+html[data-w95="metro"] body .menu-row-icon { color: var(--m-accent) !important; }
+html[data-w95="metro"] body .cl-version { border-left: 3px solid var(--m-accent) !important; }
+html[data-w95="metro"] body .app-wrapper .cl-tag { background: var(--m-accent) !important; color: #fff !important; }
+html[data-w95="metro"] body .cat-chip { background: var(--w95-field) !important; box-shadow: none !important; }
+html[data-w95="metro"] body .theme-swatch { background: var(--w95-field) !important; border: none !important; box-shadow: none !important; }
+html[data-w95="metro"] body .theme-swatch.is-active { outline: 3px solid var(--m-accent) !important; outline-offset: -3px; }
+html[data-w95="metro"] body .theme-swatch-name { color: var(--w95-text) !important; font-family: var(--w95-font-text) !important; text-transform: lowercase; }
+html[data-w95="metro"] body .theme-swatch-metro .theme-swatch-win { box-shadow: none !important; }
+html[data-w95="metro"] body .theme-swatch-metro .theme-swatch-title { height: 8px !important; }
+
+/* Папки тем — плоские плитки */
+html[data-w95="metro"] body #settings #theme-picker .theme-folder {
+    background: var(--w95-field) !important; box-shadow: none !important; border: none !important;
+    font-family: var(--w95-font-text) !important; text-transform: lowercase;
+}
+html[data-w95="metro"] body #settings #theme-picker .theme-folder.is-open { background: var(--m-accent) !important; }
+html[data-w95="metro"] body #settings #theme-picker .theme-folder.is-open * { color: #fff !important; }
+html[data-w95="metro"] body #settings #theme-picker .theme-folder.is-current { outline: 2px solid var(--m-accent); outline-offset: -2px; }
+html[data-w95="metro"] body .tf-back, html[data-w95="metro"] body .tf-back::before, html[data-w95="metro"] body .tf-front {
+    background: var(--m-accent) !important; border: none !important; box-shadow: none !important;
+}
+html[data-w95="metro"] body .tf-front { filter: brightness(1.2); }
+html[data-w95="metro"] body .tf-paper { border: none !important; }
+html[data-w95="metro"] body .tf-panel-close { background: transparent !important; border: 2px solid var(--w95-text) !important; border-radius: 50% !important; box-shadow: none !important; }
+
+/* Диалоги, подсказки, выпадающий список */
+html[data-w95="metro"] body .export-sheet-overlay { background: rgba(0, 0, 0, .72) !important; }
+html[data-w95="metro"] body .export-sheet { border-top: 4px solid var(--m-accent) !important; }
+html[data-w95="metro"] body .export-sheet-close { background: transparent !important; border: 2px solid var(--w95-text) !important; border-radius: 50% !important; box-shadow: none !important; width: 36px !important; height: 36px !important; min-height: 0 !important; padding: 0 !important; }
+html[data-w95="metro"] body .custom-dropdown { background: var(--w95-face) !important; border: 2px solid var(--m-accent) !important; box-shadow: none !important; }
+html[data-w95="metro"] body .dropdown-item:hover { background: var(--m-accent) !important; color: #fff !important; }
+html[data-w95="metro"] body .app-toast { background: var(--m-accent) !important; color: #fff !important; border: none !important; box-shadow: none !important; font-family: var(--w95-font-text) !important; }
+html[data-w95="metro"] body .fab-sync {
+    border-radius: 50% !important; background: var(--w95-desktop) !important; border: 2px solid var(--w95-text) !important; box-shadow: none !important;
+}
+html[data-w95="metro"] body .fab-sync .material-icons { color: var(--w95-text) !important; }
+html[data-w95="metro"] body .fab-sync:active { background: var(--m-accent) !important; border-color: var(--m-accent) !important; }
+
+/* ---------- Заставка — экран блокировки: огромное тонкое время слева внизу ---------- */
+html[data-w95="metro"] body .splash-screen { background-color: var(--m-accent) !important; background-image: var(--w95-pattern) !important; justify-content: space-between !important; }
+html[data-w95="metro"] body .splash-screen * { color: #fff !important; }
+html[data-w95="metro"] body .splash-content { background: transparent !important; box-shadow: none !important; text-align: left !important; padding: 0 22px !important; max-width: none; }
+html[data-w95="metro"] body #splash-greeting { font-family: var(--w95-font-text) !important; font-weight: 300 !important; font-size: 30px !important; text-transform: lowercase; }
+html[data-w95="metro"] body #splash-weather { background: transparent !important; box-shadow: none !important; padding: 0 !important; }
+html[data-w95="metro"] body .splash-center { margin-top: 18vh !important; }
+html[data-w95="metro"] body #splash-time {
+    background: transparent !important; box-shadow: none !important; padding: 0 !important; min-width: 0; color: #fff !important;
+    font-family: var(--w95-font-text) !important; font-weight: 300 !important; font-size: clamp(96px, 30vw, 160px) !important; line-height: .9; letter-spacing: -4px !important;
+}
+html[data-w95="metro"] body #splash-date { font-size: 24px !important; font-weight: 300; text-transform: lowercase; }
+html[data-w95="metro"] body .splash-quotes { justify-content: flex-start; }
+html[data-w95="metro"] body .splash-quote { background: rgba(0, 0, 0, .25) !important; box-shadow: none !important; }
+html[data-w95="metro"] body .splash-quote .q-change { color: #fff !important; }
+html[data-w95="metro"] body .slider-container { background: rgba(0, 0, 0, .3) !important; box-shadow: none !important; border: none !important; }
+html[data-w95="metro"] body .slider-thumb { background: #fff !important; box-shadow: none !important; border: none !important; }
+html[data-w95="metro"] body .slider-thumb .material-icons { color: var(--m-accent) !important; }
+html[data-w95="metro"] body .slider-text { font-family: var(--w95-font-text) !important; text-transform: lowercase; }
+html[data-w95="metro"] body .pin-screen { background: var(--w95-desktop) !important; }
+html[data-w95="metro"] body .pin-screen h2 { font-family: var(--w95-font-text) !important; font-weight: 300 !important; font-size: 30px !important; text-transform: lowercase; color: var(--w95-text) !important; }
+html[data-w95="metro"] body .pin-btn { font-size: 30px !important; font-weight: 300 !important; }
+html[data-w95="metro"] body .pin-dots .dot { background: transparent !important; border: 2px solid var(--w95-text) !important; box-shadow: none !important; }
+html[data-w95="metro"] body .pin-dots .dot.filled { background: var(--m-accent) !important; border-color: var(--m-accent) !important; }
+
+/* ---------- Ползунок прокрутки: тонкая плоская полоса без стрелок, ползунок цвета акцента ---------- */
+html[data-w95="metro"] body .w95-sb { width: 10px !important; }
+html[data-w95="metro"] body .w95-sb-btn { display: none !important; }
+html[data-w95="metro"] body .w95-sb-track { background: rgba(127, 127, 127, .18) !important; background-image: none !important; }
+html[data-w95="metro"] body .w95-sb-thumb { background: var(--m-accent) !important; box-shadow: none !important; left: 2px !important; right: 2px !important; transition: left .12s, right .12s; }
+html[data-w95="metro"] body .w95-sb-thumb.is-dragging, html[data-w95="metro"] body .w95-sb:hover .w95-sb-thumb { left: 0 !important; right: 0 !important; }
+html[data-w95="metro"] body .w95-has-sb.w95-sb-active { padding-right: 14px !important; }
+
+/* ---------- ПК: сайдбар-плитки слева, заголовок раздела поменьше ---------- */
+@media (min-width: 769px) {
+    html[data-w95="metro"] body .sidebar { width: 236px !important; }
+    html[data-w95="metro"] body main > .tab::before { font-size: clamp(90px, 9.5vw, 150px); }
+}
+@media (max-width: 768px) {
+    html[data-w95="metro"] body header, html[data-w95="metro"] body header[class] { margin: 6px 10px 0 !important; }
+    html[data-w95="metro"] body #balance { font-size: clamp(22px, 7.5vw, 34px) !important; overflow-wrap: anywhere; }
+    html[data-w95="metro"] body #hdr-time { font-size: 30px !important; }
+    html[data-w95="metro"] body main { padding-left: 10px !important; padding-right: 10px !important; }
+}
+
+/* =================== Варианты =================== */
+/* Светлая: белый фон, чёрный текст */
+html[data-w95="metro"][data-w95-variant="light"] body .balance-main .limits { border-top-color: rgba(255, 255, 255, .5) !important; }
+html[data-w95="metro"][data-w95-variant="light"] body .fab-sync { background: #fff !important; }
+
+/* Неон: светящиеся контуры и заголовки, акцент фиолетовый с бирюзой */
+html[data-w95="metro"][data-w95-variant="neon"] body main > .tab::before {
+    color: #f2ecff; text-shadow: 0 0 8px var(--m-accent), 0 0 22px var(--m-accent), 0 0 42px var(--m-accent-2);
+}
+html[data-w95="metro"][data-w95-variant="neon"] body .card > h3 { text-shadow: 0 0 6px var(--m-accent-2); }
+html[data-w95="metro"][data-w95-variant="neon"] body .card, html[data-w95="metro"][data-w95-variant="neon"] body main > .tab > .card,
+html[data-w95="metro"][data-w95-variant="neon"] body .tx-container > .forms, html[data-w95="metro"][data-w95-variant="neon"] body .tx-container > .history {
+    box-shadow: inset 0 0 0 1px rgba(177, 60, 255, .55), 0 0 14px rgba(177, 60, 255, .22) !important;
+}
+html[data-w95="metro"][data-w95-variant="neon"] body :is(.sidebar-nav, .mobile-nav) button {
+    background: linear-gradient(135deg, var(--m-accent), #4a1b7a) !important; box-shadow: 0 0 10px rgba(177, 60, 255, .45) !important;
+}
+html[data-w95="metro"][data-w95-variant="neon"] body :is(.sidebar-nav, .mobile-nav) button:nth-child(2n) {
+    background: linear-gradient(135deg, var(--m-accent-2), #08525c) !important; box-shadow: 0 0 10px rgba(0, 229, 255, .4) !important; filter: none;
+}
+html[data-w95="metro"][data-w95-variant="neon"] body :is(.sidebar-nav, .mobile-nav) button.active { outline-color: var(--m-accent-2); }
+html[data-w95="metro"][data-w95-variant="neon"] body .balance-main { background: linear-gradient(135deg, var(--m-accent), #3a1066) !important; box-shadow: 0 0 18px rgba(177, 60, 255, .5) !important; }
+html[data-w95="metro"][data-w95-variant="neon"] body .btn-primary { box-shadow: 0 0 12px rgba(177, 60, 255, .6) !important; }
+html[data-w95="metro"][data-w95-variant="neon"] body .w95-sb-thumb { box-shadow: 0 0 8px var(--m-accent) !important; }
+html[data-w95="metro"][data-w95-variant="neon"] body .splash-screen { background-color: #05010d !important; }
+html[data-w95="metro"][data-w95-variant="neon"] body #splash-time { text-shadow: 0 0 10px var(--m-accent), 0 0 30px var(--m-accent-2); }
+
+/* Леопард: пятнистый фон, янтарные плитки, плитки меню с пятнами */
+html[data-w95="metro"][data-w95-variant="leopard"] body .main-wrapper,
+html[data-w95="metro"][data-w95-variant="leopard"] body .sidebar,
+html[data-w95="metro"][data-w95-variant="leopard"] body .mobile-nav { background-color: #c8913f !important; background-image: var(--w95-pattern) !important; background-size: var(--w95-pattern-size) !important; }
+html[data-w95="metro"][data-w95-variant="leopard"] body main > .tab::before { color: #fff6e6; text-shadow: 0 2px 0 #2b1a0b, 0 0 18px rgba(43, 26, 11, .8); }
+html[data-w95="metro"][data-w95-variant="leopard"] body .header-top .mobile-title,
+html[data-w95="metro"][data-w95-variant="leopard"] body .sidebar-header h2 { color: #fff6e6 !important; text-shadow: 0 1px 2px #2b1a0b; }
+html[data-w95="metro"][data-w95-variant="leopard"] body .card, html[data-w95="metro"][data-w95-variant="leopard"] body main > .tab > .card,
+html[data-w95="metro"][data-w95-variant="leopard"] body .tx-container > .forms, html[data-w95="metro"][data-w95-variant="leopard"] body .tx-container > .history { background: rgba(30, 19, 9, .93) !important; }
+html[data-w95="metro"][data-w95-variant="leopard"] body :is(.sidebar-nav, .mobile-nav) button { box-shadow: 0 2px 0 rgba(43, 26, 11, .6) !important; }
+html[data-w95="metro"][data-w95-variant="leopard"] body :is(.sidebar-nav, .mobile-nav) button:nth-child(3n) { background: #3d2410 !important; filter: none; }
+html[data-w95="metro"][data-w95-variant="leopard"] body .splash-screen { background-color: #c8913f !important; }
+html[data-w95="metro"][data-w95-variant="leopard"] body .splash-screen * { text-shadow: 0 2px 4px #2b1a0b; }
