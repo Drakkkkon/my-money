@@ -501,6 +501,13 @@ async function runCloudSync({ manual = false } = {}) {
             if (e.code === 'auth') throw e;
             console.warn('Свои звуки: синхронизация файлов не удалась', e);
         }
+        // Фото чеков: «My Money/Чеки/год/месяц/день» (js/receipt.js)
+        try {
+            if (typeof syncReceiptPhotos === 'function') await syncReceiptPhotos();
+        } catch (e) {
+            if (e.code === 'auth') throw e;
+            console.warn('Фото чеков: загрузка на Диск не удалась', e);
+        }
         localStorage.setItem(CLOUD_KEYS.lastSync, String(Date.now()));
         setCloudStatus('ok');
         return true;

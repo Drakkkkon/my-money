@@ -1,4 +1,15 @@
-My Money v3.11.0 — сайт
+My Money v4.0.0 — сайт
+
+Что нового в 4.0.0:
+- «Стена» (js/wall.js): булавка в заголовке любого блока переносит его в раздел wall; раскладка uiPrefs.wall
+  [{id, w 1–4, h px|0}] синхронизируется. У блоков без id постоянные id «card-<раздел>-<номер>» (js/layout.js).
+- Каталог OldBook.kz (js/obcatalog.js): поиск /shop/catalog?q=<номер или текст>, страница /shop/products/<id>
+  через r.jina.ai; корешок — фото с соотношением сторон ≥ 2,2; Ozon и Wildberries — ссылки на поиск
+  (сами площадки блокируют запросы со сторонних сайтов); «Найти в Telegram» — заглушка.
+- Голосовой ввод (js/voice.js): Web Speech API, ru-RU; сумма/категория/тип из фразы.
+- Фото чеков (js/receipt.js): IndexedDB mymoney-receipts → Google Диск «My Money/Чеки/ГГГГ/ММ/ДД», tx.receiptPhoto.
+- «Старый слог» для ru-old (js/i18n.js → toOldStyle).
+- css/v4.css; service worker my-money-v13.
 
 Что нового в 3.11.0:
 - Языки (js/i18n.js + js/lang/en|kk|fr|de.js): перевод накладывается на страницу (тексты, placeholder/title/aria-label,

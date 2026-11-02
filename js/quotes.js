@@ -217,6 +217,7 @@ function renderQuotesTab() {
     const hiddenBtn = document.getElementById('quotes-show-hidden');
     if (hiddenBtn) hiddenBtn.style.display = uiPrefs.quotes.hidden.length ? '' : 'none';
     if (typeof enhanceCards === 'function') enhanceCards(box);
+    if (typeof applyWall === 'function') applyWall(); // окна котировок, вынесенные на «Стену», перерисованы заново
 }
 
 function renderQuotesStatus() {

@@ -39,6 +39,9 @@ function normalizeUiPrefs(p) {
         notify: normalizeNotifyPrefs(obj(src.notify, {})),
         bank: normalizeBankPrefs(obj(src.bank, {})),
         fonts: obj(src.fonts, {}),
+        // «Стена» (js/wall.js): [{ id блока, w — ширина в колонках 1–4, h — высота в px или 0 (по содержимому) }]
+        wall: Array.isArray(src.wall) ? src.wall.filter(x => x && typeof x.id === 'string')
+            .map(x => ({ id: x.id.slice(0, 80), w: Math.min(4, Math.max(1, Number(x.w) || 2)), h: Math.min(1600, Math.max(0, Number(x.h) || 0)) })) : [],
         layout: normalizeLayoutPrefs(obj(src.layout, {}))
     };
 }
@@ -99,6 +102,7 @@ function setUiPrefs(p) {
     if (typeof renderNotifySettings === 'function') renderNotifySettings();
     applyLayoutPrefs();
     renderLayoutSettings();
+    if (typeof applyWall === 'function') applyWall();
     if (typeof applyTheme === 'function' && typeof currentThemeId !== 'undefined') applyTheme(currentThemeId, { save: false }); // шрифты с другого устройства
 }
 
@@ -120,7 +124,22 @@ function cardKey(card) {
     return (tab ? tab.id : 'x') + ':' + (h ? h.textContent.trim().slice(0, 40) : '');
 }
 
+// Постоянные id блоков без id: «card-<раздел>-<номер>» по порядку в разметке (нужны для «Стены» и свёрнутых блоков)
+let cardIdsAssigned = false;
+function assignCardIds() {
+    if (cardIdsAssigned) return;
+    cardIdsAssigned = true;
+    document.querySelectorAll('main > .tab').forEach(tab => {
+        let i = 0;
+        tab.querySelectorAll('.card').forEach(card => {
+            if (!card.id) card.id = `card-${tab.id}-${i}`;
+            i++;
+        });
+    });
+}
+
 function enhanceCards(root = document) {
+    assignCardIds();
     const collapsed = readCollapsed();
     root.querySelectorAll('main .card').forEach(card => {
         const h = card.querySelector(':scope > h3');
@@ -130,12 +149,17 @@ function enhanceCards(root = document) {
             const ctls = document.createElement('span');
             ctls.className = 'w95-ctls';
             ctls.innerHTML =
+                (card.id && !card.classList.contains('wall-info') ? '<button type="button" class="w95-ctl w95-ctl-pin" onclick="toggleWallCard(this)" title="На стену" aria-label="Добавить блок на стену"><span class="material-icons">push_pin</span></button>' : '') +
                 '<button type="button" class="w95-ctl w95-ctl-min" onclick="toggleCardCollapse(this)" title="Свернуть" aria-label="Свернуть блок"></button>' +
                 '<button type="button" class="w95-ctl w95-ctl-max" onclick="toggleMaximize(this)" title="Развернуть" aria-label="Развернуть на весь экран"></button>' +
                 '<span class="w95-ctl w95-ctl-close" aria-hidden="true"></span>';
             h.appendChild(ctls);
         } else {
-            // старый блок Oldbook: «_» тоже становится настоящей кнопкой
+            // старый блок Oldbook: «_» тоже становится настоящей кнопкой, и появляется булавка «На стену»
+            const ctlsBox = h.querySelector('.w95-ctls');
+            if (card.id && !ctlsBox.querySelector('.w95-ctl-pin')) {
+                ctlsBox.insertAdjacentHTML('afterbegin', '<button type="button" class="w95-ctl w95-ctl-pin" onclick="toggleWallCard(this)" title="На стену" aria-label="Добавить блок на стену"><span class="material-icons">push_pin</span></button>');
+            }
             const min = h.querySelector('.w95-ctl-min');
             if (min && min.tagName !== 'BUTTON') {
                 const b = document.createElement('button');

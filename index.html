@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="css/metro.css">
     <!-- Разметка ПК, меню-гамбургер, заставка на ПК, шрифты, языки -->
     <link rel="stylesheet" href="css/layout.css">
+    <!-- 4.0: «Стена», голосовой ввод, каталог OldBook.kz, фото чеков -->
+    <link rel="stylesheet" href="css/v4.css">
     <!-- Свои темы: цвета из редактора (только при флагах data-c-*) -->
     <link rel="stylesheet" href="css/custom.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -176,6 +178,10 @@
                             </div>
                             <!-- Категории картинками (js/emoji.js; вид — Настройки → «Картинки категорий») -->
                             <div class="cat-tiles" id="cat-tiles" role="group" aria-label="Категории"></div>
+                            <!-- Голосовой ввод (js/voice.js): сумма, категория и комментарий из фразы -->
+                            <button type="button" class="btn-secondary voice-btn" id="voice-btn" onclick="toggleVoiceInput()" aria-pressed="false"><span class="material-icons">mic</span> <span class="voice-label">Сказать голосом</span></button>
+                            <p class="voice-live" id="voice-live" hidden aria-live="polite"></p>
+                            <p class="voice-result" id="voice-result" hidden></p>
                             <input type="hidden" id="tx-comment">
                             <button type="button" class="btn-secondary comment-btn" id="tx-comment-btn" onclick="openCommentDialog('tx')"><span class="material-icons">chat_bubble_outline</span> <span class="comment-btn-text">Комментарий</span></button>
                             <div class="btn-group" id="add-btns">
@@ -208,6 +214,14 @@
                             <h3><span class="material-icons">receipt_long</span> История операций</h3>
                             <div id="tx-list"></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- СТЕНА: блоки из любых разделов (js/wall.js) -->
+                <div id="wall" class="tab wall-tab" style="display:none;">
+                    <div class="card card-wide wall-info" id="wall-empty">
+                        <h3><span class="material-icons">dashboard</span> Стена</h3>
+                        <p class="hint">Соберите здесь блоки, которые нужны чаще всего: нажмите <span class="material-icons inline-icon">push_pin</span> в заголовке любого блока в любом разделе — он переедет сюда. На стене у блока меняются ширина <span class="material-icons inline-icon">swap_horiz</span> и высота <span class="material-icons inline-icon">swap_vert</span> (или потяните за уголок справа внизу), «_» сворачивает, «□» разворачивает на весь экран, булавка возвращает блок на место.</p>
                     </div>
                 </div>
 
@@ -501,6 +515,27 @@
 
                 <!-- OLDBOOK: семейная книга (Катя, Папа, Саша) с обменом между аккаунтами -->
                 <div id="oldbook" class="tab" style="display:none;">
+                    <!-- Каталог OldBook.kz: поиск книги по номеру или по фото обложки (js/obcatalog.js) -->
+                    <div class="card card-wide obc-card" id="obc-card">
+                        <h3><span class="material-icons">local_library</span> Каталог OldBook.kz</h3>
+                        <p class="hint">Введите номер книги из каталога сайта oldbook.kz или сфотографируйте обложку — приложение прочитает название и автора и найдёт книгу.</p>
+                        <div class="obc-row">
+                            <input type="text" id="obc-number" inputmode="numeric" placeholder="Номер книги, например 14898" maxlength="12" autocomplete="off">
+                            <button type="button" class="btn-primary" onclick="obSearchByNumber()"><span class="material-icons">search</span> Найти</button>
+                            <label class="btn-secondary obc-cam" title="Сфотографировать обложку"><span class="material-icons">photo_camera</span>
+                                <input type="file" accept="image/*" capture="environment" onchange="obCoverFromInput(event)">
+                            </label>
+                            <label class="btn-secondary obc-cam" title="Фото обложки из галереи"><span class="material-icons">image</span>
+                                <input type="file" accept="image/*" onchange="obCoverFromInput(event)">
+                            </label>
+                        </div>
+                        <div class="obc-row">
+                            <input type="text" id="obc-text" placeholder="Или название и автор" maxlength="120" autocomplete="off">
+                            <button type="button" class="btn-secondary" onclick="obSearchByText(document.getElementById('obc-text').value)"><span class="material-icons">manage_search</span> По названию</button>
+                        </div>
+                        <p class="hint obc-status" id="obc-status" aria-live="polite"></p>
+                        <div id="obc-result"></div>
+                    </div>
                     <div class="card ob-form-card" id="ob-form-card">
                         <h3><span class="material-icons">menu_book</span> Новая запись — Oldbook</h3>
                         <input type="datetime-local" id="ob-datetime">
@@ -772,7 +807,17 @@
                         <h3><span class="material-icons">history</span> История версий</h3>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>3.11.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>4.0.0 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Новый раздел «Стена»: любой блок из любой части программы выносится на стену булавкой в заголовке; на стене меняются ширина и высота блока (кнопками или за уголок), блок сворачивается и разворачивается на весь экран.</li>
+                                    <li>Oldbook: первый блок — каталог OldBook.kz. Поиск книги по номеру, по фото обложки (название и автор распознаются) или по названию: обложка и корешок, автор, жанр, кратко о книге, цена и наличие, ссылки на поиск книги на Ozon и Wildberries, кнопка «Найти в Telegram» (скоро).</li>
+                                    <li>Голосовой ввод в «Новой записи» (русский): из фразы берутся сумма, категория и комментарий.</li>
+                                    <li>Фото чеков сохраняются на Google Диске в папках «Чеки / год / месяц / день», в истории — ссылка «Фото чека».</li>
+                                    <li>Дореволюционный русский теперь со «старым слогом»: «казна», «прибытокъ», «издержки», «соизвольте нажать», «зѣло» и т. п.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>3.11.0</h4>
                                 <ul>
                                     <li>Шрифты: 10 шрифтов — 3 общих для всех тем и свои у каждой группы тем; отдельно для заголовков и для текста. Загрузка своего шрифта с проверкой совместимости (русские, казахские, дореформенные буквы, латиница, цифры, ₸, ширина и высота).</li>
                                     <li>Языки: русский, русский дореформенный, английский, казахский, французский и немецкий — меню, кнопки, блоки, окна и сообщения.</li>
@@ -989,6 +1034,9 @@
     <script src="js/bank.js"></script>
     <script src="js/fonts.js"></script>
     <script src="js/icon.js"></script>
+    <script src="js/voice.js"></script>
+    <script src="js/obcatalog.js"></script>
+    <script src="js/wall.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>

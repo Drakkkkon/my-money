@@ -216,8 +216,11 @@ async function scanReceipt(file) {
     }
 }
 
+let receiptPhotoFile = null; // фото чека, которое сохранится на Google Диск вместе с записью
+
 function openReceiptDialog(file) {
     closeReceiptDialog(false);
+    receiptPhotoFile = file;
     const overlay = document.createElement('div');
     overlay.id = 'receipt-dialog';
     overlay.className = 'export-sheet-overlay';
@@ -300,6 +303,12 @@ function saveReceiptTx() {
     if (!(amount > 0)) { alert('Впишите сумму чека.'); return; }
     const tx = { id: Date.now().toString(), type: 'expense', amount, category, date, fromReceipt: true };
     if (comment) tx.comment = comment;
+    // фото чека — в очередь на Google Диск (папка «My Money/Чеки/год/месяц/день»)
+    if (receiptPhotoFile) {
+        const store = ((document.getElementById('receipt-store') || {}).value || '').trim();
+        tx.receiptPhoto = { state: 'pending' };
+        queueReceiptPhoto(tx.id, receiptPhotoFile, date, store || category);
+    }
     transactions.push(tx);
     // отмеченные позиции чека — в раздел «Цены» (товар, цена, вес, магазин, дата)
     let priced = 0;
@@ -313,4 +322,141 @@ function saveReceiptTx() {
     updateUI(true);
     playSound('success');
     showToast(`Записано: ${category} ${amount.toLocaleString('ru-RU')} ₸` + (priced ? ` · цен сохранено: ${priced}` : ''));
+}
+
+// ---------- Фото чеков на Google Диске ----------
+// Каждый чек — картинка JPEG в папке «My Money/Чеки/<год>/<месяц>/<день>» на Диске пользователя.
+// Пока нет входа в Google или интернета, фото ждёт на устройстве (IndexedDB) и загружается при синхронизации
+// (cloud.js → syncReceiptPhotos). В записи остаётся ссылка: tx.receiptPhoto = { state, fileId, link, path }.
+const RECEIPT_ROOT = 'Чеки';
+const RECEIPT_FOLDERS_KEY = 'finance_receipt_folders'; // путь → id папки на Диске
+
+function receiptDb() {
+    return new Promise((resolve, reject) => {
+        if (!window.indexedDB) { reject(new Error('IndexedDB недоступна')); return; }
+        const req = indexedDB.open('mymoney-receipts', 1);
+        req.onupgradeneeded = () => req.result.createObjectStore('photos');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+    });
+}
+
+async function receiptStore(op, key, value) {
+    const db = await receiptDb();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('photos', op === 'get' || op === 'keys' ? 'readonly' : 'readwrite');
+        const s = tx.objectStore('photos');
+        const req = op === 'get' ? s.get(key) : op === 'put' ? s.put(value, key) : op === 'keys' ? s.getAllKeys() : s.delete(key);
+        tx.oncomplete = () => resolve(req.result);
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
+// Сжатие: не больше 2000 px по длинной стороне, JPEG 85% — чек читается, а место на Диске экономится
+async function compressReceiptPhoto(file) {
+    const url = URL.createObjectURL(file);
+    try {
+        const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+        const k = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * k);
+        c.height = Math.round(img.naturalHeight * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        return await new Promise(res => c.toBlob(res, 'image/jpeg', 0.85));
+    } catch (e) {
+        return file;
+    } finally {
+        URL.revokeObjectURL(url);
+    }
+}
+
+async function queueReceiptPhoto(txId, file, dateIso, label) {
+    try {
+        const blob = await compressReceiptPhoto(file);
+        await receiptStore('put', txId, { blob, date: String(dateIso || almatyIsoNow()), label: String(label || '').slice(0, 40) });
+        if (typeof scheduleCloudSync === 'function') scheduleCloudSync(800);
+    } catch (e) {
+        console.warn('Фото чека не сохранено', e);
+    }
+}
+
+function receiptFolderCache() {
+    try { return JSON.parse(localStorage.getItem(RECEIPT_FOLDERS_KEY) || '{}') || {}; } catch (e) { return {}; }
+}
+
+async function driveFolderIn(parentId, name) {
+    const safe = name.replace(/'/g, "\\'");
+    const found = await driveQuery(`name='${safe}' and '${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`, 'id');
+    if (found[0]) return found[0].id;
+    const r = await driveFetch(`${DRIVE_API}/files?fields=id`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] })
+    });
+    return (await r.json()).id;
+}
+
+// «Чеки/2026/11/02» → id папки (создаётся по шагам, путь запоминается)
+async function ensureReceiptFolder(dateIso) {
+    const [y, m, d] = String(dateIso).slice(0, 10).split('-');
+    const path = `${RECEIPT_ROOT}/${y}/${m}/${d}`;
+    const cache = receiptFolderCache();
+    if (cache[path]) {
+        try {
+            const r = await driveFetch(`${DRIVE_API}/files/${encodeURIComponent(cache[path])}?fields=id,trashed`);
+            if (!(await r.json()).trashed) return { id: cache[path], path };
+        } catch (e) { if (e.code === 'auth') throw e; }
+    }
+    let parent = await ensureDriveFolder();
+    let cur = '';
+    for (const part of [RECEIPT_ROOT, y, m, d]) {
+        cur = cur ? cur + '/' + part : part;
+        parent = cache[cur] && cur !== path ? cache[cur] : await driveFolderIn(parent, part);
+        cache[cur] = parent;
+    }
+    try { localStorage.setItem(RECEIPT_FOLDERS_KEY, JSON.stringify(cache)); } catch (e) {}
+    return { id: parent, path };
+}
+
+async function uploadReceiptPhoto(txId, rec) {
+    const folder = await ensureReceiptFolder(rec.date);
+    const time = String(rec.date).slice(11, 16).replace(':', '-') || '00-00';
+    const name = `Чек_${String(rec.date).slice(0, 10)}_${time}${rec.label ? '_' + rec.label.replace(/[\\/:*?"<>|]+/g, '') : ''}.jpg`;
+    const boundary = 'mymoney' + Date.now();
+    const meta = { name, mimeType: 'image/jpeg', parents: [folder.id], description: 'Фото чека из приложения My Money' };
+    const body = new Blob([
+        `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: image/jpeg\r\n\r\n`,
+        rec.blob, `\r\n--${boundary}--`
+    ]);
+    const r = await driveFetch(`${DRIVE_UPLOAD_API}/files?uploadType=multipart&fields=id,webViewLink`, {
+        method: 'POST', headers: { 'Content-Type': 'multipart/related; boundary=' + boundary }, body
+    });
+    const f = await r.json();
+    return { state: 'done', fileId: f.id, link: f.webViewLink || `https://drive.google.com/file/d/${f.id}/view`, path: folder.path };
+}
+
+// Вызывается при синхронизации с Google Диском (cloud.js)
+async function syncReceiptPhotos() {
+    let keys = [];
+    try { keys = await receiptStore('keys'); } catch (e) { return; }
+    let changed = false;
+    for (const id of keys) {
+        const tx = transactions.find(t => String(t.id) === String(id));
+        if (!tx) { await receiptStore('delete', id); continue; } // запись удалили
+        const rec = await receiptStore('get', id);
+        if (!rec || !rec.blob) { await receiptStore('delete', id); continue; }
+        tx.receiptPhoto = await uploadReceiptPhoto(id, rec);
+        await receiptStore('delete', id);
+        changed = true;
+    }
+    if (changed) updateUI(true);
+}
+
+// Значок фото чека в истории операций
+function receiptPhotoHtml(tx) {
+    const p = tx.receiptPhoto;
+    if (!p) return '';
+    if (p.state === 'done' && p.link) {
+        return `<a class="tx-receipt" href="${escapeHtml(p.link)}" target="_blank" rel="noopener" title="Фото чека на Google Диске: ${escapeHtml(p.path || '')}"><span class="material-icons">receipt_long</span> Фото чека</a>`;
+    }
+    return `<span class="tx-receipt is-pending" title="Загрузится на Google Диск при синхронизации"><span class="material-icons">cloud_upload</span> Фото чека ждёт загрузки</span>`;
 }

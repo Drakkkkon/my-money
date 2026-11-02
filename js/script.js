@@ -508,7 +508,8 @@ function renderTransactions() {
         g.items.reverse().forEach(tx => {
             let sign = tx.type === 'income' ? '+' : '-';
             let timeStr = (tx.date && tx.date.includes('T')) ? ` <span style="font-size:12px;color:var(--text-muted);">${tx.date.split('T')[1]}</span>` : '';
-            let commentStr = tx.comment ? `<span class="tx-comment">${escapeHtml(tx.comment)}</span>` : '';
+            let commentStr = (tx.comment ? `<span class="tx-comment">${escapeHtml(tx.comment)}</span>` : '')
+                + (typeof receiptPhotoHtml === 'function' ? receiptPhotoHtml(tx) : ''); // фото чека на Google Диске
             let div = document.createElement('div');
             div.className = `tx-item ${tx.type}`;
             div.innerHTML = `
@@ -728,6 +729,8 @@ function clearForm() {
     }
     renderCategoryTiles();
     if (typeof setTxCurrency === 'function') setTxCurrency('KZT'); // валюта по умолчанию — тенге
+    const voiceBox = document.getElementById('voice-result');
+    if (voiceBox) voiceBox.hidden = true;
 }
 
 function generateReport() {
@@ -1354,6 +1357,7 @@ function showTab(tabId, btn) {
 // иначе не останется способа вернуть пункты обратно.
 const MENU_ITEMS = [
     { id: 'transactions', icon: 'list', label: 'Записи' },
+    { id: 'wall', icon: 'dashboard', label: 'Стена' },
     { id: 'subscriptions', icon: 'autorenew', label: 'Подписки' },
     { id: 'salary', icon: 'payments', label: 'Зарплата' },
     { id: 'statistics', icon: 'pie_chart', label: 'Статистика' },
@@ -1403,6 +1407,7 @@ function renderMenus() {
         mobile.innerHTML = navHtml;
         // 9–10 пунктов — 5 колонок, чтобы нижнее меню осталось в два ряда
         mobile.classList.toggle('nav-wide', visible.length > 8);
+        mobile.classList.toggle('nav-xwide', visible.length > 10); // 11–12 пунктов — 6 колонок
     }
     updateMobileNavHeight();
     renderMenuEditor(state);
