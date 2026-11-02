@@ -294,7 +294,10 @@ const SYNC_LISTS = [
     { key: 'soundlib', get: () => soundLibrary, set: v => { soundLibrary = v; } },
     // приоритетные цели (js/goals.js) и свои котировки (js/quotes.js)
     { key: 'goals', get: () => goalsList, set: v => { goalsList = v; } },
-    { key: 'quotes', get: () => userQuotes, set: v => { userQuotes = v; } }
+    { key: 'quotes', get: () => userQuotes, set: v => { userQuotes = v; } },
+    // список покупок и цены товаров (js/shopping.js)
+    { key: 'shop', get: () => shopList, set: v => { shopList = v; } },
+    { key: 'prices', get: () => priceRecords, set: v => { priceRecords = v; } }
 ];
 
 function getSyncMeta() {
@@ -363,7 +366,7 @@ function localSnapshot() {
         profile: { name: profileName },
         tx: transactions, subs: subscriptions,
         ob: oldbookEntries, links: oldbookLinks, cats: customCategories, themes: customThemes,
-        soundlib: soundLibrary, goals: goalsList, quotes: userQuotes,
+        soundlib: soundLibrary, goals: goalsList, quotes: userQuotes, shop: shopList, prices: priceRecords,
         savings, limit: manualLimit, goal: priorityGoal,
         sounds: customSoundMeta, themeSounds: themeSoundMeta, ui: uiPrefs,
         scalarsAt: meta.scalarsAt, deleted: meta.deleted

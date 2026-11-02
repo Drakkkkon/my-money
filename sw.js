@@ -4,7 +4,7 @@
 // Важно: запрос самой страницы (navigate) нельзя пересоздавать с параметрами — браузер выдаёт ошибку,
 // и раньше из-за этого всегда открывалась старая копия index.html из кэша (в установленном приложении
 // старая страница + новые скрипты ломали запуск). Теперь страница запрашивается по адресу.
-const CACHE = 'my-money-v9';
+const CACHE = 'my-money-v10';
 const CORE = [
     './',
     'index.html',
@@ -23,6 +23,10 @@ const CORE = [
     'js/quotes.js',
     'js/goals.js',
     'js/receipt.js',
+    'js/currency.js',
+    'js/shopping.js',
+    'js/notify.js',
+    'js/bank.js',
     'js/config.js',
     'js/sound.js',
     'js/soundpicker.js',
@@ -75,5 +79,16 @@ self.addEventListener('fetch', (event) => {
             .catch(() => caches.match(isPage ? req.url : req, { ignoreSearch: true })
                 .then(hit => hit || (isPage ? caches.match('index.html') : null))
                 .then(hit => hit || Response.error()))
+    );
+});
+
+// Нажатие на уведомление (js/notify.js): открыть уже запущенное приложение или запустить его
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+            const win = list.find(c => c.url.startsWith(self.registration.scope));
+            return win ? win.focus() : self.clients.openWindow('./');
+        })
     );
 });

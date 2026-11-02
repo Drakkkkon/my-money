@@ -1,4 +1,16 @@
-My Money v3.8.0 — сайт
+My Money v3.9.0 — сайт
+
+Что нового в 3.9.0:
+- Уведомления (js/notify.js): подписки — sub.time и sub.remind (['1w','3d','1d','3h','1h','0']), утро 9:00 с целями,
+  выгрузка Excel+PDF за день в 23:00 (папка через File System Access API в Chrome/Edge на ПК, иначе «Загрузки»).
+  Настройки — uiPrefs.notify. Без своего сервера (Web Push) уведомления работают, пока приложение открыто или свёрнуто;
+  пропущенные показываются при открытии. sw.js: notificationclick открывает приложение.
+- Список покупок и раздел «Цены» (js/shopping.js): shopList и priceRecords (синхронизация 'shop' и 'prices'),
+  цены из списка, из чеков (receipt.js → addReceiptPrices) и вручную; график по магазинам, цена за 1 кг/л.
+- Валюта записи (js/currency.js): KZT/USD/EUR/RUB, запись хранится в тенге + currency/origAmount/rate.
+- «Мой банк» в Статистике (js/bank.js): выписка PDF (pdf.js 3.11 с cdnjs) или текст уведомления банка → остаток,
+  итоги, предупреждения (uiPrefs.bank). Логин и пароль банка приложение не запрашивает.
+- service worker my-money-v10.
 
 Что нового в 3.8.0:
 - Котировки (js/quotes.js): раздел «Котировки», тикер в блоке баланса (#hdr-quote) и на заставке (#splash-quotes).

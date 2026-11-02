@@ -156,14 +156,17 @@ function parseReceiptText(text) {
         const price = receiptNumber(m[1]);
         if (!(price > 0) || price >= 10000000) continue;
         let name = cleanItemName(l.slice(0, m.index));
+        let raw = l;
         if ((name.match(/[a-zа-яё]/gi) || []).length < 3) {
             if (!pendingName) continue;
             name = cleanItemName(pendingName);
+            raw = pendingName;
         }
         pendingName = '';
         if ((name.match(/[a-zа-яё]/gi) || []).length < 3) continue;
         if (total && price > total + 0.01) continue;
-        items.push({ name: name.slice(0, 40), price });
+        // raw — строка с весом («Рис круглый 1кг»): из неё «Цены» берут вес и считают цену за 1 кг
+        items.push({ name: name.slice(0, 40), price, raw: raw.slice(0, 80) });
     }
 
     const itemsSum = items.reduce((s, it) => s + it.price, 0);
@@ -298,8 +301,16 @@ function saveReceiptTx() {
     const tx = { id: Date.now().toString(), type: 'expense', amount, category, date, fromReceipt: true };
     if (comment) tx.comment = comment;
     transactions.push(tx);
+    // отмеченные позиции чека — в раздел «Цены» (товар, цена, вес, магазин, дата)
+    let priced = 0;
+    if (receiptResult && typeof addReceiptPrices === 'function') {
+        const chosen = [...document.querySelectorAll('#receipt-items input[type="checkbox"]')]
+            .filter(c => c.checked).map(c => receiptResult.items[Number(c.dataset.i)]).filter(Boolean);
+        const store = ((document.getElementById('receipt-store') || {}).value || '').trim();
+        priced = addReceiptPrices(chosen, store, date);
+    }
     closeReceiptDialog(false);
     updateUI(true);
     playSound('success');
-    showToast(`Записано: ${category} ${amount.toLocaleString('ru-RU')} ₸`);
+    showToast(`Записано: ${category} ${amount.toLocaleString('ru-RU')} ₸` + (priced ? ` · цен сохранено: ${priced}` : ''));
 }

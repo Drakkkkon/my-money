@@ -35,7 +35,34 @@ function normalizeUiPrefs(p) {
             hidden: Array.isArray(q.hidden) ? q.hidden.filter(x => typeof x === 'string') : []
         },
         catIcons: { form: obj(ci.form, {}), history: obj(ci.history, {}) },
-        iconMode: { form: mode(im.form), history: mode(im.history) }
+        iconMode: { form: mode(im.form), history: mode(im.history) },
+        notify: normalizeNotifyPrefs(obj(src.notify, {})),
+        bank: normalizeBankPrefs(obj(src.bank, {}))
+    };
+}
+
+// Уведомления (js/notify.js): утро 9:00 с целями, выгрузка за день в 23:00, напоминания подписок по умолчанию
+function normalizeNotifyPrefs(n) {
+    const offsets = ['1w', '3d', '1d', '3h', '1h', '0'];
+    return {
+        morning: n.morning !== false,
+        daily: n.daily !== false,
+        subDefault: Array.isArray(n.subDefault) ? n.subDefault.filter(o => offsets.includes(o)) : ['1d'],
+        bank: n.bank !== false
+    };
+}
+
+// Банк (js/bank.js): выбранный банк, остаток из выписки или уведомления и пороги предупреждений
+function normalizeBankPrefs(b) {
+    const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+    return {
+        name: typeof b.name === 'string' ? b.name.slice(0, 30) : 'kaspi',
+        balance: num(b.balance),
+        balanceAt: typeof b.balanceAt === 'string' ? b.balanceAt.slice(0, 16) : '',
+        source: typeof b.source === 'string' ? b.source.slice(0, 20) : '',
+        low: Math.max(0, num(b.low) || 0),
+        big: Math.max(0, num(b.big) || 0),
+        summary: (b.summary && typeof b.summary === 'object') ? b.summary : null
     };
 }
 
@@ -52,6 +79,7 @@ function setUiPrefs(p) {
     saveUiPrefsLocal();
     applyHeaderPrefs();
     renderHeaderSettings();
+    if (typeof renderNotifySettings === 'function') renderNotifySettings();
 }
 
 // Изменение настроек на этом устройстве: сохранить и отправить в облако

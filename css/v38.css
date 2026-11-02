@@ -345,3 +345,104 @@ html[data-w95="mono"] body .splash-quote .q-change.is-up, html[data-w95="mono"] 
 html[data-w95="mono"] body .receipt-progress > div { background: #000; }
 html[data-w95="mono"] body .cat-tile-emoji, html[data-w95="mono"] body .cat-emoji, html[data-w95="mono"] body .icon-cat-btn,
 html[data-w95="mono"] body .emoji-cell { filter: grayscale(1) contrast(1.4); }
+
+/* =================== 3.9: уведомления, валюта записи, список покупок, цены, банк =================== */
+/* Валюта новой записи */
+html body .amount-row { display: flex; gap: 6px; align-items: stretch; margin-bottom: 12px; }
+html body .amount-row #amount { flex: 1 1 auto; min-width: 0; margin: 0 !important; }
+html body .amount-row .tx-currency { flex: 0 0 auto; width: 92px; margin: 0 !important; font-weight: 700; }
+html body .tx-currency.is-foreign { outline: 2px solid var(--w95-select); outline-offset: -2px; }
+html body .tx-currency-hint { display: flex; gap: 6px; align-items: flex-start; margin: -6px 0 12px; padding: 6px 8px; font-size: 13px;
+    background: var(--w95-field); box-shadow: var(--w95-sunken); color: var(--w95-text); }
+html body .tx-currency-hint .material-icons { font-size: 18px !important; color: var(--w95-select); }
+html body .tx-orig-amount { display: block; font-size: 11.5px; font-weight: 400; color: var(--w95-muted) !important; text-align: right; }
+
+/* Напоминания подписок */
+html body .remind-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 3px 10px; margin: 2px 0 12px; }
+html body .remind-opt { display: flex; align-items: center; gap: 6px; font-size: 14px; font-family: var(--w95-font-text); cursor: pointer; }
+html body .remind-opt input { width: auto !important; margin: 0 !important; flex: 0 0 auto; }
+html body .sub-remind-info { display: flex; align-items: center; gap: 3px; font-size: 12px; color: var(--w95-muted); margin-top: 2px; }
+html body .sub-remind-info .material-icons { font-size: 14px !important; }
+html body .sub-remind { width: min(460px, 100%); }
+html body .sub-remind .field-inline, html body .bank-card .field-inline { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+html body .sub-remind .field-inline span, html body .bank-card .field-inline span { flex: 1 1 auto; font-size: 13px; }
+html body .sub-remind .field-inline input, html body .bank-card .field-inline select, html body .bank-card .field-inline input { flex: 0 1 160px; width: auto; margin: 0 !important; min-width: 0; }
+
+/* Настройки → Уведомления */
+html body .notify-perm { display: flex; align-items: center; gap: 6px; font-weight: 700; margin-bottom: 8px; }
+html body .notify-perm.is-granted { color: var(--w95-income); }
+html body .notify-perm.is-denied, html body .notify-perm.is-default { color: var(--w95-expense); }
+html body .notify-card .hdr-part { margin-bottom: 6px; }
+html body .notify-card .btn-group { margin: 6px 0; }
+html body .notify-sub { margin: 12px 0 4px; font-size: 14px; }
+html body .notify-warn { color: var(--w95-expense) !important; }
+html body .notify-log { max-height: 220px; overflow-y: auto; background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 4px; }
+html body .notify-log-row { display: flex; flex-direction: column; gap: 1px; padding: 5px 4px; border-bottom: 1px dotted var(--w95-grid); font-size: 12.5px; }
+html body .notify-log-row:last-child { border-bottom: none; }
+html body .notify-log-row small { color: var(--w95-muted); }
+
+/* Список покупок */
+html body .shop-card textarea, html body .bank-card textarea { width: 100%; resize: vertical; margin-bottom: 6px; font-family: var(--w95-font-text); font-size: 14px; }
+html body .shop-preview:empty { display: none; }
+html body .shop-preview { margin-bottom: 6px; }
+html body .shop-add-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+html body .shop-add-row input { flex: 1 1 160px; min-width: 0; margin: 0 !important; }
+html body .shop-add-row button { flex: 0 0 auto; width: auto; }
+html body .shop-summary:empty { display: none; }
+html body .shop-list { max-height: min(60vh, 520px); overflow-y: auto; overscroll-behavior: contain; background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 2px 4px; margin-bottom: 8px; }
+html body .shop-item { display: flex; align-items: center; gap: 6px; padding: 5px 2px; border-bottom: 1px dotted var(--w95-grid); }
+html body .shop-item:last-child { border-bottom: none; }
+html body .shop-check { flex: 0 0 auto; display: flex; cursor: pointer; }
+html body .shop-check input { width: 22px !important; height: 22px; margin: 0 !important; cursor: pointer; }
+html body .shop-name { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; font-family: var(--w95-font-text); font-size: 14px; }
+html body .shop-name span { overflow-wrap: anywhere; }
+html body .shop-name small { font-size: 12px; color: var(--w95-muted); }
+html body .shop-item.is-bought .shop-name span { text-decoration: line-through; color: var(--w95-muted); }
+html body .shop-price { flex: 0 0 86px; width: 86px !important; margin: 0 !important; padding: 4px 6px !important; min-height: 30px; }
+html body .shop-cur { flex: 0 0 auto; width: 48px !important; margin: 0 !important; padding: 2px !important; min-height: 30px; }
+html body .shop-del { flex: 0 0 auto; width: 30px; height: 30px; min-height: 0 !important; padding: 0 !important; display: flex; align-items: center; justify-content: center;
+    background: var(--w95-face) !important; border: none !important; box-shadow: var(--w95-raised) !important; cursor: pointer; color: var(--w95-text) !important; }
+html body .shop-del:active { box-shadow: var(--w95-pressed) !important; }
+html body .shop-del .material-icons { font-size: 16px !important; color: inherit !important; }
+
+/* Цены */
+html body .price-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+html body .price-filters select { flex: 1 1 140px; width: auto; margin: 0 !important; min-width: 0; }
+html body .price-filters #pr-chart-product { flex-basis: 220px; }
+html body .price-kpi { margin-top: 10px; }
+html body .price-kpi small { display: block; font-size: 11px; font-weight: 400; color: var(--w95-muted); }
+html body .price-row { display: flex; gap: 6px; }
+html body .price-row input { flex: 1 1 auto; min-width: 0; }
+html body .price-row select { flex: 0 0 96px; width: 96px; }
+html body .price-table td small { display: block; font-size: 11px; color: var(--w95-muted); }
+html body .price-table td.pr-none { color: var(--w95-muted); text-align: center; }
+html body .pr-list { max-height: min(60vh, 520px); overflow-y: auto; overscroll-behavior: contain; background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 2px 4px; }
+html body .pr-row { display: flex; align-items: center; gap: 8px; padding: 6px 2px; border-bottom: 1px dotted var(--w95-grid); }
+html body .pr-row:last-child { border-bottom: none; }
+html body .pr-row-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; font-family: var(--w95-font-text); }
+html body .pr-row-main b { font-size: 14px; overflow-wrap: anywhere; }
+html body .pr-row-main small, html body .pr-row-price small { font-size: 11.5px; color: var(--w95-muted); }
+html body .pr-row-price { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; text-align: right; font-variant-numeric: tabular-nums; }
+html body .card.is-maximized .shop-list, html body .card.is-maximized .pr-list { max-height: none !important; }
+
+/* Банк */
+html body .bank-balance { display: flex; flex-direction: column; gap: 2px; padding: 8px; margin-bottom: 8px; background: var(--w95-field); box-shadow: var(--w95-sunken); }
+html body .bank-balance b { font-size: 26px; font-family: var(--w95-font-text); font-variant-numeric: tabular-nums; }
+html body .bank-balance small { font-size: 12px; color: var(--w95-muted); }
+html body .bank-warn { margin-bottom: 8px; }
+html body .bank-warn p { display: flex; gap: 5px; align-items: flex-start; font-size: 13px; color: var(--w95-expense); margin: 0 0 4px; }
+html body .bank-warn .material-icons, html body .bank-ok .material-icons { font-size: 17px !important; }
+html body .bank-ok { display: flex; align-items: center; gap: 5px; color: var(--w95-income); font-size: 13px; margin: 0 0 8px; }
+html body .bank-kpi { margin-bottom: 6px; }
+html body .bank-file-btn { display: inline-flex !important; align-items: center; gap: 4px; cursor: pointer; }
+html body .bank-file-btn input { display: none; }
+html body .bank-card .btn-group { flex-wrap: wrap; margin-bottom: 6px; }
+html body .bank-limits { margin-top: 10px; }
+html body .bank-safe { margin-top: 8px; }
+html body #bank-status:empty { display: none; }
+html:is([data-w95="aqua"], [data-w95="aero"]) body :is(.shop-del, .shop-list, .pr-list, .bank-balance, .notify-log, .tx-currency-hint) { border-radius: 6px !important; }
+/* Подписки: кнопки действий — отдельной строкой, чтобы «Списать» не сжималось */
+html body #subs-list .sub-item { flex-wrap: wrap; row-gap: 8px; }
+html body #subs-list .sub-item .sub-info { flex: 1 1 0; min-width: 0; }
+html body #subs-list .sub-item .sub-actions { flex: 1 0 100%; justify-content: flex-end; margin-left: 0; display: flex; gap: 6px; }
+html body #subs-list .pay-btn { white-space: nowrap; width: auto; }

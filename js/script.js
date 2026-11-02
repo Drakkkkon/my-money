@@ -4,7 +4,8 @@
 // приложение должно запуститься в любом случае, просто без этой части.
 ['playSound', 'playStartupChime', 'renderOldbook', 'onOldbookTabShown', 'renderSoundSettings', 'applySavedTheme',
     'openSoundPicker', 'initW95Scrollbars', 'renderGoals', 'migrateLegacyGoal', 'runGoalAutoSave', 'renderAllQuotes',
-    'onQuotesTabShown', 'renderAllIconSettings', 'renderCategoryTiles', 'enhanceCards', 'applyHeaderPrefs', 'renderSoundLibrary']
+    'onQuotesTabShown', 'renderAllIconSettings', 'renderCategoryTiles', 'enhanceCards', 'applyHeaderPrefs', 'renderSoundLibrary',
+    'renderShoppingAndPrices', 'renderPrices', 'renderBank', 'renderNotifySettings', 'openSubReminders']
     .forEach(name => { if (typeof window[name] !== 'function') window[name] = function () {}; });
 if (typeof window.historyCategoryHtml !== 'function') window.historyCategoryHtml = name => `<strong>${escapeHtml(name || 'Без категории')}</strong>`;
 if (typeof window.getFormComment !== 'function') window.getFormComment = function () { return ''; };
@@ -189,6 +190,8 @@ function updateUI(pushToCloud = false) {
     renderAllQuotes();
     applyHeaderPrefs();
     renderSoundLibrary();
+    renderShoppingAndPrices();
+    renderBank();
 
     // Если флаг pushToCloud true, изменения отправляются на Google Диск (с небольшой задержкой, пачкой)
     if (pushToCloud) scheduleCloudSync();
@@ -511,7 +514,7 @@ function renderTransactions() {
                 <div class="tx-info">
                     <span class="tx-cat">${historyCategoryHtml(tx.category)}</span><br>${timeStr}${commentStr}
                 </div>
-                <strong class="tx-amount ${tx.type === 'income' ? 'amount-income' : 'amount-expense'}" style="font-size: 15px;">${sign}${tx.amount} ₸</strong>
+                <strong class="tx-amount ${tx.type === 'income' ? 'amount-income' : 'amount-expense'}" style="font-size: 15px;">${sign}${tx.amount} ₸${typeof txOrigAmountHtml === 'function' ? txOrigAmountHtml(tx) : ''}</strong>
                 ${tx.isSystem ? '' : `
                 <div class="tx-actions">
                     <button type="button" onclick="editTx('${tx.id}')"><span class="material-icons" style="font-size:18px;">edit</span></button>
@@ -540,7 +543,10 @@ function addSub() {
         return;
     }
 
-    subscriptions.push({ id: Date.now().toString(), name, amount, day });
+    const timeEl = document.getElementById('sub-time');
+    const sub = { id: Date.now().toString(), name, amount, day, time: (timeEl && timeEl.value) || '10:00' };
+    if (typeof newSubReminderValues === 'function') sub.remind = newSubReminderValues(); // js/notify.js
+    subscriptions.push(sub);
 
     nameEl.value = '';
     amountEl.value = '';
@@ -590,11 +596,13 @@ function renderSubscriptions() {
         div.innerHTML = `
             <div class="sub-info">
                 <strong>${sub.name}</strong><br>
-                <span style="font-size: 12px; color: var(--text-muted);">Списание: ${sub.day}-го числа каждого месяца</span>
+                <span style="font-size: 12px; color: var(--text-muted);">Списание: ${sub.day}-го числа каждого месяца${sub.time ? ' в ' + escapeHtml(sub.time) : ''}</span>
+                ${typeof subReminders === 'function' ? `<span class="sub-remind-info"><span class="material-icons">notifications</span> ${escapeHtml(remindersLabel(subReminders(sub)))}</span>` : ''}
             </div>
             <strong style="font-size: 16px; color: var(--expense);">-${sub.amount} ₸</strong>
             <div class="sub-actions">
                 <button type="button" class="pay-btn" onclick="paySub('${sub.id}')"><span class="material-icons" style="font-size:16px;">check</span> Списать</button>
+                <button type="button" onclick="openSubReminders('${sub.id}')" title="Время и напоминания" aria-label="Время списания и напоминания"><span class="material-icons" style="font-size:18px;">notifications</span></button>
                 <button type="button" onclick="deleteSub('${sub.id}')"><span class="material-icons" style="font-size:18px; color:#d32f2f;">delete</span></button>
             </div>
         `;
@@ -618,8 +626,10 @@ function saveTx(type) {
         return;
     }
     
+    const conv = typeof formAmountInTenge === 'function' ? formAmountInTenge(amount) : { amount, extra: {} };
+    if (!conv) return;
     const comment = getFormComment('tx');
-    const tx = { id: Date.now().toString(), type, amount, category, date: datetime };
+    const tx = { id: Date.now().toString(), type, amount: conv.amount, category, date: datetime, ...conv.extra };
     if (comment) tx.comment = comment;
     transactions.push(tx);
     clearForm();
@@ -645,7 +655,10 @@ function editTx(id) {
 
         if (editIdEl) editIdEl.value = tx.id;
         if (dtEl) dtEl.value = (tx.date && tx.date.includes('T')) ? tx.date : (tx.date + 'T00:00');
-        if (amountEl) amountEl.value = tx.amount;
+        // запись в другой валюте редактируется в исходной валюте
+        const foreign = tx.currency && tx.currency !== 'KZT' && tx.origAmount;
+        if (amountEl) amountEl.value = foreign ? tx.origAmount : tx.amount;
+        if (typeof setTxCurrency === 'function') setTxCurrency(foreign ? tx.currency : 'KZT');
         if (catEl) catEl.value = tx.category;
         setFormComment('tx', tx.comment || '');
         renderCategoryTiles();
@@ -675,7 +688,15 @@ function saveEdit() {
     
     let tx = transactions.find(t => t.id === id);
     if(tx) {
-        tx.amount = amount;
+        const conv = typeof formAmountInTenge === 'function' ? formAmountInTenge(amount) : { amount, extra: {} };
+        if (!conv) return;
+        // курс при правке не меняется, если валюта и сумма прежние
+        const keepRate = conv.extra.currency && tx.currency === conv.extra.currency && Number(tx.origAmount) === amount && tx.rate;
+        if (!keepRate) {
+            delete tx.currency; delete tx.origAmount; delete tx.rate;
+            Object.assign(tx, conv.extra);
+            tx.amount = conv.amount;
+        }
         tx.category = category;
         tx.date = datetime;
         const comment = getFormComment('tx');
@@ -705,6 +726,7 @@ function clearForm() {
         dtEl.value = almatyIsoNow();
     }
     renderCategoryTiles();
+    if (typeof setTxCurrency === 'function') setTxCurrency('KZT'); // валюта по умолчанию — тенге
 }
 
 function generateReport() {
@@ -775,9 +797,9 @@ function isMobileDevice() {
 }
 
 // Строки таблицы выгрузки: kind = income | expense | day | total. Используются и для .xlsx, и для просмотра/копирования.
-function buildExportRows() {
+function buildExportRows(list = transactions) {
     const rows = [];
-    const sortedTx = [...transactions].sort((a,b) => new Date((a.date||'').replace('T', ' ')) - new Date((b.date||'').replace('T', ' ')));
+    const sortedTx = [...list].sort((a,b) => new Date((a.date||'').replace('T', ' ')) - new Date((b.date||'').replace('T', ' ')));
     let currentDate = null;
     let dailyTotal = 0;
     let allTimeTotal = 0;
@@ -1070,8 +1092,9 @@ async function loadPdfLibrary() {
 
 const fmtMoney = v => Number(v || 0).toLocaleString('ru-RU', { maximumFractionDigits: 2 });
 
-function buildPdfDefinition(rows) {
-    const real = transactions.filter(t => !t.isSystem);
+// list — записи выгрузки (по умолчанию все); title — заголовок (для выгрузки за день)
+function buildPdfDefinition(rows, list = transactions, title = 'My Money — выписка операций') {
+    const real = list.filter(t => !t.isSystem);
     const income = real.filter(t => t.type === 'income').reduce((s, t) => s + (parseFloat(t.amount) || 0), 0);
     const expense = real.filter(t => t.type === 'expense').reduce((s, t) => s + (parseFloat(t.amount) || 0), 0);
     const balance = transactions.reduce((s, t) => s + (t.type === 'income' ? 1 : -1) * (parseFloat(t.amount) || 0), 0);
@@ -1108,7 +1131,7 @@ function buildPdfDefinition(rows) {
         info: { title: 'My Money — выписка', author: 'Money Pro' },
         defaultStyle: { font: 'Roboto', fontSize: 9 },
         content: [
-            { text: 'My Money — выписка операций', style: 'title' },
+            { text: title, style: 'title' },
             { text: (profileName ? `Владелец: ${profileName}. ` : '') + `Сформировано: ${generated} (Алматы). Суммы в тенге (тг).`, style: 'muted', margin: [0, 2, 0, 10] },
             {
                 // В шрифте Roboto нет знака ₸, поэтому в PDF валюта пишется «тг»
@@ -1204,6 +1227,7 @@ function saveDataLocally() {
         if (typeof saveGoalsLocal === 'function') saveGoalsLocal();
         if (typeof saveUserQuotesLocal === 'function') saveUserQuotesLocal();
         if (typeof saveUiPrefsLocal === 'function') saveUiPrefsLocal();
+        if (typeof saveShoppingLocal === 'function') saveShoppingLocal(); // список покупок и цены
         localStorage.setItem('finance_tx', JSON.stringify(transactions));
         localStorage.setItem('finance_subs', JSON.stringify(subscriptions));
         localStorage.setItem('finance_savings', savings.toString());
@@ -1284,6 +1308,7 @@ function clearAllData() {
         if (typeof clearCustomSoundsLocal === 'function') clearCustomSoundsLocal();
         if (typeof goalsList !== 'undefined') goalsList = [];
         if (typeof userQuotes !== 'undefined') userQuotes = [];
+        if (typeof shopList !== 'undefined') { shopList = []; priceRecords = []; }
         if (typeof setUiPrefs === 'function') setUiPrefs(null);
         renderMenus();
         updateUI(true);
@@ -1314,6 +1339,7 @@ function showTab(tabId, btn) {
     
     if (tabId === 'oldbook' && typeof onOldbookTabShown === 'function') onOldbookTabShown();
     if (tabId === 'quotes') onQuotesTabShown();
+    if (tabId === 'prices') renderPrices(); // диаграмме нужен видимый холст
 
     // Подсвечиваем пункт в обоих меню (боковом и нижнем)
     currentTabId = tabId;
@@ -1333,6 +1359,7 @@ const MENU_ITEMS = [
     { id: 'reports', icon: 'bar_chart', label: 'Отчёты' },
     { id: 'wishlist', icon: 'star', label: 'Цели' },
     { id: 'quotes', icon: 'candlestick_chart', label: 'Котировки' },
+    { id: 'prices', icon: 'sell', label: 'Цены' },
     { id: 'oldbook', icon: 'menu_book', label: 'Oldbook' },
     { id: 'settings', icon: 'settings', label: 'Настройки', locked: true }
 ];

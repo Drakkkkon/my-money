@@ -149,7 +149,17 @@
                             <div class="form-row">
                                 <input type="datetime-local" id="tx-datetime" required>
                             </div>
-                            <input type="number" id="amount" placeholder="Сумма (₸)">
+                            <div class="amount-row">
+                                <input type="number" id="amount" placeholder="Сумма (₸)">
+                                <!-- Валюта записи (js/currency.js): по умолчанию тенге -->
+                                <select id="tx-currency" class="tx-currency" onchange="updateCurrencyHint()" aria-label="Валюта записи" title="Валюта записи">
+                                    <option value="KZT">₸ KZT</option>
+                                    <option value="USD">$ USD</option>
+                                    <option value="EUR">€ EUR</option>
+                                    <option value="RUB">₽ RUB</option>
+                                </select>
+                            </div>
+                            <p class="tx-currency-hint" id="tx-currency-hint" hidden aria-live="polite"></p>
                             <div class="autocomplete-wrapper" style="position: relative; width: 100%;">
                                 <input type="text" id="category" placeholder="Категория" oninput="filterCategories()" onfocus="showCategories()" onblur="hideCategories()" autocomplete="off">
                                 <div id="category-dropdown" class="custom-dropdown" style="display:none;"></div>
@@ -203,6 +213,12 @@
                             <span>День списания в месяце</span>
                             <input type="number" id="sub-day" min="1" max="31" value="1" placeholder="1–31">
                         </label>
+                        <label class="field-inline" for="sub-time">
+                            <span>Время списания</span>
+                            <input type="time" id="sub-time" value="10:00">
+                        </label>
+                        <p class="hint">Напомнить о списании:</p>
+                        <div class="remind-opts" id="sub-remind-new"></div>
                         <button type="button" class="btn-primary" onclick="addSub()"><span class="material-icons">add</span> Добавить подписку</button>
                     </div>
 
@@ -250,6 +266,11 @@
                             <option value="all">Всё время</option>
                         </select>
                         <div class="kpi-grid" id="stats-kpi"></div>
+                    </div>
+                    <!-- Мой банк (js/bank.js) -->
+                    <div class="card bank-card" id="bank-card">
+                        <h3><span class="material-icons">account_balance</span> Мой банк</h3>
+                        <div id="bank-box"></div>
                     </div>
                     <div class="card calc-card">
                         <h3><span class="material-icons">calculate</span> Калькулятор</h3>
@@ -378,6 +399,78 @@
                         <h3><span class="material-icons">star</span> Приоритетные цели</h3>
                         <p class="hint goals-total" id="goals-total"></p>
                         <div class="goals-list" id="goals-list"></div>
+                    </div>
+                    <!-- Список покупок (js/shopping.js) -->
+                    <div class="card card-wide shop-card" id="shop-card">
+                        <h3><span class="material-icons">shopping_cart</span> Список покупок</h3>
+                        <p class="hint">Впишите покупки (по одной в строке или через запятую) или вставьте сообщение со списком целиком — приложение само разложит его по пунктам. Цена у пункта сохраняется в разделе «Цены».</p>
+                        <textarea id="shop-input" rows="3" placeholder="Например: молоко 2 шт, хлеб, яйца 10, сыр 1500 тг"></textarea>
+                        <div class="shop-preview" id="shop-preview"></div>
+                        <div class="shop-add-row">
+                            <input type="text" id="shop-store" list="pr-stores" placeholder="Магазин (необязательно)" maxlength="40">
+                            <button type="button" class="btn-secondary" onclick="pasteShoppingText()" title="Вставить из буфера обмена"><span class="material-icons">content_paste</span> Вставить</button>
+                            <button type="button" class="btn-primary" onclick="addShoppingFromInput()"><span class="material-icons">add</span> В список</button>
+                        </div>
+                        <p class="hint shop-summary" id="shop-summary"></p>
+                        <div class="shop-list" id="shop-list"></div>
+                        <div class="btn-group">
+                            <button type="button" class="btn-secondary" onclick="copyShoppingList()"><span class="material-icons">content_copy</span> Скопировать список</button>
+                            <button type="button" class="btn-secondary" onclick="clearBoughtItems()"><span class="material-icons">remove_done</span> Убрать купленное</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ЦЕНЫ (js/shopping.js) -->
+                <div id="prices" class="tab" style="display:none;">
+                    <div class="card card-wide price-chart-card" id="price-chart-card">
+                        <h3><span class="material-icons">show_chart</span> Как менялась цена</h3>
+                        <div class="price-filters">
+                            <select id="pr-chart-product" onchange="renderPrices()" aria-label="Товар"></select>
+                            <select id="pr-period" onchange="renderPrices()" aria-label="Период">
+                                <option value="30">30 дней</option>
+                                <option value="90" selected>3 месяца</option>
+                                <option value="365">Год</option>
+                                <option value="all">Всё время</option>
+                            </select>
+                            <select id="pr-cur-mode" onchange="renderPrices()" aria-label="Валюта графика">
+                                <option value="kzt">В тенге</option>
+                                <option value="orig">В валюте покупки</option>
+                            </select>
+                        </div>
+                        <div class="chart-box"><canvas id="priceChart"></canvas></div>
+                        <div id="pr-chart-stats"></div>
+                    </div>
+                    <div class="card price-add-card" id="price-add-card">
+                        <h3><span class="material-icons">sell</span> Добавить цену</h3>
+                        <p class="hint">Цены сюда попадают и сами: из списка покупок и из чеков по фото.</p>
+                        <input type="text" id="pr-product" list="pr-products" placeholder="Товар, например «Молоко 3,2%»" maxlength="60">
+                        <div class="price-row">
+                            <input type="number" id="pr-price" min="0" step="any" placeholder="Цена" inputmode="decimal">
+                            <select id="pr-currency" aria-label="Валюта">
+                                <option value="KZT">₸ KZT</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="RUB">₽ RUB</option>
+                            </select>
+                        </div>
+                        <div class="price-row">
+                            <input type="number" id="pr-qty" min="0" step="any" placeholder="Вес / объём / кол-во" inputmode="decimal">
+                            <select id="pr-unit" aria-label="Единица">
+                                <option value="">—</option><option value="кг">кг</option><option value="г">г</option><option value="л">л</option><option value="мл">мл</option><option value="шт">шт</option><option value="уп">уп</option>
+                            </select>
+                        </div>
+                        <input type="text" id="pr-store" list="pr-stores" placeholder="Магазин" maxlength="40">
+                        <input type="date" id="pr-date">
+                        <button type="button" class="btn-primary btn-block" onclick="addManualPrice()"><span class="material-icons">add</span> Сохранить цену</button>
+                        <datalist id="pr-products"></datalist>
+                        <datalist id="pr-stores"></datalist>
+                    </div>
+                    <div class="card card-wide price-stores-card" id="price-stores-card">
+                        <h3><span class="material-icons">storefront</span> Цены по магазинам</h3>
+                        <p class="hint">Последняя цена каждого товара в каждом магазине за выбранный период; ниже — цена за 1 кг / 1 л, если указан вес.</p>
+                        <div id="pr-stores-table"></div>
+                    </div>
+                    <div class="card price-list-card" id="price-list-card">
+                        <h3><span class="material-icons">list_alt</span> Все цены</h3>
+                        <input type="search" id="pr-search" placeholder="Поиск по товару или магазину" oninput="renderPriceList()">
+                        <div class="pr-list" id="pr-list"></div>
                     </div>
                 </div>
 
@@ -606,6 +699,11 @@
                         <button type="button" class="btn-secondary btn-block" onclick="openSoundLibrary()"><span class="material-icons">library_music</span> Мои звуки <span id="sound-lib-count"></span></button>
                     </div>
 
+                    <div class="card notify-card" id="notify-card">
+                        <h3><span class="material-icons">notifications</span> Уведомления</h3>
+                        <div id="notify-settings"></div>
+                    </div>
+
                     <div class="card header-settings-card" id="header-settings-card">
                         <h3><span class="material-icons">dashboard_customize</span> Блок «Текущий баланс»</h3>
                         <p class="hint">Что показывать в верхнем блоке с балансом, временем, погодой и курсами, и какого размера цифры и надписи. Сохраняется в аккаунте Google.</p>
@@ -649,7 +747,18 @@
                         <h3><span class="material-icons">history</span> История версий</h3>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>3.8.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>3.9.0 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Уведомления: напоминания о списании подписок (за неделю, 3 дня, день, 3 часа, час или в момент списания) — настраиваются у каждой подписки кнопкой 🔔; каждое утро в 9:00 «Доброе утро» с вашими целями.</li>
+                                    <li>В 23:00 Excel и PDF с записями за день сохраняются в выбранную папку (Chrome/Edge на ПК) или в «Загрузки».</li>
+                                    <li>Цели: список покупок — вписать или вставить сообщение, приложение само разбивает его на пункты; отметка «куплено» и цена у каждого пункта.</li>
+                                    <li>Новый раздел «Цены»: как менялась цена товара за период, цены по магазинам, разные валюты, цена за 1 кг / 1 л. Цены попадают сюда из списка покупок и из чеков по фото.</li>
+                                    <li>Новая запись: выбор валюты (тенге, доллар США, евро, рубль) с пересчётом в тенге по курсу.</li>
+                                    <li>Статистика: блок «Мой банк» — остаток и траты по выписке PDF или уведомлению банка, предупреждения о низком остатке и крупных тратах.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>3.8.0</h4>
                                 <ul>
                                     <li>Новый раздел «Котировки»: акции популярных компаний (США, Казахстан, мировые) с ценой, изменением за день и мини-графиком; «+ Добавить компанию» ищет любую компанию мира.</li>
                                     <li>Котировка акции в блоке баланса и пара котировок на заставке.</li>
@@ -820,7 +929,11 @@
     <script src="js/emoji.js"></script>
     <script src="js/quotes.js"></script>
     <script src="js/goals.js"></script>
+    <script src="js/currency.js"></script>
+    <script src="js/shopping.js"></script>
     <script src="js/receipt.js"></script>
+    <script src="js/notify.js"></script>
+    <script src="js/bank.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>
