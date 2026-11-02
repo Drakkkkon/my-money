@@ -5,7 +5,7 @@
 ['playSound', 'playStartupChime', 'renderOldbook', 'onOldbookTabShown', 'renderSoundSettings', 'applySavedTheme',
     'openSoundPicker', 'initW95Scrollbars', 'renderGoals', 'migrateLegacyGoal', 'runGoalAutoSave', 'renderAllQuotes',
     'onQuotesTabShown', 'renderAllIconSettings', 'renderCategoryTiles', 'enhanceCards', 'applyHeaderPrefs', 'renderSoundLibrary',
-    'renderShoppingAndPrices', 'renderPrices', 'renderBank', 'renderNotifySettings', 'openSubReminders']
+    'renderShoppingAndPrices', 'renderPrices', 'renderBank', 'renderNotifySettings', 'openSubReminders', 'renderSplashExtra']
     .forEach(name => { if (typeof window[name] !== 'function') window[name] = function () {}; });
 if (typeof window.historyCategoryHtml !== 'function') window.historyCategoryHtml = name => `<strong>${escapeHtml(name || 'Без категории')}</strong>`;
 if (typeof window.getFormComment !== 'function') window.getFormComment = function () { return ''; };
@@ -192,6 +192,7 @@ function updateUI(pushToCloud = false) {
     renderSoundLibrary();
     renderShoppingAndPrices();
     renderBank();
+    renderSplashExtra();
 
     // Если флаг pushToCloud true, изменения отправляются на Google Диск (с небольшой задержкой, пачкой)
     if (pushToCloud) scheduleCloudSync();
@@ -596,7 +597,7 @@ function renderSubscriptions() {
         div.innerHTML = `
             <div class="sub-info">
                 <strong>${sub.name}</strong><br>
-                <span style="font-size: 12px; color: var(--text-muted);">Списание: ${sub.day}-го числа каждого месяца${sub.time ? ' в ' + escapeHtml(sub.time) : ''}</span>
+                <span style="font-size: 12px; color: var(--text-muted);">${sub.time ? `Списание: ${sub.day}-го числа каждого месяца в ${escapeHtml(sub.time)}` : `Списание: ${sub.day}-го числа каждого месяца`}</span>
                 ${typeof subReminders === 'function' ? `<span class="sub-remind-info"><span class="material-icons">notifications</span> ${escapeHtml(remindersLabel(subReminders(sub)))}</span>` : ''}
             </div>
             <strong style="font-size: 16px; color: var(--expense);">-${sub.amount} ₸</strong>
@@ -1658,7 +1659,9 @@ const ALMATY_UTC_OFFSET_HOURS = 5;
 
 function formatAlmaty(options, date = new Date()) {
     const shifted = new Date(date.getTime() + ALMATY_UTC_OFFSET_HOURS * 3600000);
-    return new Intl.DateTimeFormat('ru-RU', { timeZone: 'UTC', ...options }).format(shifted);
+    // язык дат — из js/i18n.js (ru-RU, en-GB, kk-KZ, fr-FR, de-DE)
+    const s = new Intl.DateTimeFormat(window.APP_LOCALE || 'ru-RU', { timeZone: 'UTC', ...options }).format(shifted);
+    return typeof window.APP_DATE_FIX === 'function' ? window.APP_DATE_FIX(s) : s; // казахские месяцы, если браузер их не знает
 }
 
 // Текущие дата и время Алматы в формате 'YYYY-MM-DDTHH:MM' (для полей ввода и записей).
@@ -1686,7 +1689,8 @@ function updateSplashClock() {
         if (hour >= 5 && hour < 12) greeting = 'Доброе утро!';
         else if (hour >= 12 && hour < 18) greeting = 'Добрый день!';
         else if (hour >= 18 && hour < 23) greeting = 'Добрый вечер!';
-        greetEl.textContent = profileName ? greeting.replace('!', `, ${profileName}!`) : greeting;
+        const tr = typeof window.t === 'function' ? window.t : (s => s); // перевод (js/i18n.js)
+        greetEl.textContent = profileName ? tr(greeting).replace('!', `, ${profileName}!`) : greeting;
     }
 
     // Правая колонка в блоке «Текущий баланс»
@@ -1814,7 +1818,7 @@ function renderRates(rates, stale) {
         `<span class="rate-item"><b>$</b> ${fmt(rates.usd, 2)} ₸</span>` +
         `<span class="rate-item"><b>€</b> ${fmt(rates.eur, 2)} ₸</span>` +
         `<span class="rate-item"><b>₽</b> ${fmt(rates.rub, 2)} ₸</span>` +
-        (dateText ? `<span class="rate-note">курс на ${dateText}${stale ? ' (нет сети)' : ''}</span>` : '');
+        (dateText ? `<span class="rate-note">${stale ? `курс на ${dateText} (нет сети)` : `курс на ${dateText}`}</span>` : '');
 }
 
 async function fetchRates() {
@@ -1874,6 +1878,7 @@ function proceedFromSplash() {
     document.getElementById('splash-screen').style.opacity = '0';
     setTimeout(() => {
         document.getElementById('splash-screen').style.display = 'none';
+        document.getElementById('splash-screen').classList.add('is-gone'); // на ПК заставку показывает CSS — класс её прячет
         
         // Если установлен ПИН, показываем экран блокировки
         if (savedPin) {

@@ -249,7 +249,7 @@ function renderShoppingList() {
     if (sum) {
         const total = shopList.reduce((s, i) => s + (i.price ? (priceInTenge(i) || 0) : 0), 0);
         const left = shopList.filter(i => !i.bought).length;
-        sum.textContent = `Осталось купить: ${left} из ${shopList.length}` + (total ? ` · по ценам ≈ ${fmtTenge(total)}` : '');
+        sum.textContent = total ? `Осталось купить: ${left} из ${shopList.length} · по ценам ≈ ${fmtTenge(total)}` : `Осталось купить: ${left} из ${shopList.length}`;
     }
 }
 

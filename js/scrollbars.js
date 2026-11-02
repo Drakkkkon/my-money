@@ -104,8 +104,11 @@ function updateW95Scrollbar(el, st) {
             if (getComputedStyle(b).display !== 'none' && br.height > 0 && br.top > window.innerHeight / 2 && br.width > window.innerWidth / 2) bottom = Math.min(bottom, br.top);
         });
         height = Math.max(60, bottom - r.top - SB_INSET * 2);
-        st.bar.style.top = (r.top + SB_INSET) + 'px';
-        st.bar.style.left = (r.right - SB_INSET - st.bar.offsetWidth) + 'px';
+        // приложение по центру экрана (css/layout.css, transform): «закреплённая» полоса отсчитывается от него
+        const wrap = el.closest('.app-wrapper');
+        const shift = wrap && getComputedStyle(wrap).transform !== 'none' ? wrap.getBoundingClientRect() : { left: 0, top: 0 };
+        st.bar.style.top = (r.top - shift.top + SB_INSET) + 'px';
+        st.bar.style.left = (r.right - shift.left - SB_INSET - st.bar.offsetWidth) + 'px';
     } else {
         // Положение полосы — у правого края блока, внутри его рамки
         height = el.offsetHeight - SB_INSET * 2;
@@ -155,5 +158,6 @@ function initW95Scrollbars() {
     // При смене размера окна и вкладок пересчитать все полосы
     const all = () => sbRegistry.forEach(st => st.schedule());
     window.addEventListener('resize', all);
+    window.addEventListener('app-layout', () => setTimeout(all, 60)); // смена разметки в настройках (js/layout.js)
     document.addEventListener('click', () => setTimeout(all, 50), true);
 }

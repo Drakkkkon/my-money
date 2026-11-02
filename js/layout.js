@@ -37,7 +37,24 @@ function normalizeUiPrefs(p) {
         catIcons: { form: obj(ci.form, {}), history: obj(ci.history, {}) },
         iconMode: { form: mode(im.form), history: mode(im.history) },
         notify: normalizeNotifyPrefs(obj(src.notify, {})),
-        bank: normalizeBankPrefs(obj(src.bank, {}))
+        bank: normalizeBankPrefs(obj(src.bank, {})),
+        fonts: obj(src.fonts, {}),
+        layout: normalizeLayoutPrefs(obj(src.layout, {}))
+    };
+}
+
+// Разметка (js/layout.js ниже): ширина и колонки на ПК, плотность, вид меню, заставка на ПК
+function normalizeLayoutPrefs(l) {
+    const pick = (v, list, d) => list.includes(v) ? v : d;
+    const pct = Number(l.widthPct);
+    return {
+        pcWidth: pick(l.pcWidth, ['auto', 'full', 'narrow', 'custom'], 'auto'),
+        widthPct: Number.isFinite(pct) && pct >= 50 && pct <= 100 ? pct : 80,
+        pcCols: pick(String(l.pcCols || 'auto'), ['auto', '1', '2', '3'], 'auto'),
+        density: pick(l.density, ['compact', 'normal', 'roomy'], 'normal'),
+        pcMenu: pick(l.pcMenu, ['left', 'burger'], 'left'),
+        mobileMenu: pick(l.mobileMenu, ['bottom', 'left', 'burger'], 'bottom'),
+        pcSplash: l.pcSplash !== false
     };
 }
 
@@ -80,6 +97,9 @@ function setUiPrefs(p) {
     applyHeaderPrefs();
     renderHeaderSettings();
     if (typeof renderNotifySettings === 'function') renderNotifySettings();
+    applyLayoutPrefs();
+    renderLayoutSettings();
+    if (typeof applyTheme === 'function' && typeof currentThemeId !== 'undefined') applyTheme(currentThemeId, { save: false }); // шрифты с другого устройства
 }
 
 // Изменение настроек на этом устройстве: сохранить и отправить в облако
@@ -259,8 +279,111 @@ function openHeaderSettings() {
     setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
 }
 
+// ---------- Разметка: ПК по центру, колонки, плотность; вид меню (внизу / слева / гамбургер) ----------
+// Всё задаётся атрибутами на <html>, оформление — css/layout.css.
+function isDesktopView() {
+    return window.innerWidth >= 769;
+}
+
+function applyLayoutPrefs() {
+    const l = uiPrefs.layout;
+    const root = document.documentElement;
+    const desktop = isDesktopView();
+    root.setAttribute('data-pc-width', l.pcWidth);
+    root.style.setProperty('--pc-width-pct', l.widthPct + 'vw');
+    root.setAttribute('data-pc-cols', l.pcCols);
+    root.setAttribute('data-density', l.density);
+    const menu = desktop ? l.pcMenu : l.mobileMenu;
+    root.setAttribute('data-menu', menu);
+    root.toggleAttribute('data-pc-splash', l.pcSplash);
+    if (menu !== 'burger') toggleBurgerMenu(false);
+    if (typeof updateMobileNavHeight === 'function') updateMobileNavHeight();
+    window.dispatchEvent(new Event('app-layout'));
+}
+
+function setLayoutPref(key, value) {
+    if (key === 'widthPct') value = Math.round(Number(value));
+    if (key === 'pcSplash') value = !!value;
+    uiPrefs.layout = normalizeLayoutPrefs({ ...uiPrefs.layout, [key]: value });
+    applyLayoutPrefs();
+    if (key !== 'widthPct') renderLayoutSettings();
+    else { const v = document.getElementById('lay-width-val'); if (v) v.textContent = uiPrefs.layout.widthPct + '%'; }
+    commitUiPrefs();
+}
+
+function toggleBurgerMenu(open) {
+    const root = document.documentElement;
+    const next = typeof open === 'boolean' ? open : !root.classList.contains('menu-open');
+    root.classList.toggle('menu-open', next);
+    const btn = document.getElementById('burger-btn');
+    if (btn) btn.setAttribute('aria-expanded', String(next));
+    if (typeof open !== 'boolean' && typeof playSound === 'function') playSound(next ? 'open' : 'close');
+}
+
+function renderLayoutSettings() {
+    const box = document.getElementById('layout-settings');
+    if (!box) return;
+    const l = uiPrefs.layout;
+    const seg = (key, opts) => `<div class="seg-buttons" role="radiogroup">${opts.map(([v, label]) =>
+        `<button type="button" role="radio" aria-checked="${String(l[key]) === v}" class="seg-btn${String(l[key]) === v ? ' is-on' : ''}" onclick="setLayoutPref('${key}', '${v}')">${label}</button>`).join('')}</div>`;
+    box.innerHTML = `
+        <h4 class="font-sub">Меню на телефоне</h4>
+        ${seg('mobileMenu', [['bottom', 'Внизу'], ['left', 'Слева'], ['burger', 'Гамбургер ☰']])}
+        <div class="layout-pc-only">
+            <h4 class="font-sub">Меню на ПК</h4>
+            ${seg('pcMenu', [['left', 'Слева'], ['burger', 'Гамбургер ☰']])}
+            <h4 class="font-sub">Ширина приложения на ПК</h4>
+            ${seg('pcWidth', [['auto', 'По центру 16:9'], ['narrow', 'Узко'], ['custom', 'Своя'], ['full', 'Во весь экран']])}
+            ${l.pcWidth === 'custom' ? `<label class="hdr-slider"><span>Ширина: <b id="lay-width-val">${l.widthPct}%</b> экрана</span>
+                <input type="range" min="50" max="100" step="5" value="${l.widthPct}" oninput="setLayoutPref('widthPct', this.value)"></label>` : ''}
+            <p class="hint">«По центру 16:9»: на очень широких экранах приложение не растягивается, а стоит посередине.</p>
+            <h4 class="font-sub">Блоки в строке</h4>
+            ${seg('pcCols', [['auto', 'Авто'], ['1', '1'], ['2', '2'], ['3', '3']])}
+            <h4 class="font-sub">Плотность</h4>
+            ${seg('density', [['compact', 'Компактно'], ['normal', 'Обычно'], ['roomy', 'Просторно']])}
+            <label class="hdr-part"><input type="checkbox" ${l.pcSplash ? 'checked' : ''} onchange="setLayoutPref('pcSplash', this.checked)"> Экран приветствия с ползунком при запуске на ПК</label>
+        </div>`;
+}
+
+// ---------- Экран приветствия: баланс, траты за сегодня, главная цель ----------
+function renderSplashExtra() {
+    const el = document.getElementById('splash-extra');
+    if (!el || typeof transactions === 'undefined') return;
+    const balance = transactions.reduce((a, tx) => tx.type === 'income' ? a + tx.amount : a - tx.amount, 0);
+    const today = almatyIsoNow().slice(0, 10);
+    const spent = transactions.filter(tx => tx.type === 'expense' && !tx.isSystem && getTxDateStr(tx.date) === today).reduce((s, tx) => s + tx.amount, 0);
+    const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₸';
+    let goalHtml = '';
+    if (typeof sortedGoals === 'function') {
+        const g = sortedGoals().find(x => goalSaved(x) < x.price);
+        if (g) goalHtml = `<div class="splash-stat"><span>Цель</span><b data-i18n-skip>${escapeHtml(g.title.slice(0, 40))}</b><small>${Math.round(goalSaved(g) / g.price * 100)}%</small></div>`;
+    }
+    el.innerHTML = `<div class="splash-stat"><span>Баланс</span><b>${fmt(balance)}</b></div>
+        <div class="splash-stat"><span>Потрачено сегодня</span><b>${fmt(spent)}</b></div>${goalHtml}`;
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     enhanceCards();
     applyHeaderPrefs();
     renderHeaderSettings();
+    applyLayoutPrefs();
+    renderLayoutSettings();
+    // гамбургер: выбор пункта закрывает меню
+    const nav = document.getElementById('sidebar-nav');
+    if (nav) nav.addEventListener('click', e => { if (e.target.closest('button')) toggleBurgerMenu(false); });
+    // заставка на ПК открывается и клавишей Enter / пробелом
+    document.addEventListener('keydown', e => {
+        const splash = document.getElementById('splash-screen');
+        if ((e.key === 'Enter' || e.key === ' ') && splash && !splash.classList.contains('is-gone') && getComputedStyle(splash).display !== 'none' && typeof proceedFromSplash === 'function') {
+            e.preventDefault();
+            proceedFromSplash();
+        }
+        if (e.key === 'Escape' && document.documentElement.classList.contains('menu-open')) toggleBurgerMenu(false);
+    });
+});
+window.addEventListener('load', renderSplashExtra);
+let layoutWasDesktop = null;
+window.addEventListener('resize', () => {
+    const d = isDesktopView();
+    if (d !== layoutWasDesktop) { layoutWasDesktop = d; applyLayoutPrefs(); }
 });

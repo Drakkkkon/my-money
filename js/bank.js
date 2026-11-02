@@ -253,7 +253,7 @@ function renderBank() {
             <span class="kpi-label">На счёте в ${escapeHtml(info.name)}</span>
             <b class="${bp.balance !== null && bp.balance < (bp.low || 0) ? 'amount-expense' : ''}">${bp.balance !== null ? fmtTenge(bp.balance) : '—'}</b>
             <small>${bp.balanceAt ? `на ${shortDate(bp.balanceAt.slice(0, 10))}.${bp.balanceAt.slice(2, 4)}${bp.balanceAt.length > 10 ? ' ' + bp.balanceAt.slice(11, 16) : ''} · ${srcText}` : 'загрузите выписку или вставьте уведомление банка'}</small>
-            ${diff !== null && Math.abs(diff) >= 1 ? `<small>Баланс в приложении: ${fmtTenge(appBalance())} (${diff > 0 ? 'в банке больше на ' : 'в банке меньше на '}${fmtTenge(Math.abs(diff))})</small>` : ''}
+            ${diff !== null && Math.abs(diff) >= 1 ? `<small>${diff > 0 ? `Баланс в приложении: ${fmtTenge(appBalance())} (в банке больше на ${fmtTenge(diff)})` : `Баланс в приложении: ${fmtTenge(appBalance())} (в банке меньше на ${fmtTenge(-diff)})`}</small>` : ''}
         </div>
         ${warn.length ? `<div class="bank-warn">${warn.map(w => `<p><span class="material-icons">warning</span> ${escapeHtml(w)}</p>`).join('')}</div>` : (bp.balance !== null ? '<p class="bank-ok"><span class="material-icons">verified</span> Всё в порядке</p>' : '')}
         ${s ? `<div class="kpi-grid bank-kpi">

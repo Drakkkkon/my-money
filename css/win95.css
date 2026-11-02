@@ -318,7 +318,7 @@ html body .splash-content {
     background: var(--w95-face); box-shadow: var(--w95-window); padding: 3px 14px 16px; max-width: 420px;
 }
 html body .splash-content::before {
-    content: 'Добро пожаловать'; display: block; position: relative;
+    content: attr(data-title); display: block; position: relative; /* текст — из index.html (переводится, js/i18n.js) */
     margin: 0 -11px 14px; padding: 4px 60px 4px 8px; text-align: left;
     background: linear-gradient(90deg, var(--w95-title), var(--w95-title-2)) , var(--w95-title);
     color: var(--w95-title-text) !important; font-family: var(--w95-font-ui); font-size: 15px; font-weight: 600;

@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="css/v38.css">
     <!-- Тема «Метро» (плитки, огромные заголовки): действует только при html[data-w95="metro"] -->
     <link rel="stylesheet" href="css/metro.css">
+    <!-- Разметка ПК, меню-гамбургер, заставка на ПК, шрифты, языки -->
+    <link rel="stylesheet" href="css/layout.css">
     <!-- Свои темы: цвета из редактора (только при флагах data-c-*) -->
     <link rel="stylesheet" href="css/custom.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -36,7 +38,7 @@
 
     <!-- ЗАСТАВКА (SPLASH SCREEN) -->
     <div id="splash-screen" class="splash-screen">
-        <div class="splash-content">
+        <div class="splash-content" data-title="Добро пожаловать">
             <h1 id="splash-greeting" style="font-size: 32px; font-weight: 700; margin-bottom: 5px;">Доброе утро!</h1>
             <div id="splash-weather" style="font-size: 16px; opacity: 0.9;"><span class="material-icons" style="vertical-align:middle; font-size:18px;">thermostat</span> Загрузка погоды...</div>
             
@@ -45,6 +47,8 @@
                 <div id="splash-date" style="font-size: 18px; opacity: 0.8; margin-top: 5px;">1 января, Понедельник</div>
                 <!-- Пара котировок акций (выбираются в разделе «Котировки», js/quotes.js) -->
                 <div id="splash-quotes" class="splash-quotes" aria-label="Котировки акций"></div>
+                <!-- Баланс, траты за сегодня и главная цель (js/layout.js) -->
+                <div id="splash-extra" class="splash-extra"></div>
             </div>
         </div>
         
@@ -83,6 +87,9 @@
     </div>
 
     <div class="app-wrapper">
+        <!-- Меню-гамбургер (вид меню — Настройки → «Разметка и меню», js/layout.js) -->
+        <button type="button" class="burger-btn" id="burger-btn" onclick="toggleBurgerMenu()" aria-label="Меню" aria-expanded="false" title="Меню"><span class="material-icons">menu</span></button>
+        <div class="menu-backdrop" onclick="toggleBurgerMenu(false)"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
                 <img src="images/logo.png" alt="Logo" class="app-logo" onerror="this.style.display='none'">
@@ -692,6 +699,21 @@
                         <div class="theme-browser" id="theme-picker"></div>
                     </div>
 
+                    <div class="card font-settings-card" id="font-settings-card">
+                        <h3><span class="material-icons">text_fields</span> Шрифты</h3>
+                        <div id="font-settings"></div>
+                    </div>
+
+                    <div class="card layout-settings-card" id="layout-settings-card">
+                        <h3><span class="material-icons">view_quilt</span> Разметка и меню</h3>
+                        <div id="layout-settings"></div>
+                    </div>
+
+                    <div class="card icon-app-card" id="icon-app-card">
+                        <h3><span class="material-icons">apps</span> Иконка приложения</h3>
+                        <div id="icon-settings"></div>
+                    </div>
+
                     <div class="card sound-card">
                         <h3><span class="material-icons">volume_up</span> Звуки</h3>
                         <p class="hint">Щелчки кнопок, звуки открытия и закрытия окон и короткая мелодия при запуске. Все звуки создаются самим приложением.</p>
@@ -750,7 +772,18 @@
                         <h3><span class="material-icons">history</span> История версий</h3>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>3.10.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>3.11.0 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Шрифты: 10 шрифтов — 3 общих для всех тем и свои у каждой группы тем; отдельно для заголовков и для текста. Загрузка своего шрифта с проверкой совместимости (русские, казахские, дореформенные буквы, латиница, цифры, ₸, ширина и высота).</li>
+                                    <li>Языки: русский, русский дореформенный, английский, казахский, французский и немецкий — меню, кнопки, блоки, окна и сообщения.</li>
+                                    <li>ПК: на экранах шире 16:9 приложение стоит по центру; блок «Разметка и меню» — ширина, блоки в строке, плотность.</li>
+                                    <li>Экран приветствия с ползунком на ПК (баланс, траты за сегодня, главная цель); открывается и клавишей Enter.</li>
+                                    <li>Меню-гамбургер ☰ (на телефоне и ПК) и меню слева на телефоне — на выбор вместо нижнего.</li>
+                                    <li>Иконка приложения: своя картинка → файлы для GitHub одним ZIP и значок вкладки сразу.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>3.10.0</h4>
                                 <ul>
                                     <li>Ползунок прокрутки справа по всей программе: у всей страницы и у всех длинных блоков. Тонкий, но легко ловится пальцем; в каждой теме — в её стиле.</li>
                                     <li>Новая папка тем «Windows 8 Метро»: плитки вместо меню, огромные тонкие заголовки разделов на полэкрана, плоские окна без рамок, экран блокировки с крупным временем, «поворот» плиток при переходе, свои звуки.</li>
@@ -916,6 +949,13 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Язык приложения (js/i18n.js) — последний блок настроек -->
+                    <div class="card lang-card" id="lang-card">
+                        <h3 data-i18n-skip><span class="material-icons">translate</span> Язык · Language · Тіл</h3>
+                        <div class="lang-list" id="lang-settings"></div>
+                        <p class="hint">После выбора приложение перезапустится на новом языке. Ваши записи, категории и комментарии не переводятся.</p>
+                    </div>
                 </div>
             </main>
         </div>
@@ -928,6 +968,8 @@
         <nav class="mobile-nav tabs" id="mobile-nav"></nav>
     </div>
     <script src="js/config.js"></script>
+    <!-- Языки: должен идти первым — подгружает словарь выбранного языка -->
+    <script src="js/i18n.js"></script>
     <script src="js/sound.js"></script>
     <script src="js/soundpicker.js"></script>
     <script src="js/themes.js"></script>
@@ -945,6 +987,8 @@
     <script src="js/receipt.js"></script>
     <script src="js/notify.js"></script>
     <script src="js/bank.js"></script>
+    <script src="js/fonts.js"></script>
+    <script src="js/icon.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>

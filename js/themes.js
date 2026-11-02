@@ -307,6 +307,9 @@ function applyResolvedTheme(t, { save = true, preview = false, render = true } =
 
     if (typeof window.setSoundPack === 'function') window.setSoundPack(t.sounds);
     updateChartTheme(t);
+    // выбранные в настройках шрифты группы тем (js/fonts.js) поверх шрифтов темы
+    if (typeof applyFontPrefs === 'function' && typeof uiPrefs !== 'undefined') applyFontPrefs();
+    if (render && typeof renderFontSettings === 'function') renderFontSettings();
     if (save) {
         try { localStorage.setItem(THEME_KEY, t.id); } catch (e) {}
     }
@@ -370,6 +373,10 @@ function themesInFolder(fid) {
 }
 
 function themeCountLabel(n) {
+    // другие языки (js/i18n.js): своё число у слова
+    const lang = typeof appLang !== 'undefined' ? appLang : 'ru';
+    const other = { en: ['theme', 'themes'], fr: ['thème', 'thèmes'], de: ['Design', 'Designs'], kk: ['тақырып', 'тақырып'] }[lang];
+    if (other) return `${n} ${n === 1 ? other[0] : other[1]}`;
     const m10 = n % 10, m100 = n % 100;
     const word = m10 === 1 && m100 !== 11 ? 'тема' : (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'темы' : 'тем');
     return `${n} ${word}`;

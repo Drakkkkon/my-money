@@ -300,8 +300,12 @@ function runNotifyChecks() {
 
 // ---------- Настройки подписки: время и напоминания ----------
 function remindersLabel(list) {
-    if (!list.length) return 'без напоминаний';
-    return NOTIFY_OFFSETS.filter(o => list.includes(o.id)).map(o => o.label.toLowerCase()).join(', ');
+    const tr = typeof window.t === 'function' ? window.t : (s => s); // каждый пункт переводится отдельно (js/i18n.js)
+    if (!list.length) return tr('без напоминаний');
+    return NOTIFY_OFFSETS.filter(o => list.includes(o.id)).map((o, i) => {
+        const s = tr(o.label);
+        return i === 0 || appLang === 'de' ? s : s[0].toLowerCase() + s.slice(1);
+    }).join(', ');
 }
 
 function openSubReminders(id) {

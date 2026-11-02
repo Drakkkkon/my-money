@@ -1,0 +1,199 @@
+/* =========================================================================
+   РАЗМЕТКА И МЕНЮ (js/layout.js): атрибуты на <html>
+   data-pc-width = auto | narrow | custom | full   — ширина приложения на ПК
+   data-pc-cols  = auto | 1 | 2 | 3                 — блоков в строке на ПК
+   data-density  = compact | normal | roomy         — отступы
+   data-menu     = bottom | left | burger           — вид меню (на ПК: left | burger)
+   data-pc-splash                                    — экран приветствия на ПК
+   Плюс блоки настроек «Шрифты», «Язык», «Иконка приложения».
+   ========================================================================= */
+
+/* ---------- Ширина на ПК: приложение посередине ---------- */
+/* transform делает .app-wrapper «рамкой» для закреплённых элементов внутри него (кнопка синхронизации,
+   панели задач тем, развёрнутые окна), поэтому они остаются внутри приложения, а не у краёв экрана */
+@media (min-width: 769px) and (min-aspect-ratio: 16/9) {
+    html[data-pc-width="auto"] body .app-wrapper {
+        left: 50% !important; right: auto !important; width: calc(100vh * 16 / 9);
+        transform: translateX(-50%); box-shadow: 0 0 0 1px rgba(0, 0, 0, .3), 0 0 40px rgba(0, 0, 0, .35);
+    }
+}
+@media (min-width: 769px) {
+    html[data-pc-width="narrow"] body .app-wrapper {
+        left: 50% !important; right: auto !important; width: min(100vw, 1280px);
+        transform: translateX(-50%); box-shadow: 0 0 0 1px rgba(0, 0, 0, .3), 0 0 40px rgba(0, 0, 0, .35);
+    }
+    html[data-pc-width="custom"] body .app-wrapper {
+        left: 50% !important; right: auto !important; width: var(--pc-width-pct, 80vw);
+        transform: translateX(-50%); box-shadow: 0 0 0 1px rgba(0, 0, 0, .3), 0 0 40px rgba(0, 0, 0, .35);
+    }
+    /* Блоки в строке */
+    html[data-pc-cols="1"] body main > .tab:not(#transactions), html[data-pc-cols="1"] body main > #statistics { grid-template-columns: minmax(0, 1fr) !important; }
+    html[data-pc-cols="2"] body main > .tab:not(#transactions), html[data-pc-cols="2"] body main > #statistics { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    html[data-pc-cols="3"] body main > .tab:not(#transactions), html[data-pc-cols="3"] body main > #statistics { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+    html[data-pc-cols="1"] body main > #statistics > .card-wide,
+    html[data-pc-cols="3"] body main > #statistics > .card-wide { grid-column: 1 / -1 !important; }
+    /* в настройках колонки меняют только на ПК */
+    html body .layout-pc-only { display: block; }
+}
+@media (max-width: 768px) {
+    html body .layout-pc-only { display: none; }
+}
+
+/* ---------- Плотность ---------- */
+html[data-density="compact"] body main > .tab { gap: 7px !important; }
+html[data-density="compact"] body main { padding-top: 8px !important; padding-left: 8px !important; padding-right: 8px !important; }
+html[data-density="compact"] body .card > h3 { margin-bottom: 8px !important; }
+html[data-density="roomy"] body main > .tab { gap: 22px !important; }
+@media (min-width: 769px) {
+    html[data-density="roomy"] body main { padding-left: 30px !important; padding-right: 30px !important; padding-top: 22px !important; }
+}
+
+/* ---------- Экран приветствия на ПК ---------- */
+@media (min-width: 769px) {
+    html[data-pc-splash] body #splash-screen:not(.is-gone) { display: flex !important; }
+    html[data-pc-splash] body #slider-container { display: block !important; }
+    html[data-pc-splash] body .splash-content { max-width: 620px; }
+    html[data-pc-splash] body #splash-time { font-size: 84px !important; }
+    html[data-pc-splash] body .slider-container { width: 380px; cursor: grab; }
+}
+html body .splash-extra { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+html body .splash-extra:empty { display: none; }
+html body .splash-stat {
+    display: flex; flex-direction: column; align-items: center; min-width: 120px; padding: 6px 12px;
+    background: var(--w95-field); box-shadow: var(--w95-sunken); font-variant-numeric: tabular-nums;
+}
+html body .splash-stat span { font-size: 12px; opacity: .8; }
+html body .splash-stat b { font-size: 17px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html body .splash-stat small { font-size: 12px; }
+html[data-w95="metro"] body .splash-stat { background: rgba(0, 0, 0, .25) !important; box-shadow: none !important; align-items: flex-start; }
+html[data-w95="metro"] body .splash-extra { justify-content: flex-start; }
+html:is([data-w95="aqua"], [data-w95="aero"]) body .splash-stat { border-radius: 6px; }
+
+/* ---------- Меню-гамбургер ---------- */
+html body .burger-btn, html body .menu-backdrop { display: none; }
+html[data-menu="burger"] body .burger-btn {
+    display: flex !important; align-items: center; justify-content: center;
+    position: fixed; top: 8px; left: 8px; z-index: 2600; width: 44px; height: 44px; padding: 0 !important; min-height: 0 !important;
+    background: var(--w95-face) !important; color: var(--w95-text) !important; border: none !important; box-shadow: var(--w95-raised) !important; cursor: pointer;
+}
+html[data-menu="burger"] body .burger-btn .material-icons { font-size: 26px !important; color: var(--w95-text) !important; }
+html[data-menu="burger"] body .burger-btn:active, html[data-menu="burger"].menu-open body .burger-btn { box-shadow: var(--w95-pressed) !important; }
+html[data-menu="burger"][data-w95="metro"] body .burger-btn { background: var(--w95-desktop) !important; box-shadow: none !important; }
+html[data-menu="burger"]:is([data-w95="aqua"], [data-w95="aero"]) body .burger-btn { border-radius: 8px !important; }
+html[data-menu="burger"] body header, html[data-menu="burger"] body header[class] { margin-left: 62px !important; }
+html[data-menu="burger"] body .app-wrapper > aside.sidebar {
+    display: flex !important; flex-direction: column !important; position: fixed !important;
+    top: 0 !important; left: 0 !important; bottom: 0 !important; right: auto !important;
+    width: min(50%, 320px) !important; max-width: 50% !important; height: auto !important; min-width: 170px;
+    z-index: 2550 !important; overflow-y: auto !important; overflow-x: hidden;
+    transform: translateX(-105%); transition: transform .25s ease-out !important; visibility: hidden;
+    border-radius: 0 !important;
+}
+html[data-menu="burger"].menu-open body .app-wrapper > aside.sidebar { transform: none; visibility: visible; }
+html[data-menu="burger"].menu-open body .menu-backdrop { display: block; position: fixed; inset: 0; z-index: 2500; background: rgba(0, 0, 0, .38); }
+html[data-menu="burger"] body .app-wrapper > aside.sidebar .sidebar-header {
+    display: flex !important; width: auto !important; height: auto !important; min-height: 60px; border-radius: 0 !important;
+    justify-content: flex-start !important; align-items: center !important; padding: 10px 10px 10px 60px !important; flex: 0 0 auto;
+}
+html[data-menu="burger"] body .app-wrapper > aside.sidebar .sidebar-header h2 { display: block !important; }
+html[data-menu="burger"] body .app-wrapper > aside.sidebar .sidebar-nav {
+    flex-direction: column !important; flex: 0 0 auto !important; overflow: visible !important; padding: 6px !important; height: auto !important;
+}
+html[data-menu="burger"] body .app-wrapper > aside.sidebar .sidebar-nav:not([style*="grid"]) button {
+    flex: none !important; width: 100% !important; height: auto !important; min-height: 42px; justify-content: flex-start !important;
+}
+html[data-menu="burger"][data-w95="metro"] body .app-wrapper > aside.sidebar .sidebar-nav { display: grid !important; }
+html[data-menu="burger"][data-w95="metro"] body .app-wrapper > aside.sidebar .sidebar-nav button { min-height: 0; justify-content: space-between !important; }
+html[data-menu="burger"] body .mobile-nav { display: none !important; }
+html[data-menu="burger"], html[data-menu="left"] { --mobile-nav-h: 0px !important; }
+@media (min-width: 769px) {
+    html[data-menu="burger"] body main { padding-bottom: 26px !important; }
+    html[data-menu="burger"] body .fab-sync { bottom: 30px !important; }
+}
+
+/* ---------- Меню слева на телефоне: узкая колонка значков ---------- */
+@media (max-width: 768px) {
+    html[data-menu="left"] body .app-wrapper > aside.sidebar {
+        display: flex !important; flex-direction: column !important; position: relative !important;
+        top: auto !important; left: auto !important; bottom: auto !important; right: auto !important;
+        width: 74px !important; flex: 0 0 74px !important; height: 100% !important; min-width: 0;
+        overflow-y: auto !important; overflow-x: hidden; padding: 4px !important; z-index: 5; transform: none;
+    }
+    html[data-menu="left"] body .app-wrapper > aside.sidebar .sidebar-header { padding: 6px 2px !important; justify-content: center !important; width: auto !important; height: auto !important; border-radius: 0 !important; }
+    html[data-menu="left"] body .app-wrapper > aside.sidebar .sidebar-header h2 { display: none !important; }
+    html[data-menu="left"] body .app-wrapper > aside.sidebar .sidebar-nav {
+        display: flex !important; flex-direction: column !important; gap: 4px !important; padding: 2px !important; flex: 0 0 auto !important;
+    }
+    html[data-menu="left"] body .app-wrapper > aside.sidebar .sidebar-nav button {
+        flex: none !important; width: 100% !important; height: auto !important; aspect-ratio: auto !important;
+        flex-direction: column !important; align-items: center !important; justify-content: center !important;
+        gap: 2px !important; padding: 6px 2px !important; font-size: 10px !important; text-align: center; min-height: 52px;
+    }
+    html[data-menu="left"] body .app-wrapper > aside.sidebar .sidebar-nav button .nav-label { white-space: normal; line-height: 1.05; overflow-wrap: anywhere; align-self: center; }
+    html[data-menu="left"] body .app-wrapper > aside.sidebar .sidebar-nav button .material-icons { font-size: 22px !important; margin: 0 !important; align-self: center; }
+    html[data-menu="left"] body .mobile-nav { display: none !important; }
+    html[data-menu="left"] body main, html[data-menu="burger"] body main { padding-bottom: 24px !important; }
+    html[data-menu="left"] body .fab-sync, html[data-menu="burger"] body .fab-sync { bottom: 18px !important; }
+}
+
+/* ---------- Настройки: шрифты ---------- */
+html body .font-pick { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+html body .font-pick > span { flex: 1 1 150px; font-size: 14px; }
+html body .font-pick select { flex: 1 1 180px; width: auto; margin: 0 !important; min-width: 0; }
+html body .font-pick input[type="color"] { width: 60px; height: 34px; margin: 0 !important; }
+html body .font-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; margin: 6px 0 12px; }
+html body .font-card {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px !important; min-height: 0 !important; width: auto;
+    background: var(--w95-field) !important; color: var(--w95-text) !important; border: none !important; box-shadow: var(--w95-raised) !important; cursor: pointer; text-align: left;
+}
+html body .font-card.is-on { box-shadow: var(--w95-pressed) !important; outline: 2px solid var(--w95-select); outline-offset: -4px; }
+html body .font-card-sample { font-size: 22px !important; line-height: 1.2; white-space: nowrap; overflow: hidden; max-width: 100%; }
+html body .font-card-name { font-size: 13px; font-weight: 700; font-family: var(--w95-font-text); }
+html body .font-card-group { font-size: 11px; color: var(--w95-muted); }
+html body .font-sub { margin: 12px 0 6px; font-size: 14px; }
+html body .font-custom-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+html body .font-custom-row { display: flex; align-items: center; gap: 8px; padding: 4px 6px; background: var(--w95-field); box-shadow: var(--w95-sunken); }
+html body .font-custom-row .font-card-sample { font-size: 18px !important; flex: 0 0 auto; }
+html body .font-custom-name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; font-size: 13px; }
+html body .font-custom-row .btn-secondary { width: 34px !important; min-height: 32px !important; padding: 0 !important; display: flex !important; align-items: center; justify-content: center; }
+html body .font-custom-score, html body .font-score b { font-weight: 700; }
+html body .is-good { color: var(--w95-income) !important; }
+html body .is-mid { color: #b86e00 !important; }
+html body .is-bad { color: var(--w95-expense) !important; }
+html body .font-upload-btn { display: flex !important; align-items: center; justify-content: center; gap: 6px; cursor: pointer; margin-top: 6px; }
+html body .font-upload-btn input { display: none; }
+html body .font-upload-status:empty { display: none; }
+html body .font-upload-status { margin-top: 10px; padding: 8px; background: var(--w95-field); box-shadow: var(--w95-sunken); }
+html body .font-sample { font-size: 24px; line-height: 1.3; margin: 6px 0; overflow-wrap: anywhere; }
+html body .font-report ul { list-style: none; padding: 0; margin: 6px 0; }
+html body .font-report li { display: flex; align-items: center; gap: 4px; font-size: 13px; flex-wrap: wrap; }
+html body .font-report li .material-icons { font-size: 16px !important; }
+html body .font-report li.is-ok .material-icons { color: var(--w95-income) !important; }
+html body .font-report li.is-miss .material-icons { color: var(--w95-expense) !important; }
+html body .font-report small { color: var(--w95-muted); }
+html body .font-warn { color: var(--w95-expense) !important; }
+
+/* ---------- Настройки: язык ---------- */
+html body .lang-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; margin-bottom: 8px; }
+html body .lang-opt {
+    display: flex; align-items: center; gap: 8px; padding: 10px; cursor: pointer; font-size: 15px;
+    background: var(--w95-field); box-shadow: var(--w95-raised);
+}
+html body .lang-opt.is-on { box-shadow: var(--w95-pressed); outline: 2px solid var(--w95-select); outline-offset: -4px; font-weight: 700; }
+html body .lang-opt input { width: auto !important; margin: 0 !important; }
+
+/* ---------- Настройки: иконка ---------- */
+html body .icon-pick-btn { display: flex !important; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+html body .icon-pick-btn input { display: none; }
+html body .icon-previews { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin: 12px 0; }
+html body .icon-previews figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+html body .icon-previews figcaption { font-size: 12px; color: var(--w95-muted); }
+html body .icon-preview { box-shadow: 0 1px 4px rgba(0, 0, 0, .35); border-radius: 22% !important; }
+html body .icon-preview.is-mask { border-radius: 50% !important; }
+html body .icon-opts { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; margin-bottom: 8px; }
+html body .icon-opts .hdr-slider { flex: 1 1 160px; margin: 0; }
+
+/* ---------- Без лишних переносов на длинных языках ---------- */
+html body .mobile-nav button .nav-label { overflow: hidden; text-overflow: ellipsis; max-width: 100%; white-space: nowrap; }
+html body .sidebar-nav button .nav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+html body .btn-group > button, html body .btn-group > label { min-width: 0; }

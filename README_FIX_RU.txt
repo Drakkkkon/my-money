@@ -1,4 +1,16 @@
-My Money v3.10.0 — сайт
+My Money v3.11.0 — сайт
+
+Что нового в 3.11.0:
+- Языки (js/i18n.js + js/lang/en|kk|fr|de.js): перевод накладывается на страницу (тексты, placeholder/title/aria-label,
+  alert/confirm/prompt, подписи диаграмм; MutationObserver для новых блоков). Ключ словаря — русская строка, {0} — значения.
+  Дореформенный русский — правила в toOldOrthography(). Язык — localStorage finance_lang (смена → перезагрузка).
+  Данные пользователя не переводятся (список I18N_SKIP). Новые строки в коде на русском переводятся, только если есть в словаре.
+- Шрифты (js/fonts.js): FONT_LIB — 3 общих + по 1–2 на группу тем; выбор uiPrefs.fonts[группа] = {ui, text};
+  свои шрифты — IndexedDB mymoney-fonts, проверка совместимости checkFontCompat().
+- Разметка (js/layout.js + css/layout.css): uiPrefs.layout (pcWidth, widthPct, pcCols, density, pcMenu, mobileMenu, pcSplash);
+  ПК по центру при соотношении шире 16:9; меню-гамбургер и меню слева на телефоне; заставка на ПК.
+- Иконка (js/icon.js): картинка → ZIP с images/icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png, logo.png.
+- service worker my-money-v12.
 
 Что нового в 3.10.0:
 - Ползунок прокрутки всей страницы (.main-wrapper, класс .w95-sb-page, position: fixed) и всех длинных блоков —
