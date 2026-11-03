@@ -120,3 +120,24 @@ html:is([data-w95="aqua"], [data-w95="aero"]) body :is(.obc-book, .obc-item, .ob
     html body .mobile-nav.nav-xwide button .nav-label { font-size: 9.5px; }
     html body .mobile-nav.nav-xwide button .material-icons { font-size: 21px !important; }
 }
+
+/* ---------- 4.1: распознавание фото (js/recognize.js) ---------- */
+html body .ocr-pick-inline { margin: 8px 0 0; }
+html body .ocr-pick-inline select { min-width: 0; flex: 1 1 160px; }
+html body .receipt-engine-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+html body .receipt-engine-row > .hint { flex: 1 0 100%; margin: 0; }
+html body .receipt-engine-row select { flex: 1 1 140px; min-width: 0; margin: 0 !important; }
+html body .receipt-engine-row .btn-secondary { width: auto; flex: 0 0 auto; display: inline-flex !important; align-items: center; gap: 4px; }
+html body .ocr-engine { padding: 8px; margin: 6px 0; background: var(--w95-field); box-shadow: var(--w95-sunken); }
+html body .ocr-engine-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+html body .ocr-engine .hint { margin: 4px 0; }
+html body .ocr-badge { font-size: 11px; padding: 1px 6px; background: var(--w95-face); box-shadow: var(--w95-raised); color: var(--w95-text); }
+html body .ocr-badge.is-ready { color: var(--w95-income); }
+html body .ocr-badge.is-nokey { color: var(--w95-expense); }
+html body .ocr-key-row { display: flex; gap: 6px; margin-top: 4px; }
+html body .ocr-key-row input { flex: 1 1 auto; min-width: 0; margin: 0 !important; }
+html body .ocr-link { flex: 0 0 auto; width: 40px !important; display: inline-flex !important; align-items: center; justify-content: center; padding: 0 !important; text-decoration: none; }
+html body .ocr-privacy { display: flex; gap: 6px; align-items: flex-start; }
+html body .ocr-privacy .material-icons { font-size: 18px !important; }
+html body .ocr-bench-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+html body .ocr-bench-table th, html body .ocr-bench-table td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--w95-muted); }

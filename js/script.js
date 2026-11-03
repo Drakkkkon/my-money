@@ -102,6 +102,32 @@ function registerServiceWorker() {
         .catch(e => console.warn('Service worker не зарегистрирован', e));
 }
 
+// Кнопка «Обновить сайт сейчас» (Настройки → История версий): убирает старую копию сайта (service worker и кэш)
+// и заново скачивает файлы. Записи, настройки и ключи (localStorage) не трогаются.
+async function forceSiteUpdate() {
+    const btn = document.querySelector('.app-version-row button');
+    if (btn) btn.disabled = true;
+    try {
+        if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+        }
+    } catch (e) {}
+    try {
+        if (window.caches) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+        }
+    } catch (e) {}
+    try {
+        // обновляем и обычный кэш браузера: без этого телефон мог бы снова взять старые файлы
+        const urls = ['index.html'].concat([...document.querySelectorAll('script[src], link[rel="stylesheet"][href]')]
+            .map(e => e.getAttribute('src') || e.getAttribute('href'))
+            .filter(u => u && !/^(https?:)?\/\//.test(u)));
+        await Promise.all(urls.map(u => fetch(u, { cache: 'reload' }).catch(() => null)));
+    } catch (e) {}
+    location.href = location.pathname + '?v=' + Date.now();
+}
 
 // --- ОСТАЛЬНАЯ ЛОГИКА ---
 function loadData() {
@@ -1320,6 +1346,8 @@ function clearAllData() {
 }
 
 function showTab(tabId, btn) {
+    if (tabId === 'oldbook' && typeof isAdminUser === 'function' && !isAdminUser()) tabId = 'transactions'; // Oldbook — только для администратора
+    if (typeof adminLog === 'function' && tabId !== currentTabId) adminLog('tab', { id: tabId });
     document.querySelectorAll('.tab').forEach(t => {
         t.style.display = 'none';
         t.classList.remove('tab-enter');
@@ -1341,6 +1369,7 @@ function showTab(tabId, btn) {
         if (mainWrapper) mainWrapper.scrollTop = 0;
     }
     
+    if (typeof applyCardSizes === 'function') setTimeout(applyCardSizes, 0); // колонки видимого раздела
     if (tabId === 'oldbook' && typeof onOldbookTabShown === 'function') onOldbookTabShown();
     if (tabId === 'quotes') onQuotesTabShown();
     if (tabId === 'prices') renderPrices(); // диаграмме нужен видимый холст
@@ -1374,7 +1403,8 @@ let currentTabId = 'transactions';
 function getMenuState() {
     let state = null;
     try { state = JSON.parse(localStorage.getItem(MENU_KEY) || 'null'); } catch (e) {}
-    const known = MENU_ITEMS.map(i => i.id);
+    // раздел Oldbook виден только администратору (js/admin.js)
+    const known = MENU_ITEMS.map(i => i.id).filter(id => typeof menuAllowed !== 'function' || menuAllowed(id));
     let order = Array.isArray(state && state.order) ? state.order.filter(id => known.includes(id)) : [];
     known.forEach(id => { if (!order.includes(id)) order.push(id); }); // новые пункты из будущих версий
     let hidden = Array.isArray(state && state.hidden) ? state.hidden.filter(id => known.includes(id) && id !== 'settings') : [];
@@ -1877,6 +1907,17 @@ window.addEventListener('online', fetchRates);
 let currentPinInput = "";
 let savedPin = localStorage.getItem('finance_pin');
 let bioEnabled = localStorage.getItem('finance_bio') === 'true';
+let pinUnlocked = false; // ПИН уже введён в этот запуск — второй раз не спрашиваем
+
+// Полностью убирает экран ПИН-кода (и после ввода ПИН, и после отпечатка).
+function hidePinScreen(delay) {
+    pinUnlocked = true;
+    const pinScreen = document.getElementById('pin-screen');
+    if (!pinScreen) return;
+    pinScreen.style.opacity = '0';
+    pinScreen.style.pointerEvents = 'none'; // пока тает — не перехватывает нажатия
+    setTimeout(() => { pinScreen.style.display = 'none'; }, delay);
+}
 
 function proceedFromSplash() {
     safeStep('мелодия', () => playStartupChime()); // собственная мелодия запуска (звучит после жеста разблокировки)
@@ -1885,9 +1926,12 @@ function proceedFromSplash() {
         document.getElementById('splash-screen').style.display = 'none';
         document.getElementById('splash-screen').classList.add('is-gone'); // на ПК заставку показывает CSS — класс её прячет
         
-        // Если установлен ПИН, показываем экран блокировки
-        if (savedPin) {
-            document.getElementById('pin-screen').style.display = 'flex';
+        // Если установлен ПИН и он ещё не введён (на ПК ПИН идёт раньше заставки), показываем экран блокировки
+        if (savedPin && !pinUnlocked) {
+            const pinScreen = document.getElementById('pin-screen');
+            pinScreen.style.opacity = '';
+            pinScreen.style.pointerEvents = '';
+            pinScreen.style.display = 'flex';
             if (bioEnabled) {
                 document.getElementById('bio-login-btn').style.visibility = 'visible';
                 loginWithBiometrics();
@@ -1919,8 +1963,7 @@ function updatePinDots() {
 function checkPin() {
     if (currentPinInput === savedPin) {
         playSound('success');
-        document.getElementById('pin-screen').style.opacity = '0';
-        setTimeout(() => { document.getElementById('pin-screen').style.display = 'none'; }, 400);
+        hidePinScreen(400);
     } else {
         playSound('error');
         alert('Неверный ПИН-код!');
@@ -2074,9 +2117,7 @@ async function loginWithBiometrics() {
         };
         const credential = await navigator.credentials.get({ publicKey });
         if (credential) {
-            const pinScreen = document.getElementById('pin-screen');
-            pinScreen.style.opacity = '0';
-            setTimeout(() => { pinScreen.style.display = 'none'; }, 300);
+            hidePinScreen(300);
         }
     } catch(e) {
         console.log('Биометрия отменена или не удалась', e);
@@ -2094,6 +2135,8 @@ window.addEventListener('DOMContentLoaded', () => {
     refreshBiometricUi();
     renderMenus();
     initMenuDrag();
+    const verEl = document.getElementById('app-version-now');
+    if (verEl) verEl.textContent = window.APP_VERSION || '—';
 
     // Авто-пропуск заставки на ПК
     if (window.innerWidth >= 769) {

@@ -1,8 +1,8 @@
 // --- OLDBOOK: КАТАЛОГ OLDBOOK.KZ ---
 // Первый блок раздела Oldbook. Книгу можно найти:
 //  • по номеру из каталога (SKU на сайте, например 14898);
-//  • по фото обложки: текст с обложки распознаётся на устройстве (тот же модуль, что у чеков, js/receipt.js),
-//    по нему ищется такая же книга; если точной нет — с тем же названием и автором; иначе «Книга не найдена»;
+//  • по фото обложки: название и автор распознаются выбранным способом (ИИ, веб или на устройстве — js/recognize.js,
+//    тот же выбор, что у чеков), по ним ищется такая же книга; если точной нет — с тем же названием и автором; иначе «Книга не найдена»;
 //  • по названию или автору, вписанным вручную.
 // Данные берутся из каталога сайта oldbook.kz (магазин на платформе Slash): поиск /shop/catalog?q=…,
 // страница книги /shop/products/<id>. Сайт не отдаёт данные другим сайтам напрямую, поэтому запросы идут через
@@ -250,25 +250,22 @@ function obCoverFromInput(e) {
 }
 
 async function obScanCover(file) {
-    if (typeof getReceiptWorker !== 'function') { alert('Модуль распознавания не загружен.'); return; }
+    if (typeof ocrRecognize !== 'function') { alert('Модуль распознавания не загружен.'); return; }
     obCatResult('');
     obCatStatus('Подготавливаем фото обложки…');
     try {
-        const canvas = await prepareReceiptImage(file);
-        const worker = await getReceiptWorker((status, p) => {
-            if (status === 'recognizing text') obCatStatus(`Читаем обложку… ${Math.round(p * 100)}%`);
-            else if (/load/i.test(status)) obCatStatus('Загружаем модуль распознавания (только в первый раз)…');
-        });
-        const { data } = await worker.recognize(canvas);
-        // строки обложки: только с буквами, без мусора
-        const lines = String(data.text || '').split('\n').map(l => l.replace(/[^A-Za-zА-Яа-яЁё0-9 .,:«»"'-]/g, ' ').replace(/\s+/g, ' ').trim())
-            .filter(l => (l.match(/[A-Za-zА-Яа-яЁё]/g) || []).length >= 3);
-        const text = lines.slice(0, 6).join('\n');
+        const sel = document.getElementById('obc-engine');
+        const r = await ocrRecognize('cover', file, { engine: sel ? sel.value : undefined, onProgress: (text) => obCatStatus(escapeHtml(text)) });
+        // ИИ отдаёт название и автора сразу; обычное распознавание — строки текста обложки
+        const lines = r.lines || String(r.text || '').split('\n').map(l => l.trim()).filter(Boolean);
+        const readable = r.title ? [r.author, r.title].filter(Boolean).join(' ') : lines.slice(0, 4).join(' ');
+        const query = r.title ? [r.title, r.author].filter(Boolean).join('\n') : lines.slice(0, 6).join('\n');
         const input = document.getElementById('obc-text');
-        if (input) input.value = lines.slice(0, 4).join(' ');
-        if (!text) { obCatStatus(''); obCatResult('<p class="obc-notfound">Книга не найдена</p><p class="hint">На фото не удалось прочитать текст. Сфотографируйте обложку ровнее и ближе или впишите название вручную.</p>'); return; }
-        obCatStatus('С обложки прочитано: «' + escapeHtml(lines.slice(0, 3).join(' / ')) + '». Ищем в каталоге…');
-        await obSearchByText(text, { fromPhoto: true });
+        if (input) input.value = readable;
+        if (typeof adminLog === 'function') adminLog('scan', { kind: 'cover', engine: r.engine, ms: r.ms, ok: !!query.trim(), text: readable.slice(0, 120) });
+        if (!query.trim()) { obCatStatus(''); obCatResult('<p class="obc-notfound">Книга не найдена</p><p class="hint">На фото не удалось прочитать текст. Сфотографируйте обложку ровнее и ближе, выберите другой способ распознавания или впишите название вручную.</p>'); return; }
+        obCatStatus(`С обложки прочитано (${escapeHtml(r.engineName)}, ${(r.ms / 1000).toFixed(1).replace('.', ',')} с): «${escapeHtml(readable.slice(0, 90))}». Ищем в каталоге…`);
+        await obSearchByText(query, { fromPhoto: true });
     } catch (e) {
         obCatStatus('Не удалось распознать обложку: ' + escapeHtml(e.message || String(e)));
     }

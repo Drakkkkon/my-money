@@ -1,6 +1,6 @@
 // --- ЧЕК ПО ФОТО ---
-// Блок с камерой над «Новой записью»: фото чека → распознавание текста прямо на устройстве (Tesseract.js,
-// русский и английский; фото никуда не отправляется) → итоговая сумма, магазин и позиции.
+// Блок с камерой над «Новой записью»: фото чека → распознавание (js/recognize.js: ИИ, веб-сервис или на устройстве —
+// Tesseract.js; способ выбирается в блоке и в Настройках; «на устройстве» фото никуда не отправляет) → итог, магазин, позиции.
 // Перед сохранением всё показывается в окне и правится. Сохраняется одна запись-расход:
 // категория «Магазин» (или своя), сумма = итог чека, в комментарии магазин и позиции: «молоко 1000, хлеб 1000…».
 // Модуль распознавания (~3 МБ) и словарь (~2,5 МБ) скачиваются при первом использовании, дальше берутся из кэша.
@@ -18,7 +18,8 @@ const RECEIPT_SKIP_RE = new RegExp(
 const RECEIPT_TOTAL_RE = /(итог[оа]?|всего|к\s*оплате|сумма\s*(к\s*оплате|покупки|чека)?|total|барлығы|жиыны|төлеуге)/i;
 const RECEIPT_STORE_RE = /(тоо|ип\b|ао\b|ооо|магазин|маркет|market|supermarket|store|shop|апте|кафе|ресторан|минимаркет|гипермаркет|small|magnum|галмарт|anvar|metro|arbuz|клевер|interfood|sulpak|technodom|mechta)/i;
 
-let tesseractWorker = null;
+let tesseractWorkerPromise = null; // один общий worker (создаётся один раз, в том числе заранее — ocrWarmUp)
+let tesseractProgress = null;     // функция прогресса текущего распознавания
 let tesseractLoading = null;
 
 function loadTesseract() {
@@ -32,12 +33,13 @@ function loadTesseract() {
 
 async function getReceiptWorker(onProgress) {
     await loadTesseract();
-    if (!tesseractWorker) {
-        tesseractWorker = await Tesseract.createWorker(['rus', 'eng'], 1, {
-            logger: m => { if (onProgress && m && typeof m.progress === 'number') onProgress(m.status, m.progress); }
-        });
+    tesseractProgress = onProgress || null;
+    if (!tesseractWorkerPromise) {
+        tesseractWorkerPromise = Tesseract.createWorker(['rus', 'eng'], 1, {
+            logger: m => { if (tesseractProgress && m && typeof m.progress === 'number') tesseractProgress(m.status, m.progress); }
+        }).catch(e => { tesseractWorkerPromise = null; throw e; });
     }
-    return tesseractWorker;
+    return tesseractWorkerPromise;
 }
 
 // Подготовка фото: уменьшить до 1800 px по большей стороне, серый цвет, больше контраста
@@ -187,9 +189,9 @@ function receiptFromInput(e) {
     if (file) scanReceipt(file);
 }
 
-async function scanReceipt(file) {
+async function scanReceipt(file, engine) {
     if (!/^image\//.test(file.type || 'image/')) { alert('Выберите фото чека (JPG, PNG, HEIC).'); return; }
-    openReceiptDialog(file);
+    if (engine === undefined) openReceiptDialog(file); else showReceiptProgress();
     const setProgress = (text, p) => {
         const st = document.getElementById('receipt-status');
         const bar = document.getElementById('receipt-progress-bar');
@@ -198,22 +200,25 @@ async function scanReceipt(file) {
     };
     try {
         setProgress('Подготавливаем фото…', 0.05);
-        const canvas = await prepareReceiptImage(file);
-        setProgress('Загружаем модуль распознавания (только в первый раз, ~5 МБ)…', 0.1);
-        const worker = await getReceiptWorker((status, p) => {
-            if (status === 'recognizing text') setProgress(`Читаем чек… ${Math.round(p * 100)}%`, 0.2 + p * 0.8);
-            else if (/load/i.test(status)) setProgress('Загружаем словарь русского языка…', 0.1 + p * 0.1);
-        });
-        setProgress('Читаем чек…', 0.2);
-        const { data } = await worker.recognize(canvas);
+        const result = await ocrRecognize('receipt', file, { engine, onProgress: setProgress });
         if (!document.getElementById('receipt-dialog')) return; // окно закрыли
-        renderReceiptResult(parseReceiptText(data.text));
+        renderReceiptResult(result);
+        if (typeof adminLog === 'function') adminLog('scan', { kind: 'receipt', engine: result.engine, ms: result.ms, ok: result.total > 0, items: result.items.length });
     } catch (e) {
         console.warn('Чек не распознан', e);
         if (!document.getElementById('receipt-dialog')) return;
-        setProgress('Не удалось распознать чек: ' + (navigator.onLine ? (e.message || e) : 'для первого запуска нужен интернет, чтобы скачать модуль распознавания') + '. Можно заполнить вручную.', 0);
-        renderReceiptResult({ total: 0, store: '', date: '', items: [], text: '' });
+        const why = navigator.onLine ? (e.message || e) : 'для первого запуска нужен интернет, чтобы скачать модуль распознавания';
+        setProgress('Не удалось распознать чек: ' + why + '. Можно выбрать другой способ или заполнить вручную.', 0);
+        renderReceiptResult({ total: 0, store: '', date: '', items: [], text: '', engine: '', engineName: '', ms: 0, tried: e.tried || [] });
     }
+}
+
+// Строка прогресса вместо результата (повторное распознавание другим способом)
+function showReceiptProgress() {
+    const box = document.getElementById('receipt-fields');
+    if (!box) return;
+    box.innerHTML = '<p class="hint" id="receipt-status">Подготавливаем фото…</p><div class="receipt-progress"><div id="receipt-progress-bar"></div></div>';
+    receiptResult = null;
 }
 
 let receiptPhotoFile = null; // фото чека, которое сохранится на Google Диск вместе с записью
@@ -245,6 +250,10 @@ function openReceiptDialog(file) {
         const act = e.target.closest('[data-act]');
         if (act && act.dataset.act === 'save') saveReceiptTx();
         if (act && act.dataset.act === 'rebuild') rebuildReceiptComment();
+        if (act && act.dataset.act === 'redo' && receiptPhotoFile) {
+            const sel = document.getElementById('receipt-engine-redo');
+            scanReceipt(receiptPhotoFile, sel ? sel.value : 'auto');
+        }
         if (act && act.dataset.act === 'raw') { const pre = document.getElementById('receipt-raw'); if (pre) pre.hidden = !pre.hidden; }
     });
     document.body.appendChild(overlay);
@@ -266,7 +275,14 @@ function renderReceiptResult(r) {
     const box = document.getElementById('receipt-fields');
     if (!box) return;
     const found = r.total > 0;
+    const sec = r.ms ? (r.ms / 1000).toFixed(1).replace('.', ',') : '';
+    const tried = (r.tried || []).length ? `<br>Не сработало: ${escapeHtml(r.tried.join('; ').slice(0, 220))}` : '';
     box.innerHTML = `
+        <div class="receipt-engine-row">
+            <span class="hint">${r.engineName ? `Распознано: <b data-i18n-skip>${escapeHtml(r.engineName)}</b>, ${sec} с.` : 'Способ распознавания:'}${tried}</span>
+            <select id="receipt-engine-redo" aria-label="Способ распознавания">${ocrOptionsHtml('receipt', r.engine || 'auto')}</select>
+            <button type="button" class="btn-secondary" data-act="redo"><span class="material-icons">refresh</span> Ещё раз</button>
+        </div>
         <p class="hint">${found
             ? `Найдено: итог <b>${escapeHtml(String(r.total).replace('.', ','))} ₸</b>, позиций — ${r.items.length}. Проверьте и при необходимости исправьте.`
             : (r.text ? 'Итоговую сумму найти не удалось — впишите её сами.' : 'Впишите данные чека вручную.')}</p>

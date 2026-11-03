@@ -1,0 +1,114 @@
+/* =========================================================================
+   4.1: размеры блоков (js/sizes.js) и кнопка размера в каждой теме.
+   Всё новое — только добавления: правила тем идут под html[data-w95="<тема>"], остальные темы не затронуты.
+   Значок на кнопке показывает текущий размер: 1×2 — одна полоса с делением, 2×2 — крест, 2×4 — крест с двумя делениями,
+   пунктирный квадрат — «как было».
+   ========================================================================= */
+
+/* ---------- Блок заданного размера ---------- */
+html body main .card.card-sized:not(.is-maximized):not(.on-wall):not(.is-collapsed) {
+    height: calc(var(--card-rows, 2) * var(--row-h, 150px) + (var(--card-rows, 2) - 1) * 14px) !important; /* !important: в «Настройках» есть #settings > .card { height: fit-content } */
+    overflow: auto; overscroll-behavior: contain;
+}
+html body main > .tab:not(#transactions) > .card.card-sized:not(.on-wall) { grid-column: span var(--card-cols, 1); }
+html body .card.on-wall .w95-ctl-size { display: none !important; }
+html body .card > h3.has-controls { padding-right: 122px; }
+
+/* ---------- Кнопка размера: основа (Windows 95 и все темы на его переменных) ---------- */
+html body .w95-ctl-size { --i: var(--size-ink, var(--w95-text)); margin-right: 2px; cursor: pointer; }
+html body .w95-ctl-size:active { box-shadow: var(--w95-pressed) !important; }
+html body .w95-ctl-size::before { display: none; }
+html body .w95-ctl-size::after, html body .size-glyph {
+    content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 10px; height: 10px; box-sizing: border-box; border: 1.5px dashed var(--i); background: none;
+}
+html body .size-glyph { position: relative; left: auto; top: auto; transform: none; flex: 0 0 auto; --i: var(--w95-text); }
+html body .w95-ctl-size[data-size="s"]::after, html body .size-glyph[data-size="s"] {
+    width: 6px; height: 11px; border-style: solid; background: linear-gradient(var(--i), var(--i)) 0 50% / 100% 1px no-repeat;
+}
+html body .w95-ctl-size[data-size="m"]::after, html body .size-glyph[data-size="m"] {
+    width: 11px; height: 11px; border-style: solid;
+    background: linear-gradient(var(--i), var(--i)) 0 50% / 100% 1px no-repeat, linear-gradient(var(--i), var(--i)) 50% 0 / 1px 100% no-repeat;
+}
+html body .w95-ctl-size[data-size="l"]::after, html body .size-glyph[data-size="l"] {
+    width: 11px; height: 15px; border-style: solid;
+    background: linear-gradient(var(--i), var(--i)) 0 50% / 100% 1px no-repeat, linear-gradient(var(--i), var(--i)) 50% 0 / 1px 100% no-repeat,
+        linear-gradient(var(--i), var(--i)) 0 25% / 100% 1px no-repeat, linear-gradient(var(--i), var(--i)) 0 75% / 100% 1px no-repeat;
+}
+html body .w95-ctl-size[data-size="l"]::after { height: 14px; }
+
+/* ---------- Меню размера ---------- */
+html body .card-size-menu {
+    position: fixed; z-index: 3500; display: flex; flex-direction: column; gap: 2px; padding: 4px; min-width: 190px;
+    background: var(--w95-face); color: var(--w95-text); box-shadow: var(--w95-raised), 0 4px 14px rgba(0, 0, 0, .35);
+}
+html body .size-opt {
+    display: flex; align-items: center; gap: 10px; width: 100%; min-height: 36px; padding: 4px 8px !important; text-align: left; cursor: pointer;
+    background: var(--w95-face) !important; color: var(--w95-text) !important; border: none !important; box-shadow: none !important; font-size: 14px;
+}
+html body .size-opt:hover { background: var(--w95-select) !important; color: var(--w95-select-text, #fff) !important; }
+html body .size-opt:hover .size-glyph { --i: var(--w95-select-text, #fff); }
+html body .size-opt.is-on { font-weight: 700; box-shadow: var(--w95-pressed) !important; }
+html body .size-opt-name { flex: 1 1 auto; }
+html body .size-opt-dim { opacity: .7; font-size: 12px; font-variant-numeric: tabular-nums; }
+
+/* ---------- Windows 95: рельефная серая кнопка с пиксельным значком (основа выше) ---------- */
+
+/* ---------- Аква: круглая «капля» фиолетового геля, четвёртая после красной, жёлтой, зелёной ---------- */
+html[data-w95="aqua"] body .card > h3.has-controls { padding: 4px 118px !important; }
+html[data-w95="aqua"] body .w95-ctl-size { order: 4; --i: #fff; background: radial-gradient(circle at 50% 35%, #eadcff, #9a6fe0 55%, #5a2fb0) !important; }
+html[data-w95="aqua"] body .w95-ctl-size::after {
+    position: absolute !important; inset: auto !important; left: 50% !important; top: 50% !important; display: block !important; opacity: 1 !important;
+    width: 7px !important; height: 7px !important; transform: translate(-50%, -50%) !important; border: 1px dashed #fff !important; font: 0/0 serif !important;
+}
+html[data-w95="aqua"] body .w95-ctl-size[data-size="s"]::after { width: 4px !important; height: 8px !important; border-style: solid !important; }
+html[data-w95="aqua"] body .w95-ctl-size[data-size="m"]::after { width: 8px !important; height: 8px !important; border-style: solid !important; }
+html[data-w95="aqua"] body .w95-ctl-size[data-size="l"]::after { width: 8px !important; height: 10px !important; border-style: solid !important; }
+html[data-w95="aqua"] body .w95-ctl-size[data-size="s"]::after, html[data-w95="aqua"] body .w95-ctl-size[data-size="m"]::after, html[data-w95="aqua"] body .w95-ctl-size[data-size="l"]::after { background-color: transparent !important; }
+html[data-w95="aqua"] body .w95-ctl-size:hover { filter: brightness(1.12); }
+html[data-w95="aqua"] body .card-size-menu { border-radius: 10px; background: linear-gradient(#fff, #e9ecf2); box-shadow: 0 6px 18px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(0, 0, 0, .25); }
+html[data-w95="aqua"] body .size-opt { border-radius: 6px; background: transparent !important; }
+html[data-w95="aqua"] body .size-opt:hover { background: linear-gradient(#6cb2f5, #2a7fe0) !important; }
+
+/* ---------- Аэро: стеклянная плитка в ряду стеклянных кнопок ---------- */
+html[data-w95="aero"] body .card > h3.has-controls { padding-right: 160px !important; }
+html[data-w95="aero"] body .w95-ctl-size { --i: #fff; border-radius: 0 !important; }
+html[data-w95="aero"] body .w95-ctl-size::after { filter: drop-shadow(0 0 1px #1d2b3a); }
+html[data-w95="aero"] body .w95-ctl-size + .w95-ctl-min { border-radius: 0 !important; }
+html[data-w95="aero"] body .w95-ctl-pin + .w95-ctl-size { border-radius: 0 !important; }
+html[data-w95="aero"] body .w95-ctl-size:hover { filter: brightness(1.1); }
+html[data-w95="aero"] body .card-size-menu { border-radius: 6px; background: rgba(233, 240, 250, .96); box-shadow: 0 0 0 1px #253447, 0 6px 18px rgba(0, 0, 0, .4); }
+html[data-w95="aero"] body .size-opt:hover { background: linear-gradient(#e3f1fd, #a8d4f5) !important; color: #000 !important; }
+html[data-w95="aero"] body .size-opt:hover .size-glyph { --i: #000; }
+
+/* ---------- Классика 1-бит: белая плитка с чёрной рамкой, значок штрихом ---------- */
+html[data-w95="mono"] body .w95-ctl-size { --i: #000; }
+html[data-w95="mono"] body .w95-ctl-size::after { background-color: transparent; border-width: 1px; }
+html[data-w95="mono"] body .w95-ctl-size:active { background: #000 !important; --i: #fff; }
+html[data-w95="mono"] body .card-size-menu { background: #fff; box-shadow: none; border: 2px solid #000; border-radius: 0; }
+html[data-w95="mono"] body .size-opt:hover { background: #000 !important; color: #fff !important; }
+html[data-w95="mono"] body .size-opt:hover .size-glyph { --i: #fff; }
+
+/* ---------- Метро: плоский тонкий значок без рамки; ширина ряда кнопок больше ---------- */
+html[data-w95="metro"] body .card > h3, html[data-w95="metro"] body .card > h3.has-controls { padding-right: 124px !important; }
+html[data-w95="metro"] body .w95-ctl-size { --i: var(--w95-muted); }
+html[data-w95="metro"] body .w95-ctl-size::after { border-width: 2px; }
+html[data-w95="metro"] body .w95-ctl-size:active { --i: #fff; }
+html[data-w95="metro"] body .card-size-menu { box-shadow: 0 6px 18px rgba(0, 0, 0, .5); background: var(--w95-desktop); border: 1px solid var(--m-accent); }
+html[data-w95="metro"] body .size-opt { background: transparent !important; }
+html[data-w95="metro"] body .size-opt:hover { background: var(--m-accent) !important; color: #fff !important; }
+html[data-w95="metro"][data-w95-variant="neon"] body .w95-ctl-size { --i: var(--m-accent); filter: drop-shadow(0 0 3px var(--m-accent)); }
+html[data-w95="metro"][data-w95-variant="leopard"] body .w95-ctl-size { --i: #e8a21c; }
+html[data-w95="metro"][data-w95-variant="light"] body .w95-ctl-size { --i: #444; }
+
+/* ---------- Администратор и журнал ---------- */
+html body .admin-card[hidden], html body .activity-card[hidden] { display: none !important; }
+html body .admin-scroll { max-height: 300px; overflow: auto; margin: 6px 0; background: var(--w95-field); box-shadow: var(--w95-sunken); }
+html body .admin-scroll-events { max-height: 420px; }
+html body .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+html body .admin-table th, html body .admin-table td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--w95-muted); vertical-align: top; overflow-wrap: anywhere; }
+html body .admin-table th { position: sticky; top: 0; background: var(--w95-face); }
+html body .admin-table tbody tr { cursor: pointer; }
+html body .admin-table tr.is-on { background: var(--w95-select); color: var(--w95-select-text, #fff); }
+html body .activity-consent { max-width: 460px; }
+html body .activity-consent p { margin: 8px 0; font-size: 14px; }

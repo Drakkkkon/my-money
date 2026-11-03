@@ -145,6 +145,7 @@ function signInWithGoogle() {
         .then(fetchGoogleProfile)
         .then(() => {
             renderCloudUi();
+            if (typeof adminLog === 'function') adminLog('login', {});
             return runCloudSync({ manual: true });
         })
         .catch(e => {
@@ -489,7 +490,7 @@ async function runCloudSync({ manual = false } = {}) {
         }
         // Oldbook: своя книга для других пользователей и книги, которыми поделились с вами
         try {
-            await syncOldbookShared();
+            if (typeof isAdminUser !== 'function' || isAdminUser()) await syncOldbookShared(); // Oldbook — только у администратора
         } catch (e) {
             if (e.code === 'auth') throw e;
             console.warn('Oldbook: обмен с другими аккаунтами не удался', e);
@@ -546,6 +547,7 @@ function setCloudStatus(state, message = '') {
 }
 
 function renderCloudUi() {
+    if (typeof applyAdminAccess === 'function') applyAdminAccess(); // Oldbook и журнал — только администратору / по согласию
     const out = document.getElementById('auth-logged-out');
     const inn = document.getElementById('auth-logged-in');
     if (!out || !inn) return;

@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="css/layout.css">
     <!-- 4.0: «Стена», голосовой ввод, каталог OldBook.kz, фото чеков -->
     <link rel="stylesheet" href="css/v4.css">
+    <link rel="stylesheet" href="css/v41.css">
     <!-- Свои темы: цвета из редактора (только при флагах data-c-*) -->
     <link rel="stylesheet" href="css/custom.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -154,6 +155,7 @@
                                     <input type="file" accept="image/*" onchange="receiptFromInput(event)">
                                 </label>
                             </div>
+                            <label class="field-inline ocr-pick-inline"><span>Способ</span><select data-ocr-kind="receipt" onchange="onOcrSelectChange(this)" aria-label="Способ распознавания чека"></select></label>
                         </div>
                         <div class="forms card">
                             <h3><span class="material-icons">edit_note</span> Новая запись</h3>
@@ -533,6 +535,7 @@
                             <input type="text" id="obc-text" placeholder="Или название и автор" maxlength="120" autocomplete="off">
                             <button type="button" class="btn-secondary" onclick="obSearchByText(document.getElementById('obc-text').value)"><span class="material-icons">manage_search</span> По названию</button>
                         </div>
+                        <label class="field-inline ocr-pick-inline"><span>Распознавание обложки</span><select id="obc-engine" data-ocr-kind="cover" onchange="onOcrSelectChange(this)" aria-label="Способ распознавания обложки"></select></label>
                         <p class="hint obc-status" id="obc-status" aria-live="polite"></p>
                         <div id="obc-result"></div>
                     </div>
@@ -744,6 +747,22 @@
                         <div id="layout-settings"></div>
                     </div>
 
+                    <div class="card admin-card" id="admin-card" hidden>
+                        <h3><span class="material-icons">admin_panel_settings</span> Администратор: пользователи</h3>
+                        <p class="hint">Кто вошёл в приложение и что делает. Видно только аккаунту администратора; данные собираются только с согласия пользователей.</p>
+                        <div id="admin-panel"></div>
+                    </div>
+
+                    <div class="card activity-card" id="activity-card" hidden>
+                        <h3><span class="material-icons">visibility</span> Журнал действий</h3>
+                        <div id="activity-settings"></div>
+                    </div>
+
+                    <div class="card ocr-card" id="ocr-card">
+                        <h3><span class="material-icons">document_scanner</span> Распознавание фото</h3>
+                        <div id="ocr-settings"></div>
+                    </div>
+
                     <div class="card icon-app-card" id="icon-app-card">
                         <h3><span class="material-icons">apps</span> Иконка приложения</h3>
                         <div id="icon-settings"></div>
@@ -805,9 +824,34 @@
 
                     <div class="card changelog-card">
                         <h3><span class="material-icons">history</span> История версий</h3>
+                        <div class="app-version-row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:0 0 10px;">
+                            <span>Загружена версия: <b id="app-version-now">—</b></span>
+                            <button type="button" class="btn-secondary" onclick="forceSiteUpdate()"><span class="material-icons">refresh</span> Обновить сайт сейчас</button>
+                        </div>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>4.0.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>4.1.2 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>В «Истории версий» показано, какая версия реально загружена на этом устройстве, и добавлена кнопка «Обновить сайт сейчас»: она сбрасывает старую копию сайта в телефоне и загружает свежие файлы (записи, настройки и ключи не удаляются).</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.1.1</h4>
+                                <ul>
+                                    <li>Исправлено: после ввода ПИН-кода и ползунка «Разблокировать» на компьютере страница не реагировала на нажатия — невидимый экран ПИН-кода включался снова и закрывал всё. Теперь ПИН не запрашивается второй раз, а тающий экран не перехватывает нажатия.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.1.0</h4>
+                                <ul>
+                                    <li>Распознавание фото: чек и обложка книги теперь читаются на выбор ИИ (Gemini, Claude, OpenAI — название, сумма и позиции сразу), веб-сервисом (Google Cloud Vision, OCR.space) или на устройстве (Tesseract, «точно» и «быстро»). Выбор — в блоке и в Настройках → «Распознавание фото»; «Авто» сам пробует по порядку, при сбое переходит к следующему способу. Есть проверка скорости. Ключи хранятся только на устройстве.</li>
+                                    <li>На устройстве чек стал читаться лучше: выравнивание освещения (адаптивная чёрно-белая обработка) и режим построчного чтения.</li>
+                                    <li>Размеры блоков: у каждого блока кнопка размера в заголовке — маленький 1×2, средний 2×2, большой 2×4 или «как было». Кнопка нарисована в стиле каждой темы (Windows 95, Аква, Аэро, 1-бит, Метро с неоном и леопардом).</li>
+                                    <li>Администратор (Lego2009as@gmail.com): только ему виден раздел Oldbook и блок «Администратор: пользователи» в Настройках — список вошедших, их действия и то, что они вводят в поиск. Данные собираются только с согласия пользователя, отключаются в Настройках → «Журнал действий». Подключение — ADMIN_SETUP_RU.txt.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.0.0</h4>
                                 <ul>
                                     <li>Новый раздел «Стена»: любой блок из любой части программы выносится на стену булавкой в заголовке; на стене меняются ширина и высота блока (кнопками или за уголок), блок сворачивается и разворачивается на весь экран.</li>
                                     <li>Oldbook: первый блок — каталог OldBook.kz. Поиск книги по номеру, по фото обложки (название и автор распознаются) или по названию: обложка и корешок, автор, жанр, кратко о книге, цена и наличие, ссылки на поиск книги на Ozon и Wildberries, кнопка «Найти в Telegram» (скоро).</li>
@@ -1030,6 +1074,7 @@
     <script src="js/currency.js"></script>
     <script src="js/shopping.js"></script>
     <script src="js/receipt.js"></script>
+    <script src="js/recognize.js"></script>
     <script src="js/notify.js"></script>
     <script src="js/bank.js"></script>
     <script src="js/fonts.js"></script>
@@ -1037,6 +1082,8 @@
     <script src="js/voice.js"></script>
     <script src="js/obcatalog.js"></script>
     <script src="js/wall.js"></script>
+    <script src="js/sizes.js"></script>
+    <script src="js/admin.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>

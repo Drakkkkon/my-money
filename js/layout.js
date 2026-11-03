@@ -42,6 +42,8 @@ function normalizeUiPrefs(p) {
         // «Стена» (js/wall.js): [{ id блока, w — ширина в колонках 1–4, h — высота в px или 0 (по содержимому) }]
         wall: Array.isArray(src.wall) ? src.wall.filter(x => x && typeof x.id === 'string')
             .map(x => ({ id: x.id.slice(0, 80), w: Math.min(4, Math.max(1, Number(x.w) || 2)), h: Math.min(1600, Math.max(0, Number(x.h) || 0)) })) : [],
+        // Размеры блоков (js/sizes.js): { id блока: 's' | 'm' | 'l' }
+        sizes: Object.fromEntries(Object.entries(obj(src.sizes, {})).filter(([k, v]) => typeof k === 'string' && k.length < 80 && ['s', 'm', 'l'].includes(v)).slice(0, 200)),
         layout: normalizeLayoutPrefs(obj(src.layout, {}))
     };
 }
@@ -103,6 +105,7 @@ function setUiPrefs(p) {
     applyLayoutPrefs();
     renderLayoutSettings();
     if (typeof applyWall === 'function') applyWall();
+    if (typeof applyCardSizes === 'function') applyCardSizes();
     if (typeof applyTheme === 'function' && typeof currentThemeId !== 'undefined') applyTheme(currentThemeId, { save: false }); // шрифты с другого устройства
 }
 
@@ -150,6 +153,7 @@ function enhanceCards(root = document) {
             ctls.className = 'w95-ctls';
             ctls.innerHTML =
                 (card.id && !card.classList.contains('wall-info') ? '<button type="button" class="w95-ctl w95-ctl-pin" onclick="toggleWallCard(this)" title="На стену" aria-label="Добавить блок на стену"><span class="material-icons">push_pin</span></button>' : '') +
+                (card.id && !card.classList.contains('wall-info') ? '<button type="button" class="w95-ctl w95-ctl-size" onclick="openCardSizeMenu(this)" title="Размер блока" aria-label="Размер блока" aria-haspopup="menu"></button>' : '') +
                 '<button type="button" class="w95-ctl w95-ctl-min" onclick="toggleCardCollapse(this)" title="Свернуть" aria-label="Свернуть блок"></button>' +
                 '<button type="button" class="w95-ctl w95-ctl-max" onclick="toggleMaximize(this)" title="Развернуть" aria-label="Развернуть на весь экран"></button>' +
                 '<span class="w95-ctl w95-ctl-close" aria-hidden="true"></span>';
@@ -159,6 +163,10 @@ function enhanceCards(root = document) {
             const ctlsBox = h.querySelector('.w95-ctls');
             if (card.id && !ctlsBox.querySelector('.w95-ctl-pin')) {
                 ctlsBox.insertAdjacentHTML('afterbegin', '<button type="button" class="w95-ctl w95-ctl-pin" onclick="toggleWallCard(this)" title="На стену" aria-label="Добавить блок на стену"><span class="material-icons">push_pin</span></button>');
+            }
+            if (card.id && !card.classList.contains('wall-info') && !ctlsBox.querySelector('.w95-ctl-size')) {
+                const before = ctlsBox.querySelector('.w95-ctl-min');
+                (before || ctlsBox).insertAdjacentHTML(before ? 'beforebegin' : 'afterbegin', '<button type="button" class="w95-ctl w95-ctl-size" onclick="openCardSizeMenu(this)" title="Размер блока" aria-label="Размер блока" aria-haspopup="menu"></button>');
             }
             const min = h.querySelector('.w95-ctl-min');
             if (min && min.tagName !== 'BUTTON') {
