@@ -693,6 +693,7 @@ function editTx(id) {
 
         if (addBtns) addBtns.style.display = 'none';
         if (saveEditBtn) saveEditBtn.style.display = 'flex';
+        { const ec = document.querySelector('.forms.card'); if (ec) ec.classList.add('is-editing'); } // при правке запись показывается целиком, даже в «Маленьком» размере
         
         let mainWrap = document.querySelector('.main-wrapper');
         if (mainWrap) mainWrap.scrollTo(0, 0);
@@ -749,6 +750,7 @@ function clearForm() {
     setFormComment('tx', '');
     if (addBtns) addBtns.style.display = 'flex';
     if (saveEditBtn) saveEditBtn.style.display = 'none';
+    { const ec = document.querySelector('.forms.card'); if (ec) ec.classList.remove('is-editing'); }
     
     if (dtEl) {
         dtEl.value = almatyIsoNow();

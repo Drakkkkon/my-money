@@ -6,7 +6,7 @@ var ADMIN_EMAIL = 'lego2009as@gmail.com';
 var CLIENT_ID = 'ВСТАВЬТЕ_СЮДА_CLIENT_ID.apps.googleusercontent.com'; // тот же, что googleClientId в js/config.js
 var USERS_SHEET = 'Users', EVENTS_SHEET = 'Events';
 var MAX_EVENT_ROWS = 20000, TRIM_ROWS = 2000, MAX_BATCH = 60;
-var ALLOWED_TYPES = ['open', 'login', 'tab', 'search', 'scan', 'scan_fail', 'entry'];
+var ALLOWED_TYPES = ['open', 'login', 'tab', 'search', 'scan', 'scan_fail', 'voice', 'voice_fail', 'entry'];
 
 function doGet() { return ContentService.createTextOutput('My Money log: ok'); }
 

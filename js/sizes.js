@@ -4,6 +4,10 @@
 // «Как было» — прежний вид блока. Ширина в клетках ограничивается числом колонок раздела (на телефоне колонка одна:
 // меняется только высота); то, что не помещается по высоте, прокручивается внутри блока. Блоки на «Стене» меняют размер
 // своими кнопками (js/wall.js), поэтому здесь для них кнопки нет.
+// 4.2: размер меняет и содержимое. Каждый прямой потомок блока получает уровень data-t: 1 — главное (видно при любом размере),
+// 2 — кнопки и варианты (средний и большой), 3 — всё остальное (только большой = «классический» вид). Уровни ставит tierCard();
+// где нужен точный выбор, в разметке пишется data-tier="1|2|3". Скрытие — css/v41.css (раздел 4.2).
+// На одной колонке (телефон) высоты 1 / 2 / 4 клетки, чтобы каждый шаг был заметным; на нескольких колонках — 2 / 2 / 4 и ширина 1 / 2 / 2.
 // Выбор хранится в uiPrefs.sizes { id блока: 's' | 'm' | 'l' } и синхронизируется с Google Диском вместе с остальными настройками вида.
 
 const CARD_SIZES = {
@@ -11,6 +15,42 @@ const CARD_SIZES = {
     m: { cols: 2, rows: 2, name: 'Средний', dim: '2 × 2' },
     l: { cols: 2, rows: 4, name: 'Большой', dim: '2 × 4' }
 };
+
+// Высота в клетках: на одной колонке «маленький» — одна клетка (иначе он не отличался бы от среднего)
+const CARD_ROWS_1COL = { s: 1, m: 2, l: 4 };
+
+// ---------- Уровни содержимого ----------
+const TIER_SKIP = 'h3, script, style, datalist, template, input[type="hidden"], .w95-sb';
+const TIER_ACTION = 'button, .btn-group, .btn-stack, .ob-keypad, .calc-tape-tools, [class*="-btns"], .tx-actions';
+function tierHasField(k) { return k.matches('input:not([type="hidden"]), select, textarea') || !!k.querySelector('input:not([type="hidden"]):not([type="file"]), select, textarea'); }
+function tierIsAction(k) { return k.matches(TIER_ACTION); }
+function tierIsHint(k) { return (k.matches('p, h4, .hint, .ob-label') && !k.querySelector('input, select, textarea, button')); }
+
+function tierCard(card) {
+    const kids = [...card.children].filter(k => !k.matches(TIER_SKIP));
+    const plain = kids.filter(k => !k.dataset.tier);
+    let primaryDone = false, firstField = null, nextFieldTaken = false, actions = 0;
+    // 1) главное: первый не-подсказка; если это поле-фильтр, к нему в пару идёт первый блок с данными (список, таблица, диаграмма)
+    const body = plain.filter(k => !tierIsHint(k));
+    const first = body[0];
+    const pair = new Set();
+    if (first) {
+        pair.add(first);
+        if (tierHasField(first) && !tierIsAction(first)) {
+            const data = body.find(k => k !== first && !tierHasField(k) && !tierIsAction(k));
+            if (data && body.indexOf(data) <= 2) pair.add(data);
+        }
+    }
+    plain.forEach(k => {
+        let t = 3;
+        if (pair.has(k)) t = 1;
+        else if (tierIsHint(k)) t = 3;
+        else if (tierIsAction(k)) { if (actions++ < 2) t = 2; }
+        else if (first && tierHasField(first) && tierHasField(k) && !nextFieldTaken) { nextFieldTaken = true; t = 2; }
+        k.dataset.t = t;
+    });
+    kids.filter(k => k.dataset.tier).forEach(k => { k.dataset.t = k.dataset.tier; });
+}
 
 function cardSizeOf(id) {
     const v = (uiPrefs.sizes || {})[id];
@@ -23,6 +63,7 @@ function applyCardSize(card) {
     const size = cardSizeOf(card.id), def = CARD_SIZES[size];
     card.classList.toggle('card-sized', !!def);
     if (card.dataset.size !== size) card.dataset.size = size;
+    if (def) tierCard(card);
     const btn = card.querySelector(':scope > h3 .w95-ctl-size');
     if (btn) {
         btn.dataset.size = size;
@@ -44,7 +85,11 @@ function applyCardCols(parent) {
     if (parent.matches('main > .tab') && parent.id !== 'transactions') {
         cols = Math.max(1, getComputedStyle(parent).gridTemplateColumns.split(' ').filter(t => parseFloat(t) > 0).length);
     }
-    sized.forEach(c => c.style.setProperty('--card-cols', Math.min(CARD_SIZES[cardSizeOf(c.id)].cols, cols)));
+    sized.forEach(c => {
+        const k = cardSizeOf(c.id), def = CARD_SIZES[k];
+        c.style.setProperty('--card-cols', Math.min(def.cols, cols));
+        c.style.setProperty('--card-rows', cols === 1 ? CARD_ROWS_1COL[k] : def.rows);
+    });
 }
 
 function applyCardSizes() {
@@ -102,7 +147,16 @@ function openCardSizeMenu(btn) {
     if (typeof playSound === 'function') playSound('open');
 }
 
-window.addEventListener('DOMContentLoaded', () => setTimeout(applyCardSizes, 0));
+// Блоки, которые перерисовываются целиком (котировки и др.), теряют размер: следим за разделами и применяем снова
+let cardSizeWatchTimer = null;
+const cardSizeObserver = new MutationObserver(() => {
+    clearTimeout(cardSizeWatchTimer);
+    cardSizeWatchTimer = setTimeout(() => { if (typeof enhanceCards === 'function') enhanceCards(); applyCardSizes(); }, 60);
+});
+function watchCardSizes() {
+    document.querySelectorAll('main > .tab').forEach(tab => { if (!tab._sizeWatched) { tab._sizeWatched = true; cardSizeObserver.observe(tab, { childList: true }); } });
+}
+window.addEventListener('DOMContentLoaded', () => setTimeout(() => { applyCardSizes(); watchCardSizes(); }, 0));
 window.addEventListener('load', applyCardSizes);
 window.addEventListener('app-layout', () => setTimeout(applyCardSizes, 60));
 let cardSizeResizeTimer = null;

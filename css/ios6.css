@@ -1,0 +1,598 @@
+/* =========================================================================
+   ТЕМА «iOS 6» — по мотивам iPhone и iPad 2012 года (светлая и тёмная «лён»).
+   Всё нарисовано градиентами и простыми SVG: без логотипов, значков, шрифтов и звуков Apple.
+   Каждое правило начинается с html[data-w95="ios6"], поэтому остальные темы этот файл не затрагивает.
+   Цвета фона, текста и шрифт задаются в js/themes.js (--w95-*), здесь — форма, глянец и переключатели.
+   Тёмный вариант — html[data-w95="ios6"][data-w95-variant="linen"].
+   ========================================================================= */
+
+html[data-w95="ios6"] body {
+    /* Навигационная панель: глянцевый сине-серый градиент с «изломом» на середине */
+    --ios-nav: linear-gradient(to bottom, #b8c6dc 0%, #98adca 49%, #7f98ba 50%, #7088ad 100%);
+    --ios-nav-line: #2b394e;
+    --ios-nav-hi: inset 0 1px 0 rgba(255, 255, 255, .6);
+    /* Кнопки на навигационной панели */
+    --ios-bar-btn: linear-gradient(to bottom, #aebfd7 0%, #8aa1c2 49%, #7690b3 50%, #809ac0 100%);
+    --ios-bar-btn-press: linear-gradient(to bottom, #6a82a7 0%, #566f95 50%, #4b658c 100%);
+    --ios-bar-border: #4a5e7c;
+    /* Кнопки в таблицах: белая, синяя (главная) */
+    --ios-btn: linear-gradient(to bottom, #ffffff 0%, #f1f2f4 49%, #dcdee2 50%, #e8e9ec 100%);
+    --ios-btn-press: linear-gradient(to bottom, #cdd0d6 0%, #dcdee2 100%);
+    --ios-btn-border: #9ea3ab;
+    --ios-blue: linear-gradient(to bottom, #8fbaf3 0%, #4d90e8 49%, #2a73dd 50%, #3d88ec 100%);
+    --ios-blue-press: linear-gradient(to bottom, #3a74c8 0%, #2a5fb4 50%, #2a68c4 100%);
+    --ios-blue-border: #1a4a9c;
+    --ios-blue-flat: #1b6fe0;
+    /* Группы (как таблицы в «Настройках») */
+    --ios-group-bg: #ffffff;
+    --ios-group-border: #abb1ba;
+    --ios-group-line: #d8dbe0;
+    --ios-card-bg: repeating-linear-gradient(90deg, #d2d8de 0, #d2d8de 4px, #dde2e8 4px, #dde2e8 7px);
+    --ios-tab: linear-gradient(to bottom, #4a4a4a 0%, #262626 49%, #0a0a0a 50%, #151515 100%);
+    --ios-glow: 0 1px 0 rgba(255, 255, 255, .75);
+    --ios-title-shadow: 0 -1px 0 rgba(0, 0, 0, .5);
+    --ios-sheet-shadow: 0 0 0 1px rgba(0, 0, 0, .35), 0 8px 24px rgba(0, 0, 0, .35);
+    --ios-lock: radial-gradient(ellipse at 50% 115%, #5a86c6 0%, #2d4a7e 48%, #111c33 100%);
+    /* Стрелки выпадающего списка */
+    --ios-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='18'%3E%3Cpath d='M2 7l4-4.5L10 7zM2 11l4 4.5L10 11z' fill='%23485268'/%3E%3C/svg%3E");
+    font-weight: 400;
+}
+html[data-w95="ios6"][data-w95-variant="linen"] body {
+    --ios-nav: linear-gradient(to bottom, #74767c 0%, #55575c 49%, #3c3e43 50%, #2c2d31 100%);
+    --ios-nav-line: #000;
+    --ios-nav-hi: inset 0 1px 0 rgba(255, 255, 255, .25);
+    --ios-bar-btn: linear-gradient(to bottom, #7d7f85 0%, #5d5f64 49%, #484a4f 50%, #4f5156 100%);
+    --ios-bar-btn-press: linear-gradient(to bottom, #2b2c30 0%, #3a3b40 100%);
+    --ios-bar-border: #17181a;
+    --ios-btn: linear-gradient(to bottom, #6e7076 0%, #52545a 49%, #3d3f44 50%, #46484d 100%);
+    --ios-btn-press: linear-gradient(to bottom, #2e2f33 0%, #3a3b40 100%);
+    --ios-btn-border: #111213;
+    --ios-group-bg: #1f2022;
+    --ios-group-border: #0b0b0c;
+    --ios-group-line: #35373b;
+    --ios-card-bg: repeating-linear-gradient(0deg, rgba(255, 255, 255, .04) 0, rgba(255, 255, 255, .04) 1px, rgba(0, 0, 0, .12) 1px, rgba(0, 0, 0, .12) 2px), repeating-linear-gradient(90deg, rgba(255, 255, 255, .035) 0, rgba(255, 255, 255, .035) 1px, rgba(0, 0, 0, .1) 1px, rgba(0, 0, 0, .1) 3px), #2f3033;
+    --ios-glow: 0 -1px 0 rgba(0, 0, 0, .6);
+    --ios-sheet-shadow: 0 0 0 1px rgba(0, 0, 0, .8), 0 8px 24px rgba(0, 0, 0, .6);
+    --ios-lock: radial-gradient(ellipse at 50% 115%, #3a3d48 0%, #1d1f27 55%, #07080b 100%);
+    --ios-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='18'%3E%3Cpath d='M2 7l4-4.5L10 7zM2 11l4 4.5L10 11z' fill='%23d6d9e0'/%3E%3C/svg%3E");
+}
+
+html[data-w95="ios6"] body ::selection { background: rgba(27, 111, 224, .35); color: inherit; }
+html[data-w95="ios6"] body { -webkit-tap-highlight-color: rgba(27, 111, 224, .25); }
+
+/* ---------- Блоки: «лист» с навигационной панелью сверху, внутри — полосатый фон и белые группы ---------- */
+html[data-w95="ios6"] body .card,
+html[data-w95="ios6"] body main > .tab > .card,
+html[data-w95="ios6"] body .tx-container > .forms,
+html[data-w95="ios6"] body .tx-container > .history,
+html[data-w95="ios6"] body header,
+html[data-w95="ios6"] body header[class] {
+    background: var(--ios-card-bg) !important;
+    box-shadow: var(--ios-sheet-shadow) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 0 12px 12px !important;
+    overflow: visible;
+}
+html[data-w95="ios6"] body .export-sheet {
+    background: var(--ios-card-bg) !important;
+    box-shadow: var(--ios-sheet-shadow), 0 20px 50px rgba(0, 0, 0, .35) !important;
+    border-radius: 10px !important; padding: 0 12px 12px !important;
+}
+html[data-w95="ios6"] body .export-sheet-overlay { background: rgba(0, 0, 0, .45) !important; }
+
+/* Заголовок: глянцевая навигационная панель, по центру жирное белое название с тенью */
+html[data-w95="ios6"] body .card > h3,
+html[data-w95="ios6"] body .header-top,
+html[data-w95="ios6"] body .export-sheet-head {
+    position: relative;
+    background: var(--ios-nav) !important;
+    color: #fff !important;
+    border: none !important;
+    border-bottom: 1px solid var(--ios-nav-line) !important;
+    border-radius: 10px 10px 0 0 !important;
+    box-shadow: var(--ios-nav-hi) !important;
+    margin: 0 -12px 12px !important;
+    padding: 0 12px !important;
+    min-height: 40px;
+    justify-content: center !important;
+    text-align: center;
+    font-family: var(--w95-font-ui) !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0;
+    text-shadow: var(--ios-title-shadow);
+    overflow: hidden;
+}
+html[data-w95="ios6"] body .card > h3 { display: block !important; line-height: 40px; white-space: nowrap; text-overflow: ellipsis; }
+html[data-w95="ios6"] body .header-top { margin-bottom: 10px !important; }
+html[data-w95="ios6"] body .card > h3 *,
+html[data-w95="ios6"] body .header-top *,
+html[data-w95="ios6"] body .export-sheet-head h3,
+html[data-w95="ios6"] body .export-sheet-head h3 * { color: #fff !important; text-shadow: var(--ios-title-shadow); }
+html[data-w95="ios6"] body .export-sheet-head h3 { flex: 1 1 auto; text-align: center; font-size: 17px !important; font-weight: 700 !important; margin: 0; }
+html[data-w95="ios6"] body .card > h3 .material-icons { display: none !important; }
+html[data-w95="ios6"] body .card > h3::after,
+html[data-w95="ios6"] body .header-top::after { display: none !important; content: none !important; }
+html[data-w95="ios6"] body .header-top .mobile-title { font-family: var(--w95-font-ui) !important; font-size: 17px !important; font-weight: 700 !important; }
+html[data-w95="ios6"] body .header-top .app-logo { width: 24px; height: 24px; border-radius: 6px !important; box-shadow: 0 1px 2px rgba(0, 0, 0, .5); }
+html[data-w95="ios6"] body .card.is-maximized { border-radius: 0 !important; }
+html[data-w95="ios6"] body .card.is-maximized > h3 { border-radius: 0 !important; }
+
+/* Кнопка закрытия диалога — «кнопка панели» справа */
+html[data-w95="ios6"] body .export-sheet-close {
+    position: absolute !important; right: 8px; top: 50%; transform: translateY(-50%);
+    width: 30px !important; height: 26px !important; min-height: 0 !important; padding: 0 !important;
+    background: var(--ios-bar-btn) !important; border: 1px solid var(--ios-bar-border) !important; border-radius: 5px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 1px 0 rgba(255, 255, 255, .3) !important;
+}
+html[data-w95="ios6"] body .export-sheet-close .material-icons { font-size: 18px !important; color: #fff !important; text-shadow: var(--ios-title-shadow); }
+html[data-w95="ios6"] body .export-sheet-close:active { background: var(--ios-bar-btn-press) !important; }
+
+/* Кнопки окна в заголовке: маленькие «кнопки панели» (закрепить, размер, свернуть, развернуть) */
+html[data-w95="ios6"] body .card > h3.has-controls { padding: 0 128px 0 12px !important; }
+html[data-w95="ios6"] body .w95-ctls { right: 6px; left: auto; top: 50% !important; transform: translateY(-50%); gap: 4px; align-items: center; display: flex; }
+/* значок «закрыть» в заголовке блока не нажимается (оставлен для вида в других темах) — здесь он не нужен */
+html[data-w95="ios6"] body span.w95-ctl-close { display: none !important; }
+html[data-w95="ios6"] body .w95-ctl {
+    position: relative; width: 26px !important; height: 24px !important; margin: 0 !important; padding: 0 !important; cursor: pointer;
+    background: var(--ios-bar-btn) !important; border: 1px solid var(--ios-bar-border) !important; border-radius: 5px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 1px 0 rgba(255, 255, 255, .25) !important;
+    display: inline-flex !important; align-items: center; justify-content: center; text-shadow: none;
+}
+html[data-w95="ios6"] body .w95-ctl:active { background: var(--ios-bar-btn-press) !important; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5) !important; }
+html[data-w95="ios6"] body .w95-ctl::before,
+html[data-w95="ios6"] body .card.is-maximized .w95-ctl-max::before { display: none !important; content: none !important; }
+html[data-w95="ios6"] body .w95-ctl::after,
+html[data-w95="ios6"] body .card.is-maximized .w95-ctl-max::after {
+    position: static !important; left: auto !important; top: auto !important; right: auto !important; bottom: auto !important;
+    width: auto !important; height: auto !important; border: none !important; background: none !important; transform: none !important;
+    display: block !important; opacity: 1 !important; font: 700 16px/1 var(--w95-font-ui) !important; color: #fff !important;
+    text-shadow: var(--ios-title-shadow) !important; box-shadow: none !important; filter: none !important;
+}
+html[data-w95="ios6"] body .w95-ctl-close::after { content: '×' !important; font-size: 19px !important; }
+html[data-w95="ios6"] body .w95-ctl-min::after { content: '–' !important; }
+html[data-w95="ios6"] body .w95-ctl-max::after { content: '▢' !important; font-size: 13px !important; }
+html[data-w95="ios6"] body .card.is-maximized .w95-ctl-max::after { content: '❐' !important; font-size: 13px !important; }
+html[data-w95="ios6"] body .w95-ctl-pin .material-icons { font-size: 15px !important; color: #fff !important; text-shadow: var(--ios-title-shadow); }
+html[data-w95="ios6"] body .w95-ctl-pin.is-on { background: var(--ios-blue) !important; border-color: var(--ios-blue-border) !important; }
+/* Кнопка размера: значок показывает текущий размер (1×2, 2×2, 2×4), «как было» — пунктиром */
+html[data-w95="ios6"] body .w95-ctl-size { --i: #fff; }
+html[data-w95="ios6"] body .w95-ctl-size::after {
+    position: absolute !important; inset: auto !important; left: 50% !important; top: 50% !important; display: block !important; opacity: 1 !important;
+    width: 9px !important; height: 9px !important; transform: translate(-50%, -50%) !important;
+    border: 1.5px dashed #fff !important; font: 0/0 serif !important; text-shadow: none !important; filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, .45)) !important;
+}
+html[data-w95="ios6"] body .w95-ctl-size[data-size="s"]::after { width: 6px !important; height: 11px !important; border-style: solid !important; }
+html[data-w95="ios6"] body .w95-ctl-size[data-size="m"]::after { width: 11px !important; height: 11px !important; border-style: solid !important; }
+html[data-w95="ios6"] body .w95-ctl-size[data-size="l"]::after { width: 11px !important; height: 14px !important; border-style: solid !important; }
+html[data-w95="ios6"] body .w95-ctl-size[data-size="s"]::after,
+html[data-w95="ios6"] body .w95-ctl-size[data-size="m"]::after,
+html[data-w95="ios6"] body .w95-ctl-size[data-size="l"]::after { background-color: transparent !important; }
+html[data-w95="ios6"] body .w95-ctl-size:hover { filter: brightness(1.1); }
+
+/* Меню выбора размера — всплывающее окошко со стрелкой, как у iPad */
+html[data-w95="ios6"] body .card-size-menu {
+    border-radius: 9px; padding: 5px; background: var(--ios-group-bg) !important; color: var(--w95-text);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .45), 0 8px 22px rgba(0, 0, 0, .45);
+}
+html[data-w95="ios6"] body .size-opt { border-radius: 6px; background: transparent !important; color: var(--w95-text) !important; }
+html[data-w95="ios6"] body .size-opt:hover { background: var(--ios-blue) !important; color: #fff !important; }
+html[data-w95="ios6"] body .size-opt:hover .size-glyph { --i: #fff; }
+html[data-w95="ios6"] body .size-opt.is-on { box-shadow: none !important; }
+
+/* ---------- Кнопки ---------- */
+html[data-w95="ios6"] body .btn-primary, html[data-w95="ios6"] body .btn-secondary,
+html[data-w95="ios6"] body .btn-income, html[data-w95="ios6"] body .btn-expense,
+html[data-w95="ios6"] body .export-btn, html[data-w95="ios6"] body .pay-btn,
+html[data-w95="ios6"] body label.btn-secondary, html[data-w95="ios6"] body #settings button:not(.menu-row-btn),
+html[data-w95="ios6"] body #reports .export-btn, html[data-w95="ios6"] body #add-btns .btn-income,
+html[data-w95="ios6"] body #add-btns .btn-expense, html[data-w95="ios6"] body #salary .btn-income,
+html[data-w95="ios6"] body .icon-btn, html[data-w95="ios6"] body .tx-actions button,
+html[data-w95="ios6"] body .sub-actions button, html[data-w95="ios6"] body .export-sheet-actions > button,
+html[data-w95="ios6"] body .cat-chip {
+    background: var(--ios-btn) !important;
+    color: var(--w95-text) !important;
+    border: 1px solid var(--ios-btn-border) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .55), inset 0 1px 0 rgba(255, 255, 255, .6) !important;
+    font-family: var(--w95-font-ui) !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    text-shadow: var(--ios-glow);
+    padding: 6px 14px !important;
+    min-height: 36px;
+}
+html[data-w95="ios6"][data-w95-variant="linen"] body .btn-primary, html[data-w95="ios6"][data-w95-variant="linen"] body .btn-secondary,
+html[data-w95="ios6"][data-w95-variant="linen"] body .export-btn, html[data-w95="ios6"][data-w95-variant="linen"] body label.btn-secondary,
+html[data-w95="ios6"][data-w95-variant="linen"] body #settings button:not(.menu-row-btn), html[data-w95="ios6"][data-w95-variant="linen"] body .icon-btn,
+html[data-w95="ios6"][data-w95-variant="linen"] body .tx-actions button, html[data-w95="ios6"][data-w95-variant="linen"] body .sub-actions button,
+html[data-w95="ios6"][data-w95-variant="linen"] body .cat-chip { box-shadow: 0 1px 0 rgba(255, 255, 255, .12), inset 0 1px 0 rgba(255, 255, 255, .22) !important; }
+html[data-w95="ios6"] body .cat-chip { border-radius: 999px !important; padding: 2px 4px 2px 10px !important; min-height: 0; }
+html[data-w95="ios6"] body .tx-actions button, html[data-w95="ios6"] body .sub-actions button { padding: 3px 9px !important; min-height: 32px; }
+html[data-w95="ios6"] body .btn-secondary *, html[data-w95="ios6"] body .export-btn *, html[data-w95="ios6"] body label.btn-secondary *,
+html[data-w95="ios6"] body #settings button:not(.menu-row-btn) *, html[data-w95="ios6"] body .icon-btn * { color: var(--w95-text) !important; }
+/* Главная и выбранная — синий глянец с белым текстом */
+html[data-w95="ios6"] body .btn-primary, html[data-w95="ios6"] body #settings button.btn-primary,
+html[data-w95="ios6"] body .export-sheet-actions > .btn-primary, html[data-w95="ios6"] body .icon-btn.selected {
+    background: var(--ios-blue) !important; border-color: var(--ios-blue-border) !important; color: #fff !important;
+    text-shadow: 0 -1px 0 rgba(0, 30, 90, .55);
+}
+html[data-w95="ios6"] body .btn-primary *, html[data-w95="ios6"] body #settings button.btn-primary *,
+html[data-w95="ios6"] body .icon-btn.selected * { color: #fff !important; text-shadow: 0 -1px 0 rgba(0, 30, 90, .55); }
+/* Доход и расход — цветной жирный текст на кнопке */
+html[data-w95="ios6"] body .btn-income, html[data-w95="ios6"] body .btn-income *,
+html[data-w95="ios6"] body #add-btns .btn-income, html[data-w95="ios6"] body #add-btns .btn-income *,
+html[data-w95="ios6"] body #salary .btn-income, html[data-w95="ios6"] body #salary .btn-income * { color: var(--w95-income) !important; }
+html[data-w95="ios6"] body .btn-expense, html[data-w95="ios6"] body .btn-expense *,
+html[data-w95="ios6"] body #add-btns .btn-expense, html[data-w95="ios6"] body #add-btns .btn-expense * { color: var(--w95-expense) !important; }
+/* Нажатие: тёмнеет, без сдвига */
+html[data-w95="ios6"] body .btn-primary:active, html[data-w95="ios6"] body .btn-secondary:active,
+html[data-w95="ios6"] body .btn-income:active, html[data-w95="ios6"] body .btn-expense:active,
+html[data-w95="ios6"] body .export-btn:active, html[data-w95="ios6"] body .pay-btn:active,
+html[data-w95="ios6"] body label.btn-secondary:active, html[data-w95="ios6"] body #settings button:not(.menu-row-btn):active,
+html[data-w95="ios6"] body #add-btns .btn-income:active, html[data-w95="ios6"] body #add-btns .btn-expense:active,
+html[data-w95="ios6"] body .icon-btn:active, html[data-w95="ios6"] body .tx-actions button:active,
+html[data-w95="ios6"] body .sub-actions button:active, html[data-w95="ios6"] body .export-sheet-actions > button:active {
+    background: var(--ios-btn-press) !important; padding: 6px 14px !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, .3) !important;
+}
+html[data-w95="ios6"] body .tx-actions button:active, html[data-w95="ios6"] body .sub-actions button:active { padding: 3px 9px !important; }
+html[data-w95="ios6"] body .btn-primary:active, html[data-w95="ios6"] body #settings button.btn-primary:active { background: var(--ios-blue-press) !important; }
+html[data-w95="ios6"] body button:focus-visible, html[data-w95="ios6"] body label.btn-secondary:focus-visible {
+    outline: none !important; box-shadow: 0 0 0 3px rgba(27, 111, 224, .5) !important;
+}
+
+/* Строки настроек (меню блоков) и мини-превью тем */
+html[data-w95="ios6"] body .menu-row, html[data-w95="ios6"] body .theme-swatch {
+    background: var(--ios-group-bg) !important; border: 1px solid var(--ios-group-border) !important; border-radius: 8px !important;
+    box-shadow: none !important; padding: 6px !important; min-height: 0;
+}
+html[data-w95="ios6"] body .menu-row.is-hidden { opacity: .6; }
+html[data-w95="ios6"] body .menu-row.is-dragging { box-shadow: 0 6px 16px rgba(0, 0, 0, .35) !important; }
+html[data-w95="ios6"] body .menu-row-icon { color: var(--ios-blue-flat) !important; }
+html[data-w95="ios6"] body .menu-row-label { font-family: var(--w95-font-ui); font-size: 16px; }
+html[data-w95="ios6"] body .theme-swatch.is-active { border-color: var(--ios-blue-flat) !important; box-shadow: 0 0 0 2px rgba(27, 111, 224, .55) !important; }
+html[data-w95="ios6"] body .theme-swatch-name { font-family: var(--w95-font-ui); font-size: 12px; }
+html body .theme-swatch-ios6 .theme-swatch-win { border-radius: 5px !important; }
+html body .theme-swatch-ios6 .theme-swatch-title { border-radius: 4px 4px 0 0 !important; }
+
+/* Цифровая клавиатура */
+html[data-w95="ios6"] body .ob-keypad button {
+    background: var(--ios-btn) !important; border: 1px solid var(--ios-btn-border) !important; border-radius: 9px !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .55), inset 0 1px 0 rgba(255, 255, 255, .6) !important; font-family: var(--w95-font-ui) !important;
+    font-weight: 700; text-shadow: var(--ios-glow);
+}
+html[data-w95="ios6"] body .ob-keypad button:active { background: var(--ios-btn-press) !important; padding: 0 !important; box-shadow: inset 0 2px 4px rgba(0, 0, 0, .3) !important; }
+html[data-w95="ios6"] body .fab-sync {
+    border-radius: 50% !important; background: var(--ios-blue) !important; border: 1px solid var(--ios-blue-border) !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .6) !important;
+}
+html[data-w95="ios6"] body .fab-sync .material-icons { color: #fff !important; text-shadow: 0 -1px 0 rgba(0, 30, 90, .5); }
+html[data-w95="ios6"] body .fab-sync:active { filter: brightness(.85); }
+
+/* ---------- Сегментированный переключатель («Кто» в Oldbook): единая полоса ---------- */
+html[data-w95="ios6"] body .ob-persons { display: flex !important; justify-content: center; gap: 0 !important; }
+html[data-w95="ios6"] body .ob-persons .icon-btn { flex: 0 1 112px; border-radius: 0 !important; margin-left: -1px !important; padding: 5px 10px !important; min-height: 32px; }
+html[data-w95="ios6"] body .ob-persons .icon-btn:first-child { border-radius: 7px 0 0 7px !important; margin-left: 0 !important; }
+html[data-w95="ios6"] body .ob-persons .icon-btn:last-child { border-radius: 0 7px 7px 0 !important; }
+
+/* ---------- Поля ввода ---------- */
+html[data-w95="ios6"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+html[data-w95="ios6"] body textarea {
+    background: var(--w95-field) !important; color: var(--w95-text) !important;
+    border: 1px solid var(--ios-group-border) !important; border-radius: 7px !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .2) !important;
+    font-family: var(--w95-font-text) !important; font-size: 16px; padding: 8px 10px !important;
+}
+html[data-w95="ios6"] body select {
+    background: var(--ios-btn) var(--ios-arrow) no-repeat right 8px center / 12px 18px !important;
+    color: var(--w95-text) !important; border: 1px solid var(--ios-btn-border) !important; border-radius: 8px !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .5), inset 0 1px 0 rgba(255, 255, 255, .55) !important; padding: 7px 30px 7px 10px !important;
+    font-family: var(--w95-font-text) !important; font-size: 15px; font-weight: 700;
+}
+html[data-w95="ios6"] body input:focus, html[data-w95="ios6"] body select:focus, html[data-w95="ios6"] body textarea:focus {
+    outline: none !important; border-color: var(--ios-blue-flat) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .15), 0 0 0 3px rgba(27, 111, 224, .45) !important;
+}
+html[data-w95="ios6"] body input::placeholder, html[data-w95="ios6"] body textarea::placeholder { color: #8e949e !important; }
+html[data-w95="ios6"] body .voice-res-text { border-radius: 6px !important; }
+
+/* ---------- Переключатели «ВКЛ / ВЫКЛ» (настройки), круглые галочки (списки), ползунок ---------- */
+html[data-w95="ios6"] body label.hdr-part > input[type="checkbox"], html[data-w95="ios6"] body #import-skip-dup {
+    -webkit-appearance: none; appearance: none; position: relative; flex: none; display: inline-block;
+    width: 70px !important; min-width: 70px !important; height: 27px !important; padding: 0 !important; margin: 0 10px 0 0 !important; vertical-align: middle; cursor: pointer;
+    border: 1px solid #8a8f98 !important; border-radius: 14px !important; overflow: hidden;
+    background: linear-gradient(to bottom, #b4b8c0 0%, #dcdee3 100%) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, .38), 0 1px 0 rgba(255, 255, 255, .7) !important;
+}
+html[data-w95="ios6"] body label.hdr-part > input[type="checkbox"]::before, html[data-w95="ios6"] body #import-skip-dup::before {
+    content: 'ВЫКЛ'; position: absolute; inset: 0; box-sizing: border-box; padding-right: 9px;
+    display: flex; align-items: center; justify-content: flex-end;
+    font: 700 11px/1 var(--w95-font-ui); color: #6a6f78; text-shadow: 0 1px 0 rgba(255, 255, 255, .7);
+}
+html[data-w95="ios6"] body label.hdr-part > input[type="checkbox"]::after, html[data-w95="ios6"] body #import-skip-dup::after {
+    content: ''; position: absolute; top: 1px; left: 1px; width: 23px; height: 23px; border-radius: 50% !important;
+    background: linear-gradient(to bottom, #ffffff 0%, #e8e9ec 49%, #d2d4d9 50%, #e4e5e8 100%);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .55), 0 0 0 .5px rgba(0, 0, 0, .3), inset 0 1px 0 #fff;
+    transition: left .18s ease;
+}
+html[data-w95="ios6"] body label.hdr-part > input[type="checkbox"]:checked, html[data-w95="ios6"] body #import-skip-dup:checked {
+    background: linear-gradient(to bottom, #2468cc 0%, #4a92f2 100%) !important; border-color: #1a4a9c !important;
+    box-shadow: inset 0 2px 4px rgba(0, 20, 80, .5), 0 1px 0 rgba(255, 255, 255, .7) !important;
+}
+html[data-w95="ios6"] body label.hdr-part > input[type="checkbox"]:checked::before, html[data-w95="ios6"] body #import-skip-dup:checked::before {
+    content: 'ВКЛ'; justify-content: flex-start; padding: 0 0 0 10px; color: #fff; text-shadow: 0 -1px 0 rgba(0, 30, 90, .5);
+}
+html[data-w95="ios6"] body label.hdr-part > input[type="checkbox"]:checked::after, html[data-w95="ios6"] body #import-skip-dup:checked::after { left: 44px; }
+html[data-w95="ios6"] body label.hdr-part > input[type="checkbox"]:focus-visible { box-shadow: 0 0 0 3px rgba(27, 111, 224, .5) !important; }
+html[data-w95="ios6"] body label.hdr-part { display: flex; align-items: center; gap: 0; }
+
+/* Остальные галочки — круглые, с синей отметкой */
+html[data-w95="ios6"] body input[type="checkbox"]:not(#import-skip-dup):not(label.hdr-part > input), html[data-w95="ios6"] body input[type="radio"] {
+    -webkit-appearance: none; appearance: none; position: relative; flex: none; width: 22px !important; min-width: 22px !important; height: 22px !important; padding: 0 !important; margin: 0 8px 0 0 !important;
+    vertical-align: middle; cursor: pointer; border: 1px solid #8a8f98 !important; border-radius: 50% !important;
+    background: linear-gradient(to bottom, #ffffff, #dfe1e5) !important; box-shadow: inset 0 1px 1px rgba(0, 0, 0, .2) !important;
+}
+html[data-w95="ios6"] body input[type="checkbox"]:not(#import-skip-dup):not(label.hdr-part > input):checked, html[data-w95="ios6"] body input[type="radio"]:checked {
+    background: var(--ios-blue) !important; border-color: var(--ios-blue-border) !important;
+}
+html[data-w95="ios6"] body input[type="checkbox"]:not(#import-skip-dup):not(label.hdr-part > input):checked::after {
+    content: ''; position: absolute; left: 7px; top: 3px; width: 5px; height: 10px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
+    border-radius: 0 !important;
+}
+html[data-w95="ios6"] body input[type="radio"]:checked::after { content: ''; position: absolute; left: 6px; top: 6px; width: 8px; height: 8px; border-radius: 50% !important; background: #fff; }
+/* Ползунок: тонкая дорожка и белый глянцевый кружок */
+html[data-w95="ios6"] body input[type="range"] {
+    -webkit-appearance: none; appearance: none; height: 7px; padding: 0 !important; border: 1px solid #8a8f98 !important;
+    background: linear-gradient(to bottom, #b6bac1, #e8e9ec) !important; border-radius: 4px !important; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .35) !important;
+}
+html[data-w95="ios6"] body input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(to bottom, #fff 0%, #e6e8eb 49%, #cfd2d7 50%, #e2e4e7 100%); border: 1px solid #7d828b; box-shadow: 0 1px 3px rgba(0, 0, 0, .45);
+}
+
+/* ---------- Группы: белые скруглённые таблицы на полосатом фоне ---------- */
+html[data-w95="ios6"] body .balance-main, html[data-w95="ios6"] body .balance-info,
+html[data-w95="ios6"] body #tx-list, html[data-w95="ios6"] body #subs-list, html[data-w95="ios6"] body #salary-list,
+html[data-w95="ios6"] body .table-scroll, html[data-w95="ios6"] body .export-sheet-table,
+html[data-w95="ios6"] body .kpi, html[data-w95="ios6"] body .chart-box, html[data-w95="ios6"] body .cat-list,
+html[data-w95="ios6"] body .changelog, html[data-w95="ios6"] body .ob-amount-display, html[data-w95="ios6"] body .ob-list,
+html[data-w95="ios6"] body .custom-categories, html[data-w95="ios6"] body .sound-slots, html[data-w95="ios6"] body #splash-weather,
+html[data-w95="ios6"] body .ob-share-row, html[data-w95="ios6"] body .stats-summary .stat-value, html[data-w95="ios6"] body .theme-swatch-desk,
+html[data-w95="ios6"] body .ocr-engine, html[data-w95="ios6"] body .voice-live, html[data-w95="ios6"] body .voice-result,
+html[data-w95="ios6"] body .obc-book, html[data-w95="ios6"] body .obc-notfound, html[data-w95="ios6"] body .wall-placeholder,
+html[data-w95="ios6"] body .tx-keypad-box, html[data-w95="ios6"] body .calc-display, html[data-w95="ios6"] body .calc-tape,
+html[data-w95="ios6"] body .import-preview, html[data-w95="ios6"] body .splash-stat {
+    background: var(--ios-group-bg) !important;
+    border: 1px solid var(--ios-group-border) !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+}
+html[data-w95="ios6"] body .theme-swatch-desk { background-color: var(--w95-desktop) !important; }
+html[data-w95="ios6"] body .obc-item { border-radius: 8px !important; background: var(--ios-group-bg) !important; border: 1px solid var(--ios-group-border) !important; box-shadow: none !important; }
+html[data-w95="ios6"] body .balance-main .limits, html[data-w95="ios6"] body .balance-info .info-lines { border-top-color: var(--ios-group-line); }
+html[data-w95="ios6"] body .ocr-badge { background: var(--ios-btn) !important; border: 1px solid var(--ios-btn-border); border-radius: 999px !important; box-shadow: none !important; font-weight: 700; }
+html[data-w95="ios6"] body .voice-res-retry {
+    background: var(--ios-btn) !important; border: 1px solid var(--ios-btn-border) !important; border-radius: 8px !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6) !important;
+}
+/* Заголовки дат — «шапки секций» таблицы */
+html[data-w95="ios6"] body .date-group-header {
+    background: linear-gradient(to bottom, #a2adbd 0%, #8d99ac 100%) !important; box-shadow: none !important; border: none !important;
+    border-top: 1px solid #b6bfcc !important; border-bottom: 1px solid #6f7b8f !important; margin: 0 !important; padding: 2px 10px !important;
+}
+html[data-w95="ios6"][data-w95-variant="linen"] body .date-group-header { background: linear-gradient(to bottom, #4a4c51, #34363a) !important; border-top-color: #5c5e63 !important; border-bottom-color: #000 !important; }
+html[data-w95="ios6"] body .date-group-header h4, html[data-w95="ios6"] body .date-group-header { color: #fff !important; text-shadow: var(--ios-title-shadow); font-family: var(--w95-font-ui) !important; font-size: 14px !important; }
+html[data-w95="ios6"] body .date-group-header * { color: #fff !important; text-shadow: var(--ios-title-shadow); }
+html[data-w95="ios6"] body #tx-list, html[data-w95="ios6"] body #subs-list, html[data-w95="ios6"] body #salary-list { padding: 0; overflow: hidden; }
+html[data-w95="ios6"] body .tx-item, html[data-w95="ios6"] body .sub-item {
+    background: var(--ios-group-bg) !important; border: none !important; border-bottom: 1px solid var(--ios-group-line) !important;
+    border-left: 4px solid var(--ios-group-line) !important; border-radius: 0 !important;
+}
+html[data-w95="ios6"] body .tx-item.income { border-left-color: var(--w95-income) !important; }
+html[data-w95="ios6"] body .tx-item.expense, html[data-w95="ios6"] body #subs-list .sub-item { border-left-color: var(--w95-expense) !important; }
+html[data-w95="ios6"] body .tx-item:active, html[data-w95="ios6"] body .sub-item:active { background: var(--ios-blue-flat) !important; }
+html[data-w95="ios6"] body .tx-item:active *, html[data-w95="ios6"] body .sub-item:active * { color: #fff !important; }
+html[data-w95="ios6"] body .analytics-table th {
+    background: linear-gradient(to bottom, #a2adbd, #8d99ac) !important; box-shadow: none !important; border: 1px solid #6f7b8f !important;
+    color: #fff !important; text-shadow: var(--ios-title-shadow); font-family: var(--w95-font-ui) !important; font-weight: 700;
+}
+html[data-w95="ios6"] body .analytics-table td { border-color: var(--ios-group-line) !important; background: var(--ios-group-bg) !important; }
+html[data-w95="ios6"] body .export-sheet .export-table th { background: linear-gradient(to bottom, #a2adbd, #8d99ac) !important; color: #fff !important; }
+html[data-w95="ios6"] body .ob-person { color: #fff !important; border-radius: 5px !important; border-color: rgba(0, 0, 0, .3) !important; }
+html[data-w95="ios6"] body .app-wrapper .cl-tag { color: #fff !important; border-radius: 999px !important; background: var(--ios-blue) !important; border: 1px solid var(--ios-blue-border); }
+html[data-w95="ios6"] body .cl-version { border-left-color: var(--ios-blue-flat) !important; }
+html[data-w95="ios6"] body .google-avatar { border-radius: 50% !important; }
+html[data-w95="ios6"] body .custom-dropdown { background: var(--ios-group-bg) !important; border: 1px solid var(--ios-group-border) !important; border-radius: 9px !important; box-shadow: 0 8px 22px rgba(0, 0, 0, .4) !important; overflow: hidden; }
+html[data-w95="ios6"] body .dropdown-item { border-bottom: 1px solid var(--ios-group-line) !important; }
+html[data-w95="ios6"] body .dropdown-item:hover { background: var(--ios-blue) !important; color: #fff !important; }
+
+/* ---------- Прогресс: голубая глянцевая полоса ---------- */
+html[data-w95="ios6"] body .goal-progress {
+    background: linear-gradient(to bottom, #c7ccd3, #eceef1) !important; border: 1px solid #8a8f98; border-radius: 999px !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, .35) !important; padding: 1px; height: 16px !important;
+}
+html[data-w95="ios6"] body .goal-bar { border-radius: 999px !important; background: linear-gradient(to bottom, #9cc3f6 0%, #4d90e8 49%, #2a73dd 50%, #4a90ec 100%) !important; }
+
+/* ---------- Подсказки: тёмная полупрозрачная плашка ---------- */
+html[data-w95="ios6"] body .app-toast {
+    background: rgba(18, 18, 22, .86) !important; color: #fff !important; border: 1px solid rgba(255, 255, 255, .25) !important;
+    border-radius: 12px !important; box-shadow: 0 6px 20px rgba(0, 0, 0, .45) !important; font-family: var(--w95-font-ui); font-weight: 700;
+}
+
+/* ---------- Экран блокировки: заставка и ползунок «разблокируйте» ---------- */
+html[data-w95="ios6"] body .splash-screen { background: var(--ios-lock) !important; font-family: var(--w95-font-ui) !important; }
+html[data-w95="ios6"] body .splash-screen, html[data-w95="ios6"] body .splash-screen * { color: #fff !important; }
+html[data-w95="ios6"] body .splash-content {
+    background: transparent !important; box-shadow: none !important; border: none !important; padding: 0 14px 16px !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, .55);
+}
+html[data-w95="ios6"] body .splash-content::before, html[data-w95="ios6"] body .splash-content::after { display: none !important; content: none !important; }
+html[data-w95="ios6"] body #splash-greeting { font-family: var(--w95-font-ui) !important; font-weight: 400 !important; }
+html[data-w95="ios6"] body #splash-time {
+    background: transparent !important; box-shadow: none !important; border: none !important; padding: 0 !important; min-width: 0;
+    font-family: var(--w95-font-ui) !important; font-weight: 300 !important; letter-spacing: 0 !important; color: #fff !important;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, .5);
+}
+html[data-w95="ios6"] body #splash-weather { background: rgba(0, 0, 0, .28) !important; border: 1px solid rgba(255, 255, 255, .18) !important; color: #fff !important; }
+html[data-w95="ios6"] body .splash-stat { background: rgba(0, 0, 0, .3) !important; border: 1px solid rgba(255, 255, 255, .18) !important; }
+html[data-w95="ios6"] body .splash-quote { background: rgba(0, 0, 0, .3) !important; border: 1px solid rgba(255, 255, 255, .22) !important; border-radius: 999px !important; box-shadow: none !important; color: #fff !important; }
+html[data-w95="ios6"] body .splash-quote * { text-shadow: none; }
+html[data-w95="ios6"] body .splash-quote .q-change.is-up { color: #7fe08a !important; }
+html[data-w95="ios6"] body .splash-quote .q-change.is-down { color: #ff8a80 !important; }
+html[data-w95="ios6"] body .slider-container {
+    background: linear-gradient(to bottom, #07070a 0%, #26272c 100%) !important; border: 1px solid #000 !important; border-radius: 9px !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .4), inset 0 2px 5px rgba(0, 0, 0, .9) !important; height: 56px;
+}
+html[data-w95="ios6"] body .slider-text {
+    font-family: var(--w95-font-ui) !important; font-size: 20px; font-weight: 400; letter-spacing: 0; text-transform: none;
+    background: linear-gradient(90deg, #5d5f66 0%, #5d5f66 35%, #ffffff 50%, #5d5f66 65%, #5d5f66 100%) 0 0 / 250% 100% no-repeat !important;
+    -webkit-background-clip: text !important; background-clip: text !important;
+    -webkit-text-fill-color: transparent !important; color: transparent !important; text-shadow: none !important;
+    animation: iosShimmer 2.6s linear infinite;
+}
+@keyframes iosShimmer { from { background-position: 100% 0; } to { background-position: -50% 0; } }
+html[data-w95="ios6"] body .slider-thumb {
+    background: linear-gradient(to bottom, #fbfbfb 0%, #e3e4e7 49%, #c3c5ca 50%, #dcdde0 100%) !important;
+    border: 1px solid #6c6e74 !important; border-radius: 7px !important; top: 3px; left: 3px; height: 48px; width: 70px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .6), inset 0 1px 0 #fff !important;
+}
+html[data-w95="ios6"] body .slider-thumb .material-icons { color: #4c4f57 !important; text-shadow: 0 1px 0 #fff; }
+
+/* ---------- ПИН-код: как экран пароля ---------- */
+html[data-w95="ios6"] body .pin-screen { background: var(--ios-lock) !important; }
+html[data-w95="ios6"] body .pin-screen h2 { color: #fff !important; font-family: var(--w95-font-ui) !important; font-weight: 400; text-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
+html[data-w95="ios6"] body .pin-dots .dot {
+    background: transparent !important; border: 1px solid rgba(255, 255, 255, .9) !important; border-radius: 4px !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .5), inset 0 1px 2px rgba(0, 0, 0, .4) !important; width: 18px; height: 18px;
+}
+html[data-w95="ios6"] body .pin-dots .dot.filled { background: #fff !important; box-shadow: 0 1px 2px rgba(0, 0, 0, .5) !important; }
+html[data-w95="ios6"] body .pin-btn {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, .42) 0%, rgba(255, 255, 255, .18) 49%, rgba(255, 255, 255, .08) 50%, rgba(255, 255, 255, .2) 100%) !important;
+    border: 1px solid rgba(0, 0, 0, .55) !important; border-radius: 10px !important; width: 78px; height: 58px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 1px 0 rgba(255, 255, 255, .15) !important; text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
+}
+html[data-w95="ios6"] body .pin-btn, html[data-w95="ios6"] body .pin-btn * { color: #fff !important; font-weight: 400 !important; }
+html[data-w95="ios6"] body .pin-btn:active { padding: 0 !important; background: rgba(255, 255, 255, .55) !important; }
+
+/* ---------- Полосы прокрутки: тонкие тёмные «пилюли» ---------- */
+html[data-w95="ios6"] body .w95-sb-track { border-radius: 4px !important; background: rgba(0, 0, 0, .06) !important; background-image: none !important; box-shadow: none !important; }
+html[data-w95="ios6"] body .w95-sb-btn { display: none !important; }
+html[data-w95="ios6"] body .w95-sb-thumb { left: 2px; right: 2px; border-radius: 999px !important; background: rgba(60, 66, 80, .65) !important; box-shadow: none !important; }
+@media (hover: hover) and (pointer: fine) {
+    html[data-w95="ios6"] body ::-webkit-scrollbar { width: 12px; height: 12px; }
+    html[data-w95="ios6"] body ::-webkit-scrollbar-track { background: transparent !important; background-image: none !important; }
+    html[data-w95="ios6"] body ::-webkit-scrollbar-thumb {
+        background: rgba(60, 66, 80, .6) !important; border-radius: 999px !important; border: 3px solid transparent; background-clip: padding-box !important; box-shadow: none !important;
+    }
+    html[data-w95="ios6"] body ::-webkit-scrollbar-corner { background: transparent !important; }
+}
+
+/* ---------- Навигация на ПК и планшете: боковая панель «Настройки» ---------- */
+html[data-w95="ios6"] body .sidebar {
+    background: var(--ios-card-bg) !important; box-shadow: 0 0 0 1px rgba(0, 0, 0, .35), 2px 0 8px rgba(0, 0, 0, .25) !important;
+    padding: 0 !important; border-radius: 0 !important;
+}
+html[data-w95="ios6"] body .sidebar-header {
+    background: var(--ios-nav) !important; border-bottom: 1px solid var(--ios-nav-line) !important; box-shadow: var(--ios-nav-hi) !important;
+    min-height: 44px; justify-content: center !important; padding: 6px 10px !important;
+}
+html[data-w95="ios6"] body .sidebar-header h2 { color: #fff !important; font-family: var(--w95-font-ui) !important; font-size: 17px !important; font-weight: 700; text-shadow: var(--ios-title-shadow); }
+html[data-w95="ios6"] body .sidebar-header .app-logo { width: 24px; height: 24px; border-radius: 6px !important; }
+html[data-w95="ios6"] body .sidebar-nav {
+    margin: 12px 10px !important; padding: 0 !important; gap: 0 !important; overflow: hidden;
+    background: var(--ios-group-bg); border: 1px solid var(--ios-group-border); border-radius: 9px !important;
+}
+html[data-w95="ios6"] body .sidebar-nav button {
+    font-family: var(--w95-font-ui) !important; font-size: 16px !important; font-weight: 700 !important; padding: 7px 10px !important;
+    background: transparent !important; box-shadow: none !important; border-bottom: 1px solid var(--ios-group-line) !important; min-height: 44px;
+    gap: 10px; align-items: center; border-radius: 0 !important; color: var(--w95-text);
+}
+html[data-w95="ios6"] body .sidebar-nav button:last-child { border-bottom: none !important; }
+/* Значок пункта — цветной скруглённый квадрат с глянцем, как значки «Настроек» */
+html[data-w95="ios6"] body .sidebar-nav button .material-icons {
+    flex: none; width: 30px; height: 30px; line-height: 30px; font-size: 19px !important; text-align: center; border-radius: 7px !important;
+    background: linear-gradient(to bottom, #8fb4ea 0%, #4f86d8 49%, #2f6bc9 50%, #4a85dc 100%); color: #fff !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .55); text-shadow: 0 -1px 0 rgba(0, 30, 90, .45);
+}
+html[data-w95="ios6"] body .sidebar-nav button:hover { background: rgba(27, 111, 224, .08) !important; }
+html[data-w95="ios6"] body .sidebar-nav button:hover, html[data-w95="ios6"] body .sidebar-nav button:hover * { color: var(--w95-text) !important; }
+html[data-w95="ios6"] body .sidebar-nav button:hover .material-icons { color: #fff !important; }
+html[data-w95="ios6"] body .sidebar-nav button.active { background: var(--ios-blue) !important; }
+html[data-w95="ios6"] body .sidebar-nav button.active, html[data-w95="ios6"] body .sidebar-nav button.active * { color: #fff !important; text-shadow: 0 -1px 0 rgba(0, 30, 90, .5); }
+html[data-w95="ios6"] body .sidebar-nav button.active .material-icons { background: linear-gradient(to bottom, #ffffff, #d9e6f8); color: #1b5ec0 !important; text-shadow: none; }
+
+/* ---------- Навигация на телефоне: чёрная глянцевая панель вкладок ---------- */
+@media (max-width: 768px) {
+    html[data-w95="ios6"] body .mobile-nav {
+        background: var(--ios-tab) !important; border: none !important; border-top: 1px solid #000 !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 -1px 8px rgba(0, 0, 0, .35) !important;
+    }
+    html[data-w95="ios6"] body .mobile-nav button {
+        background: transparent !important; box-shadow: none !important; border-radius: 6px !important;
+        font-family: var(--w95-font-ui) !important; font-size: 10px !important; font-weight: 700 !important; letter-spacing: 0;
+    }
+    html[data-w95="ios6"] body .mobile-nav button * { color: #9c9ea4 !important; }
+    html[data-w95="ios6"] body .mobile-nav button.active {
+        background: linear-gradient(to bottom, rgba(255, 255, 255, .26), rgba(255, 255, 255, .1)) !important;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6), 0 1px 0 rgba(255, 255, 255, .12) !important; font-weight: 700 !important;
+    }
+    html[data-w95="ios6"] body .mobile-nav button.active * { color: #3d9bff !important; }
+    html[data-w95="ios6"] body .mobile-nav button.active .material-icons { filter: drop-shadow(0 0 3px rgba(61, 155, 255, .8)); }
+    html[data-w95="ios6"] body header, html[data-w95="ios6"] body header[class] { margin: 8px 8px 0; }
+    html[data-w95="ios6"] body .card > h3 { font-size: 16px !important; }
+    html[data-w95="ios6"] body .card > h3.has-controls { padding-right: 126px !important; }
+}
+/* Бургер-меню и меню слева: те же белые строки, значок меню — «кнопка панели» */
+html[data-menu="burger"][data-w95="ios6"] body .burger-btn {
+    border-radius: 7px !important; background: var(--ios-bar-btn) !important; border: 1px solid var(--ios-bar-border) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 1px 3px rgba(0, 0, 0, .35) !important;
+}
+html[data-menu="burger"][data-w95="ios6"] body .burger-btn .material-icons { color: #fff !important; text-shadow: var(--ios-title-shadow); }
+html[data-menu="burger"][data-w95="ios6"] body .app-wrapper > aside.sidebar .sidebar-header { padding-left: 60px !important; justify-content: flex-start !important; }
+
+/* Сенсорное управление: крупнее */
+@media (pointer: coarse) {
+    html[data-w95="ios6"] body .btn-primary, html[data-w95="ios6"] body .btn-secondary,
+    html[data-w95="ios6"] body .export-btn, html[data-w95="ios6"] body .icon-btn,
+    html[data-w95="ios6"] body #add-btns .btn-income, html[data-w95="ios6"] body #add-btns .btn-expense { min-height: 44px; }
+    html[data-w95="ios6"] body .tx-actions button, html[data-w95="ios6"] body .sub-actions button { min-height: 38px; min-width: 40px; }
+}
+
+/* ---------- Папки тем в настройках (значки и панель) ---------- */
+html[data-w95="ios6"] body #settings #theme-picker .theme-folder { border-radius: 10px !important; font-family: var(--w95-font-ui) !important; }
+html[data-w95="ios6"] body #settings #theme-picker .theme-folder.is-open .tf-name { background: var(--ios-blue); color: #fff !important; border-radius: 999px; padding: 1px 9px; }
+html[data-w95="ios6"] body #settings #theme-picker .theme-folder.is-current .tf-icon::after { border-radius: 50%; background: var(--ios-blue); border-color: var(--ios-blue-border); color: #fff; }
+html[data-w95="ios6"] body .tf-back, html[data-w95="ios6"] body .tf-back::before { background: linear-gradient(to bottom, #8aa6cf, #5f7fb0) !important; border-color: #3d5885 !important; }
+html[data-w95="ios6"] body .tf-back { border-radius: 4px !important; }
+html[data-w95="ios6"] body .tf-back::before { border-radius: 4px 4px 0 0 !important; }
+html[data-w95="ios6"] body .tf-paper { border-color: #c4c4c4 !important; border-radius: 2px !important; }
+html[data-w95="ios6"] body .tf-front {
+    border-radius: 4px !important; border-color: #3d5885 !important;
+    background: linear-gradient(to bottom, #c4d4ec 0%, #98b0d6 49%, #7e9ccb 50%, #92acd4 100%) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7) !important;
+}
+html[data-w95="ios6"] body .theme-folder-panel { background: var(--ios-card-bg); box-shadow: var(--ios-sheet-shadow); border-radius: 10px !important; padding: 0 10px 10px; }
+html[data-w95="ios6"] body .tf-panel-head {
+    background: var(--ios-nav) !important; border-bottom: 1px solid var(--ios-nav-line); box-shadow: var(--ios-nav-hi); border-radius: 10px 10px 0 0 !important;
+    margin: 0 -10px 10px; padding: 6px 44px !important; justify-content: center; min-height: 38px;
+}
+html[data-w95="ios6"] body .tf-panel-title { flex: 0 1 auto; color: #fff !important; font-family: var(--w95-font-ui); font-size: 17px; font-weight: 700; text-shadow: var(--ios-title-shadow); }
+html[data-w95="ios6"] body #settings #theme-picker .tf-panel-close {
+    position: absolute !important; left: 8px; top: 50%; transform: translateY(-50%); width: 30px !important; height: 26px !important; min-height: 0 !important; padding: 0 !important;
+    background: var(--ios-bar-btn) !important; border: 1px solid var(--ios-bar-border) !important; border-radius: 5px !important;
+}
+html[data-w95="ios6"] body #settings #theme-picker .tf-panel-close .material-icons { font-size: 17px !important; color: #fff !important; }
+
+html[data-w95="ios6"] body .import-drop { border-radius: 9px !important; border-color: #8aa6cf !important; background: rgba(255, 255, 255, .5) !important; }
+html[data-w95="ios6"] body .calc-tape-row:hover { background: rgba(27, 111, 224, .12) !important; }
+html[data-w95="ios6"] body .te-color input[type="color"] { border-radius: 7px !important; border: 1px solid var(--ios-btn-border); background: var(--ios-btn) !important; }
+
+/* Голосовой ввод: уровень голоса и кнопка записи */
+html[data-w95="ios6"] body .voice-btn.is-listening { box-shadow: inset 0 2px 5px rgba(0, 0, 0, .35) !important; }
+html[data-w95="ios6"] body .voice-bars i { border-radius: 2px !important; background: linear-gradient(to bottom, #ff7a70, #d4281c); }
+html[data-w95="ios6"] body .voice-live.is-busy .voice-bars i { background: var(--ios-blue); }
+
+@media (prefers-reduced-motion: reduce) {
+    html[data-w95="ios6"] body .slider-text { animation: none; background-position: 50% 0 !important; }
+    html[data-w95="ios6"] body input[type="checkbox"]::after { transition: none; }
+}

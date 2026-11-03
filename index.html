@@ -24,6 +24,9 @@
     <link rel="stylesheet" href="css/v41.css">
     <!-- Свои темы: цвета из редактора (только при флагах data-c-*) -->
     <link rel="stylesheet" href="css/custom.css">
+    <!-- 4.3: голосовые помощники (индикатор, результат), тема «iOS 6» (действует только при html[data-w95="ios6"]) -->
+    <link rel="stylesheet" href="css/v43.css">
+    <link rel="stylesheet" href="css/ios6.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
@@ -160,11 +163,12 @@
                         <div class="forms card">
                             <h3><span class="material-icons">edit_note</span> Новая запись</h3>
                             <input type="hidden" id="edit-id">
-                            <div class="form-row">
+                            <!-- Уровни содержимого (js/sizes.js): data-tier 1 — главное, 2 — кнопки и варианты, 3 — только в большом размере -->
+                            <div class="form-row" data-tier="3">
                                 <input type="datetime-local" id="tx-datetime" required>
                             </div>
-                            <div class="amount-row">
-                                <input type="number" id="amount" placeholder="Сумма (₸)">
+                            <div class="amount-row" data-tier="1">
+                                <input type="number" id="amount" placeholder="Сумма (₸)" inputmode="decimal">
                                 <!-- Валюта записи (js/currency.js): по умолчанию тенге -->
                                 <select id="tx-currency" class="tx-currency" onchange="updateCurrencyHint()" aria-label="Валюта записи" title="Валюта записи">
                                     <option value="KZT">₸ KZT</option>
@@ -173,26 +177,30 @@
                                     <option value="RUB">₽ RUB</option>
                                 </select>
                             </div>
-                            <p class="tx-currency-hint" id="tx-currency-hint" hidden aria-live="polite"></p>
-                            <div class="autocomplete-wrapper" style="position: relative; width: 100%;">
+                            <p class="tx-currency-hint" id="tx-currency-hint" data-tier="1" hidden aria-live="polite"></p>
+                            <div class="autocomplete-wrapper" data-tier="3" style="position: relative; width: 100%;">
                                 <input type="text" id="category" placeholder="Категория" oninput="filterCategories()" onfocus="showCategories()" onblur="hideCategories()" autocomplete="off">
                                 <div id="category-dropdown" class="custom-dropdown" style="display:none;"></div>
                             </div>
                             <!-- Категории картинками (js/emoji.js; вид — Настройки → «Картинки категорий») -->
-                            <div class="cat-tiles" id="cat-tiles" role="group" aria-label="Категории"></div>
-                            <!-- Голосовой ввод (js/voice.js): сумма, категория и комментарий из фразы -->
-                            <button type="button" class="btn-secondary voice-btn" id="voice-btn" onclick="toggleVoiceInput()" aria-pressed="false"><span class="material-icons">mic</span> <span class="voice-label">Сказать голосом</span></button>
-                            <p class="voice-live" id="voice-live" hidden aria-live="polite"></p>
-                            <p class="voice-result" id="voice-result" hidden></p>
+                            <div class="cat-tiles" id="cat-tiles" data-tier="2" role="group" aria-label="Категории"></div>
+                            <!-- Голосовой помощник (js/voiceengines.js): выбор — здесь (большой размер блока) и в Настройках → «Голосовой ввод» -->
+                            <label class="field-inline voice-pick-inline" data-tier="3"><span>Голосовой помощник</span><select data-voice-select onchange="onVoiceSelectChange(this)" aria-label="Голосовой помощник"></select></label>
+                            <p class="voice-live" id="voice-live" data-tier="2" hidden></p>
+                            <p class="voice-result" id="voice-result" data-tier="2" hidden></p>
                             <input type="hidden" id="tx-comment">
-                            <button type="button" class="btn-secondary comment-btn" id="tx-comment-btn" onclick="openCommentDialog('tx')"><span class="material-icons">chat_bubble_outline</span> <span class="comment-btn-text">Комментарий</span></button>
-                            <div class="btn-group" id="add-btns">
-                                <button type="button" class="btn-income" onclick="saveTx('income')"><span class="material-icons" style="font-size:18px;">add</span> Доход</button>
-                                <button type="button" class="btn-expense" onclick="saveTx('expense')"><span class="material-icons" style="font-size:18px;">remove</span> Расход</button>
+                            <!-- Ряд из четырёх значков: слева голос и комментарий, справа доход и расход -->
+                            <div class="tx-actions" id="tx-actions" data-tier="2">
+                                <!-- Голосовой ввод (js/voice.js): сумма, категория и комментарий из фразы -->
+                                <button type="button" class="btn-secondary tx-icon-btn voice-btn" id="voice-btn" onclick="toggleVoiceInput()" aria-pressed="false" title="Сказать голосом" aria-label="Сказать голосом"><span class="material-icons">mic</span><span class="voice-label">Сказать голосом</span></button>
+                                <button type="button" class="btn-secondary tx-icon-btn comment-btn" id="tx-comment-btn" onclick="openCommentDialog('tx')" title="Комментарий" aria-label="Комментарий"><span class="material-icons">chat_bubble_outline</span><span class="comment-btn-text">Комментарий</span></button>
+                                <div class="btn-group" id="add-btns">
+                                    <button type="button" class="btn-income" onclick="saveTx('income')" title="Доход" aria-label="Доход"><span class="material-icons">add</span><span class="tx-btn-word">Доход</span></button>
+                                    <button type="button" class="btn-expense" onclick="saveTx('expense')" title="Расход" aria-label="Расход"><span class="material-icons">remove</span><span class="tx-btn-word">Расход</span></button>
+                                </div>
                             </div>
-                            <button type="button" class="btn-primary" id="save-edit-btn" style="display:none;" onclick="saveEdit()">Сохранить изменения</button>
-                            <div class="tx-keypad-box">
-                                <p class="tx-keypad-title">Сумма с цифровой клавиатуры</p>
+                            <button type="button" class="btn-primary" id="save-edit-btn" data-tier="2" style="display:none;" onclick="saveEdit()">Сохранить изменения</button>
+                            <div class="tx-keypad-box" data-tier="3">
                                 <div class="ob-keypad tx-keypad" role="group" aria-label="Цифровая клавиатура для суммы">
                                     <button type="button" onclick="txKey('1')">1</button>
                                     <button type="button" onclick="txKey('2')">2</button>
@@ -541,11 +549,11 @@
                     </div>
                     <div class="card ob-form-card" id="ob-form-card">
                         <h3><span class="material-icons">menu_book</span> Новая запись — Oldbook</h3>
-                        <input type="datetime-local" id="ob-datetime">
+                        <input type="datetime-local" id="ob-datetime" data-tier="3">
 
-                        <div class="ob-label">Сумма</div>
-                        <div class="ob-amount-display is-empty" id="ob-amount-display" aria-live="polite">0 ₸</div>
-                        <div class="ob-keypad" role="group" aria-label="Цифровая клавиатура">
+                        <div class="ob-label" data-tier="1">Сумма</div>
+                        <div class="ob-amount-display is-empty" id="ob-amount-display" data-tier="1" aria-live="polite">0 ₸</div>
+                        <div class="ob-keypad" data-tier="3" role="group" aria-label="Цифровая клавиатура">
                             <button type="button" onclick="obKey('1')">1</button>
                             <button type="button" onclick="obKey('2')">2</button>
                             <button type="button" onclick="obKey('3')">3</button>
@@ -562,8 +570,8 @@
                             <button type="button" class="ob-key-wide" onclick="obKey('00')">00</button>
                         </div>
 
-                        <div class="ob-label">На что</div>
-                        <div class="ob-category-row">
+                        <div class="ob-label" data-tier="2">На что</div>
+                        <div class="ob-category-row" data-tier="2">
                             <input type="text" id="ob-category" list="ob-category-list" placeholder="Категория (продукты, кружок, проезд…)" maxlength="60" autocomplete="off">
                             <button type="button" class="btn-secondary ob-cat-add" onclick="addCustomCategory(document.getElementById('ob-category').value)" title="Добавить в мои категории" aria-label="Добавить в мои категории"><span class="material-icons">bookmark_add</span></button>
                         </div>
@@ -583,13 +591,13 @@
                         </datalist>
 
                         <input type="hidden" id="ob-comment">
-                        <button type="button" class="btn-secondary comment-btn" id="ob-comment-btn" onclick="openCommentDialog('ob')"><span class="material-icons">chat_bubble_outline</span> <span class="comment-btn-text">Комментарий</span></button>
+                        <button type="button" class="btn-secondary comment-btn" id="ob-comment-btn" data-tier="3" onclick="openCommentDialog('ob')"><span class="material-icons">chat_bubble_outline</span> <span class="comment-btn-text">Комментарий</span></button>
 
-                        <div class="btn-group" id="ob-add-btns">
+                        <div class="btn-group" id="ob-add-btns" data-tier="2">
                             <button type="button" class="btn-income" onclick="saveObEntry('income')"><span class="material-icons">add</span> Доход</button>
                             <button type="button" class="btn-expense" onclick="saveObEntry('expense')"><span class="material-icons">remove</span> Расход</button>
                         </div>
-                        <div class="btn-group" id="ob-save-edit" style="display:none;">
+                        <div class="btn-group" id="ob-save-edit" data-tier="2" style="display:none;">
                             <button type="button" class="btn-primary" onclick="saveObEdit()"><span class="material-icons">save</span> Сохранить</button>
                             <button type="button" class="btn-secondary" onclick="resetObForm()">Отмена</button>
                         </div>
@@ -763,6 +771,11 @@
                         <div id="ocr-settings"></div>
                     </div>
 
+                    <div class="card voice-card" id="voice-card">
+                        <h3><span class="material-icons">record_voice_over</span> Голосовой ввод</h3>
+                        <div id="voice-settings"></div>
+                    </div>
+
                     <div class="card icon-app-card" id="icon-app-card">
                         <h3><span class="material-icons">apps</span> Иконка приложения</h3>
                         <div id="icon-settings"></div>
@@ -830,7 +843,22 @@
                         </div>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>4.1.2 <span class="cl-tag">текущая</span></h4>
+                                <h4>4.3.0 <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Голосовой ввод переделан: теперь у него несколько голосовых помощников на выбор — по образцу распознавания фото. ИИ (Gemini слышит запись и сразу отдаёт текст, сумму, категорию, тип и день), веб-сервисы (Groq Whisper, OpenAI, Google Cloud Speech-to-Text), встроенное распознавание браузера и Whisper на устройстве (работает без интернета после загрузки модели). «Авто» пробует по порядку и при сбое переходит к следующему. Выбор — в «Новой записи» и в Настройках → «Голосовой ввод»; ключи Gemini и OpenAI общие с распознаванием фото.</li>
+                                    <li>Запись звука с индикатором уровня и автоматической остановкой, когда вы замолчали; языки речи: русский, казахский, английский, французский, немецкий; сумма словами по-русски, по-казахски и по-английски (раньше не понимались числа 11–19), несколько чисел во фразе, валюта («пять долларов»), день («вчера», «позавчера»).</li>
+                                    <li>Распознанную фразу можно исправить прямо в результате — сумма и категория пересчитаются. «Уточнять фразу ИИ» (Gemini, Claude или OpenAI) точнее находит категорию и тип. В Настройках есть проверка помощника и сравнение всех помощников на одной записи.</li>
+                                    <li>Новая тема «iOS 6» (папка «iOS») — светлая с глянцевыми синими панелями и полосатым фоном «Настроек» и тёмная «лён»: сгруппированные таблицы, переключатели ВКЛ/ВЫКЛ, чёрная глянцевая панель вкладок, заставка и ПИН-код в виде экрана блокировки. Все прежние темы остались как были.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.2.0</h4>
+                                <ul>
+                                    <li>Размер блока меняет и содержимое: маленький показывает только главное, средний — главное и кнопки, большой — всё. «Новая запись» переделана: сумма, плитки категорий, ряд значков (голос, комментарий, доход, расход) и цифровая клавиатура.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.1.2</h4>
                                 <ul>
                                     <li>В «Истории версий» показано, какая версия реально загружена на этом устройстве, и добавлена кнопка «Обновить сайт сейчас»: она сбрасывает старую копию сайта в телефоне и загружает свежие файлы (записи, настройки и ключи не удаляются).</li>
                                 </ul>
@@ -1079,6 +1107,7 @@
     <script src="js/bank.js"></script>
     <script src="js/fonts.js"></script>
     <script src="js/icon.js"></script>
+    <script src="js/voiceengines.js"></script>
     <script src="js/voice.js"></script>
     <script src="js/obcatalog.js"></script>
     <script src="js/wall.js"></script>

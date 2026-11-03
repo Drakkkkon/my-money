@@ -1,0 +1,59 @@
+/* =========================================================================
+   4.3: голосовые помощники (js/voiceengines.js, js/voice.js).
+   Только на переменных темы (--w95-*), поэтому подходит всем темам; форму кнопок по-прежнему задают сами темы.
+   Тема «iOS 6» — отдельный файл css/ios6.css.
+   ========================================================================= */
+
+/* Выбор помощника в «Новой записи» (виден в большом размере блока) */
+html body .voice-pick-inline { margin: 0 0 8px; }
+html body .voice-pick-inline select { min-width: 0; flex: 1 1 160px; }
+
+/* Полоска «Слушаю…» с индикатором уровня голоса */
+html body .voice-live { display: flex; align-items: center; gap: 10px; font-style: normal; min-height: 34px; }
+html body .voice-live[hidden] { display: none !important; }
+html body .voice-live .voice-live-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+html body .voice-bars { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 3px; height: 22px; }
+html body .voice-bars i {
+    display: block; width: 4px; height: 22px; border-radius: 2px; background: var(--w95-expense, #b3261e);
+    transform: scaleY(.16); transform-origin: 50% 50%; transition: transform 70ms linear;
+}
+html body .voice-live.is-busy .voice-bars i { background: var(--w95-select, #000080); animation: voiceBusy 1s ease-in-out infinite; }
+html body .voice-live.is-busy .voice-bars i:nth-child(2) { animation-delay: .12s; }
+html body .voice-live.is-busy .voice-bars i:nth-child(3) { animation-delay: .24s; }
+html body .voice-live.is-busy .voice-bars i:nth-child(4) { animation-delay: .36s; }
+html body .voice-live.is-busy .voice-bars i:nth-child(5) { animation-delay: .48s; }
+@keyframes voiceBusy { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(.8); } }
+
+/* Кнопка микрофона: запись (красная, пульс) и обработка (песочные часы) */
+html body .voice-btn.is-busy { box-shadow: var(--w95-pressed) !important; }
+html body .voice-btn.is-busy .material-icons { animation: voiceSpin 1.4s ease-in-out infinite; }
+@keyframes voiceSpin { 0%, 40% { transform: rotate(0); } 60%, 100% { transform: rotate(180deg); } }
+
+/* Результат: помощник, время, фраза (можно исправить), разбор и кнопка «ещё раз» */
+html body .voice-result { align-items: center; }
+html body .voice-result .voice-res-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+html body .voice-res-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 12px; }
+html body .voice-res-ms { color: var(--w95-muted); font-variant-numeric: tabular-nums; }
+html body .voice-res-text {
+    width: 100%; min-width: 0; margin: 0 !important; padding: 3px 6px; font-size: 14px; font-family: inherit;
+    background: var(--w95-field); color: var(--w95-text); box-sizing: border-box;
+}
+html body .voice-result small { line-height: 1.35; }
+html body .voice-res-retry {
+    flex: 0 0 auto; width: 36px; height: 36px; min-height: 0 !important; padding: 0 !important; margin: 0 !important;
+    display: inline-flex !important; align-items: center; justify-content: center; cursor: pointer;
+    background: var(--w95-face); color: var(--w95-text); border: none; box-shadow: var(--w95-raised);
+}
+html body .voice-res-retry:active { box-shadow: var(--w95-pressed); }
+html body .voice-result .voice-res-retry .material-icons { font-size: 20px !important; color: var(--w95-text) !important; }
+
+/* Настройки → «Голосовой ввод»: проверка помощника */
+html body .voice-test { margin-top: 6px; }
+html body .voice-test .is-bad { color: var(--w95-expense); }
+html body .voice-test small { color: var(--w95-muted); }
+html body .ocr-bench-table td small { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+    html body .voice-bars i { transition: none; }
+    html body .voice-live.is-busy .voice-bars i, html body .voice-btn.is-busy .material-icons { animation: none; }
+}

@@ -78,6 +78,7 @@ function renderCategoryTiles() {
     if (!box) return;
     const mode = iconMode('form');
     box.classList.toggle('is-icons', mode === 'icon');
+    const owner = box.closest('.card'); if (owner) owner.classList.toggle('tiles-off', mode === 'text'); // в «Среднем» размере без плиток показываем поле категории
     box.style.display = mode === 'text' ? 'none' : '';
     if (mode === 'text') return;
     const input = document.getElementById('category');

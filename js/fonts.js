@@ -1,6 +1,6 @@
 // --- ШРИФТЫ ---
 // 10 шрифтов с Google Fonts (все с кириллицей): 3 общих для всех тем и по 1–2 своих у каждой группы тем
-// (Windows 95, Windows Vista, Mac OS, Windows 8 Метро). Шрифт выбирается отдельно для заголовков/кнопок
+// (Windows 95, Windows Vista, Mac OS, Windows 8 Метро, iOS). Шрифт выбирается отдельно для заголовков/кнопок
 // и для текста/цифр и запоминается для группы тем: при смене темы на другую группу действует её выбор.
 // Свои шрифты (TTF, OTF, WOFF, WOFF2) хранятся на устройстве; перед установкой приложение проверяет, какие
 // буквы в шрифте есть (русские, казахские, дореформенные, латиница, цифры, ₸) и насколько он шире/выше обычного.
@@ -8,7 +8,7 @@
 
 const FONT_GROUPS = [
     { id: 'win95', name: 'Windows 95' }, { id: 'vista', name: 'Windows Vista' },
-    { id: 'mac', name: 'Mac OS' }, { id: 'metro', name: 'Windows 8 Метро' }
+    { id: 'mac', name: 'Mac OS' }, { id: 'metro', name: 'Windows 8 Метро' }, { id: 'ios', name: 'iOS' }
 ];
 const FONT_LIB = [
     // общие — для всех тем
@@ -25,7 +25,9 @@ const FONT_LIB = [
     { id: 'nunito', name: 'Nunito', family: "'Nunito'", group: 'mac', css: 'Nunito:wght@400;600;700' },
     { id: 'comfortaa', name: 'Comfortaa', family: "'Comfortaa'", group: 'mac', css: 'Comfortaa:wght@400;600;700' },
     // Windows 8 Метро
-    { id: 'montserrat', name: 'Montserrat', family: "'Montserrat'", group: 'metro', css: 'Montserrat:wght@300;400;600' }
+    { id: 'montserrat', name: 'Montserrat', family: "'Montserrat'", group: 'metro', css: 'Montserrat:wght@300;400;600' },
+    // iOS (Helvetica-подобный шрифт с кириллицей)
+    { id: 'arimo', name: 'Arimo (как Helvetica)', family: "'Arimo'", group: 'ios', css: 'Arimo:wght@400;700' }
 ];
 const FONT_FALLBACK = "'Segoe UI', Tahoma, Roboto, Arial, sans-serif";
 const CUSTOM_FONTS_KEY = 'finance_custom_fonts';

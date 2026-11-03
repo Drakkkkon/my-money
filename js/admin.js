@@ -9,7 +9,7 @@
 //    ссылка на товар, название цели, список покупок), способ и итог распознавания фото, тип и категория новой записи.
 //    НЕ передаётся: суммы, комментарии, баланс, названия подписок, пароли, ключи распознавания.
 
-window.APP_VERSION = window.APP_VERSION || '4.1.2';
+window.APP_VERSION = window.APP_VERSION || '4.3.0';
 const ADMIN_EMAILS = ['lego2009as@gmail.com'];
 const ADMIN_CONSENT_KEY = 'finance_activity_consent'; // 'yes' | 'no'
 const ADMIN_QUEUE_KEY = 'finance_activity_queue';
@@ -17,7 +17,7 @@ const ADMIN_QUEUE_MAX = 300;
 const ADMIN_BATCH = 50;
 
 const ADMIN_EVENT_LABELS = { open: 'Открыл приложение', login: 'Вошёл через Google', tab: 'Открыл раздел', search: 'Ввёл в поиск',
-    scan: 'Распознал фото', scan_fail: 'Сбой распознавания', entry: 'Новая запись' };
+    scan: 'Распознал фото', scan_fail: 'Сбой распознавания', voice: 'Голосовой ввод', voice_fail: 'Сбой голосового ввода', entry: 'Новая запись' };
 const ADMIN_FIELD_LABELS = { 'obc-number': 'Oldbook: номер книги', 'obc-text': 'Oldbook: название/автор', 'quote-search-input': 'Котировки',
     'pr-search': 'Цены', 'goal-url': 'Цели: ссылка на товар', 'goal-title': 'Цели: название', 'shop-input': 'Список покупок' };
 const ADMIN_TAB_NAMES = { transactions: 'Записи', wall: 'Стена', subscriptions: 'Подписки', salary: 'Зарплата', statistics: 'Статистика',
@@ -258,6 +258,8 @@ function adminDescribe(ev) {
         case 'search': return `${ADMIN_FIELD_LABELS[d.field] || d.field}: «${d.text || ''}»`;
         case 'scan': return `${what} · ${d.engine || ''}${d.ms ? ' · ' + (d.ms / 1000).toFixed(1) + ' с' : ''} · ${d.ok ? 'распознано' : 'не распознано'}${d.text ? ' · «' + d.text + '»' : ''}`;
         case 'scan_fail': return `${what} · ${d.engine || ''} · ${d.code || ''}`;
+        case 'voice': return `${d.engine || ''}${d.ms ? ' · ' + (d.ms / 1000).toFixed(1) + ' с' : ''} · ${d.ok ? 'сумма найдена' : 'сумма не найдена'}`;
+        case 'voice_fail': return `${d.engine || ''} · ${d.code || ''}`;
         case 'entry': return `${d.type === 'income' ? 'доход' : 'расход'} · категория «${d.category || ''}»${d.via && d.via !== 'form' ? ' · ' + d.via : ''}`;
         default: return '';
     }

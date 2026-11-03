@@ -32,6 +32,7 @@ function setFormComment(prefix, text) {
     const label = btn.querySelector('.comment-btn-text');
     const value = el ? el.value : '';
     btn.classList.toggle('has-comment', !!value);
+    if (prefix === 'tx') btn.title = value ? 'Комментарий: ' + value : 'Комментарий';
     if (label) label.textContent = value ? '«' + value + '»' : 'Комментарий';
 }
 
