@@ -100,7 +100,7 @@ html[data-w95="aqua"] body .export-sheet-close .material-icons { font-size: 11px
 html[data-w95="aqua"] body .export-sheet-head:hover .export-sheet-close .material-icons,
 html[data-w95="aqua"] body .export-sheet-close:focus-visible .material-icons { opacity: 1; }
 
-/* Настоящие кнопки окна (список Oldbook): закрыть — свернуть — развернуть, слева */
+/* Настоящие кнопки окна: закрыть — свернуть — развернуть, слева */
 html[data-w95="aqua"] body .card > h3.has-controls { padding: 4px 70px !important; }
 html[data-w95="aqua"] body .card > h3.has-controls::after { display: none !important; }
 html[data-w95="aqua"] body .w95-ctls { left: 9px; right: auto; gap: 7px; }
@@ -213,12 +213,6 @@ html[data-w95="aqua"] body .fab-sync {
 html[data-w95="aqua"] body .fab-sync .material-icons { color: #fff !important; }
 html[data-w95="aqua"] body .fab-sync:active { filter: brightness(.86); }
 
-/* ---------- Сегменты (переключатель «Кто» в Oldbook): одна полоса по центру ---------- */
-html[data-w95="aqua"] body .ob-persons { display: flex !important; justify-content: center; gap: 0 !important; }
-html[data-w95="aqua"] body .ob-persons .icon-btn { flex: 0 1 112px; border-radius: 0 !important; margin-left: -1px !important; padding: 5px 10px !important; }
-html[data-w95="aqua"] body .ob-persons .icon-btn:first-child { border-radius: 999px 0 0 999px !important; margin-left: 0 !important; }
-html[data-w95="aqua"] body .ob-persons .icon-btn:last-child { border-radius: 0 999px 999px 0 !important; }
-
 /* ---------- Поля ввода ---------- */
 html[data-w95="aqua"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 html[data-w95="aqua"] body textarea {
@@ -261,13 +255,22 @@ html[data-w95="aqua"] body input[type="range"]::-webkit-slider-thumb {
 }
 
 /* ---------- Вдавленные панели и списки (скругление 6px) ---------- */
-html[data-w95="aqua"] body .balance-main, html[data-w95="aqua"] body .balance-info,
-html[data-w95="aqua"] body #tx-list, html[data-w95="aqua"] body #subs-list, html[data-w95="aqua"] body #salary-list,
-html[data-w95="aqua"] body .table-scroll, html[data-w95="aqua"] body .export-sheet-table,
-html[data-w95="aqua"] body .kpi, html[data-w95="aqua"] body .chart-box, html[data-w95="aqua"] body .cat-list,
-html[data-w95="aqua"] body .changelog, html[data-w95="aqua"] body .ob-amount-display, html[data-w95="aqua"] body .ob-list,
-html[data-w95="aqua"] body .custom-categories, html[data-w95="aqua"] body .sound-slots, html[data-w95="aqua"] body #splash-weather,
-html[data-w95="aqua"] body .ob-share-row, html[data-w95="aqua"] body .stats-summary .stat-value, html[data-w95="aqua"] body .theme-swatch-desk {
+html[data-w95="aqua"] body .balance-main,
+html[data-w95="aqua"] body .balance-info,
+html[data-w95="aqua"] body #tx-list,
+html[data-w95="aqua"] body #subs-list,
+html[data-w95="aqua"] body #salary-list,
+html[data-w95="aqua"] body .table-scroll,
+html[data-w95="aqua"] body .export-sheet-table,
+html[data-w95="aqua"] body .kpi,
+html[data-w95="aqua"] body .chart-box,
+html[data-w95="aqua"] body .cat-list,
+html[data-w95="aqua"] body .changelog,
+html[data-w95="aqua"] body .custom-categories,
+html[data-w95="aqua"] body .sound-slots,
+html[data-w95="aqua"] body #splash-weather,
+html[data-w95="aqua"] body .stats-summary .stat-value,
+html[data-w95="aqua"] body .theme-swatch-desk {
     background: #fff !important;
     border: 1px solid #b6b6b6 !important;
     border-radius: 6px !important;
@@ -287,7 +290,7 @@ html[data-w95="aqua"] body .analytics-table th {
     border: 1px solid #c8c8c8 !important; font-family: var(--w95-font-text) !important; font-weight: 400;
 }
 html[data-w95="aqua"] body .export-sheet .export-table th { background: linear-gradient(to bottom, #fbfbfb, #e1e1e1) !important; color: var(--w95-text) !important; }
-html[data-w95="aqua"] body .ob-person { color: #fff !important; border-radius: 4px !important; border-color: rgba(0, 0, 0, .25) !important; }
+
 html[data-w95="aqua"] body .app-wrapper .cl-tag { color: #fff !important; border-radius: 999px !important; background: var(--aqua-select) !important; }
 html[data-w95="aqua"] body .google-avatar { border-radius: 50% !important; }
 

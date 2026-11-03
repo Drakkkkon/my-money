@@ -1,0 +1,16 @@
+/* =========================================================================
+   4.6.0 — общее для всех тем
+   1) Подпись внизу Настроек: название версии и год обновления.
+   2) Карточка «Обои рабочего стола» в Настройках: скрыта везде, кроме темы «Windows 95_Пуск» и папки «Windows 95_Экстра»
+      (оформление карточки — css/desk95.css под html[data-w95="desk95"]).
+   ========================================================================= */
+
+html body .app-footer {
+    grid-column: 1 / -1; align-self: start; justify-self: stretch; box-sizing: border-box; /* на ПК Настройки — сетка: подпись занимает всю нижнюю строку */
+    margin: 6px 0 22px; padding: 7px 12px; text-align: center; font-size: 13px; line-height: 1.4;
+    background: var(--w95-face, transparent); color: var(--w95-text, inherit); font-family: var(--w95-font-text, inherit);
+}
+html body .app-footer b { color: inherit; font-weight: 700; }
+
+html body .desk-wall-card { display: none !important; }
+html[data-w95="desk95"] body .desk-wall-card { display: block !important; }

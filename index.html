@@ -27,6 +27,10 @@
     <!-- 4.3: голосовые помощники (индикатор, результат), тема «iOS 6» (действует только при html[data-w95="ios6"]) -->
     <link rel="stylesheet" href="css/v43.css">
     <link rel="stylesheet" href="css/ios6.css">
+    <!-- 4.5: тема «Windows 95_Пуск» (рабочий стол со значками, страницы в окнах): действует только при html[data-w95="desk95"] -->
+    <link rel="stylesheet" href="css/desk95.css">
+    <!-- 4.6.0: общее для всех тем (подпись версии внизу Настроек, карточка обоев — видна только в теме «Windows 95_Пуск» и папке «Windows 95_Экстра») -->
+    <link rel="stylesheet" href="css/v46.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
@@ -232,6 +236,29 @@
                     <div class="card card-wide wall-info" id="wall-empty">
                         <h3><span class="material-icons">dashboard</span> Стена</h3>
                         <p class="hint">Соберите здесь блоки, которые нужны чаще всего: нажмите <span class="material-icons inline-icon">push_pin</span> в заголовке любого блока в любом разделе — он переедет сюда. На стене у блока меняются ширина <span class="material-icons inline-icon">swap_horiz</span> и высота <span class="material-icons inline-icon">swap_vert</span> (или потяните за уголок справа внизу), «_» сворачивает, «□» разворачивает на весь экран, булавка возвращает блок на место.</p>
+                    </div>
+
+                    <!-- Каталог OldBook.kz: постоянный блок «Стены» (только администратор), поиск книги по номеру, по фото обложки или по названию (js/obcatalog.js) -->
+                    <div class="card card-wide obc-card on-wall" id="obc-card" data-wall-fixed data-admin-only style="--wall-w:4;">
+                        <h3><span class="material-icons">local_library</span> Каталог OldBook.kz</h3>
+                        <p class="hint">Введите номер книги из каталога сайта oldbook.kz или сфотографируйте обложку — приложение прочитает название и автора и найдёт книгу.</p>
+                        <div class="obc-row">
+                            <input type="text" id="obc-number" inputmode="numeric" placeholder="Номер книги, например 14898" maxlength="12" autocomplete="off">
+                            <button type="button" class="btn-primary" onclick="obSearchByNumber()"><span class="material-icons">search</span> Найти</button>
+                            <label class="btn-secondary obc-cam" title="Сфотографировать обложку"><span class="material-icons">photo_camera</span>
+                                <input type="file" accept="image/*" capture="environment" onchange="obCoverFromInput(event)">
+                            </label>
+                            <label class="btn-secondary obc-cam" title="Фото обложки из галереи"><span class="material-icons">image</span>
+                                <input type="file" accept="image/*" onchange="obCoverFromInput(event)">
+                            </label>
+                        </div>
+                        <div class="obc-row">
+                            <input type="text" id="obc-text" placeholder="Или название и автор" maxlength="120" autocomplete="off">
+                            <button type="button" class="btn-secondary" onclick="obSearchByText(document.getElementById('obc-text').value)"><span class="material-icons">manage_search</span> По названию</button>
+                        </div>
+                        <label class="field-inline ocr-pick-inline"><span>Распознавание обложки</span><select id="obc-engine" data-ocr-kind="cover" onchange="onOcrSelectChange(this)" aria-label="Способ распознавания обложки"></select></label>
+                        <p class="hint obc-status" id="obc-status" aria-live="polite"></p>
+                        <div id="obc-result"></div>
                     </div>
                 </div>
 
@@ -523,150 +550,6 @@
                     <!-- Здесь js/quotes.js рисует окна: «Мои котировки», «Технологии США», «Казахстан», «Мировые компании» -->
                 </div>
 
-                <!-- OLDBOOK: семейная книга (Катя, Папа, Саша) с обменом между аккаунтами -->
-                <div id="oldbook" class="tab" style="display:none;">
-                    <!-- Каталог OldBook.kz: поиск книги по номеру или по фото обложки (js/obcatalog.js) -->
-                    <div class="card card-wide obc-card" id="obc-card">
-                        <h3><span class="material-icons">local_library</span> Каталог OldBook.kz</h3>
-                        <p class="hint">Введите номер книги из каталога сайта oldbook.kz или сфотографируйте обложку — приложение прочитает название и автора и найдёт книгу.</p>
-                        <div class="obc-row">
-                            <input type="text" id="obc-number" inputmode="numeric" placeholder="Номер книги, например 14898" maxlength="12" autocomplete="off">
-                            <button type="button" class="btn-primary" onclick="obSearchByNumber()"><span class="material-icons">search</span> Найти</button>
-                            <label class="btn-secondary obc-cam" title="Сфотографировать обложку"><span class="material-icons">photo_camera</span>
-                                <input type="file" accept="image/*" capture="environment" onchange="obCoverFromInput(event)">
-                            </label>
-                            <label class="btn-secondary obc-cam" title="Фото обложки из галереи"><span class="material-icons">image</span>
-                                <input type="file" accept="image/*" onchange="obCoverFromInput(event)">
-                            </label>
-                        </div>
-                        <div class="obc-row">
-                            <input type="text" id="obc-text" placeholder="Или название и автор" maxlength="120" autocomplete="off">
-                            <button type="button" class="btn-secondary" onclick="obSearchByText(document.getElementById('obc-text').value)"><span class="material-icons">manage_search</span> По названию</button>
-                        </div>
-                        <label class="field-inline ocr-pick-inline"><span>Распознавание обложки</span><select id="obc-engine" data-ocr-kind="cover" onchange="onOcrSelectChange(this)" aria-label="Способ распознавания обложки"></select></label>
-                        <p class="hint obc-status" id="obc-status" aria-live="polite"></p>
-                        <div id="obc-result"></div>
-                    </div>
-                    <div class="card ob-form-card" id="ob-form-card">
-                        <h3><span class="material-icons">menu_book</span> Новая запись — Oldbook</h3>
-                        <input type="datetime-local" id="ob-datetime" data-tier="3">
-
-                        <div class="ob-label" data-tier="1">Сумма</div>
-                        <div class="ob-amount-display is-empty" id="ob-amount-display" data-tier="1" aria-live="polite">0 ₸</div>
-                        <div class="ob-keypad" data-tier="3" role="group" aria-label="Цифровая клавиатура">
-                            <button type="button" onclick="obKey('1')">1</button>
-                            <button type="button" onclick="obKey('2')">2</button>
-                            <button type="button" onclick="obKey('3')">3</button>
-                            <button type="button" onclick="obKey('back')" aria-label="Стереть"><span class="material-icons">backspace</span></button>
-                            <button type="button" onclick="obKey('4')">4</button>
-                            <button type="button" onclick="obKey('5')">5</button>
-                            <button type="button" onclick="obKey('6')">6</button>
-                            <button type="button" onclick="obKey('clear')" aria-label="Очистить">C</button>
-                            <button type="button" onclick="obKey('7')">7</button>
-                            <button type="button" onclick="obKey('8')">8</button>
-                            <button type="button" onclick="obKey('9')">9</button>
-                            <button type="button" onclick="obKey('000')">000</button>
-                            <button type="button" class="ob-key-wide" onclick="obKey('0')">0</button>
-                            <button type="button" class="ob-key-wide" onclick="obKey('00')">00</button>
-                        </div>
-
-                        <div class="ob-label" data-tier="2">На что</div>
-                        <div class="ob-category-row" data-tier="2">
-                            <input type="text" id="ob-category" list="ob-category-list" placeholder="Категория (продукты, кружок, проезд…)" maxlength="60" autocomplete="off">
-                            <button type="button" class="btn-secondary ob-cat-add" onclick="addCustomCategory(document.getElementById('ob-category').value)" title="Добавить в мои категории" aria-label="Добавить в мои категории"><span class="material-icons">bookmark_add</span></button>
-                        </div>
-                        <datalist id="ob-category-list">
-                            <option value="Продукты"></option>
-                            <option value="Еда вне дома"></option>
-                            <option value="Проезд"></option>
-                            <option value="Одежда"></option>
-                            <option value="Учёба"></option>
-                            <option value="Кружки и секции"></option>
-                            <option value="Развлечения"></option>
-                            <option value="Подарки"></option>
-                            <option value="Здоровье"></option>
-                            <option value="Карманные деньги"></option>
-                            <option value="Зарплата"></option>
-                            <option value="Другое"></option>
-                        </datalist>
-
-                        <input type="hidden" id="ob-comment">
-                        <button type="button" class="btn-secondary comment-btn" id="ob-comment-btn" data-tier="3" onclick="openCommentDialog('ob')"><span class="material-icons">chat_bubble_outline</span> <span class="comment-btn-text">Комментарий</span></button>
-
-                        <div class="btn-group" id="ob-add-btns" data-tier="2">
-                            <button type="button" class="btn-income" onclick="saveObEntry('income')"><span class="material-icons">add</span> Доход</button>
-                            <button type="button" class="btn-expense" onclick="saveObEntry('expense')"><span class="material-icons">remove</span> Расход</button>
-                        </div>
-                        <div class="btn-group" id="ob-save-edit" data-tier="2" style="display:none;">
-                            <button type="button" class="btn-primary" onclick="saveObEdit()"><span class="material-icons">save</span> Сохранить</button>
-                            <button type="button" class="btn-secondary" onclick="resetObForm()">Отмена</button>
-                        </div>
-                    </div>
-
-                    <div class="card card-wide ob-history-card" id="ob-history-card">
-                        <h3 class="has-controls"><span class="material-icons">receipt_long</span> Расходы и доходы
-                            <span class="w95-ctls">
-                                <span class="w95-ctl w95-ctl-min" aria-hidden="true"></span>
-                                <button type="button" class="w95-ctl w95-ctl-max" onclick="toggleMaximize(this)" title="Развернуть" aria-label="Развернуть на весь экран"></button>
-                                <span class="w95-ctl w95-ctl-close" aria-hidden="true"></span>
-                            </span>
-                        </h3>
-                        <div class="ob-list-toolbar">
-                            <select id="ob-filter-person" onchange="renderObList()" aria-label="Чьи записи показать">
-                                <option value="">Все</option>
-                            </select>
-                            <div class="ob-totals" id="ob-totals"></div>
-                        </div>
-                        <div class="ob-list" id="ob-list"></div>
-                    </div>
-
-                    <div class="card card-wide ob-stats-card">
-                        <h3><span class="material-icons">insights</span> Кто, на что и зачем</h3>
-                        <select id="ob-stats-period" onchange="renderObStats()" aria-label="Период статистики">
-                            <option value="7">Последние 7 дней</option>
-                            <option value="30">Последние 30 дней</option>
-                            <option value="month" selected>Этот месяц</option>
-                            <option value="year">Этот год</option>
-                            <option value="all">Всё время</option>
-                        </select>
-                        <div class="ob-charts">
-                            <div class="ob-chart">
-                                <h4>Кто сколько потратил</h4>
-                                <div class="chart-box chart-box-round"><canvas id="ob-person-chart"></canvas></div>
-                            </div>
-                            <div class="ob-chart">
-                                <h4>На что тратил каждый</h4>
-                                <div class="chart-box"><canvas id="ob-category-chart"></canvas></div>
-                            </div>
-                            <div class="ob-chart">
-                                <h4>Доходы и расходы по людям</h4>
-                                <div class="chart-box"><canvas id="ob-balance-chart"></canvas></div>
-                            </div>
-                        </div>
-                        <h4 class="ob-why-title">Зачем: самые крупные траты</h4>
-                        <div class="ob-why-list cat-list" id="ob-why-list"></div>
-                    </div>
-
-                    <div class="card card-wide ob-share-card">
-                        <h3><span class="material-icons">group</span> Совместный доступ</h3>
-                        <p class="hint">Записи других членов семьи попадают к вам только с согласия обеих сторон: владелец открывает доступ к своей книге, а получатель подтверждает его у себя. Делятся только записи Oldbook — остальные ваши финансы никто не видит.</p>
-
-                        <h4>1. Поделиться своей книгой</h4>
-                        <p class="hint">Введите email аккаунта Google человека. Google пришлёт ему письмо со ссылкой.</p>
-                        <div class="ob-share-form">
-                            <input type="email" id="ob-share-email" placeholder="email, например katya@gmail.com" autocomplete="email">
-                            <button type="button" class="btn-primary" onclick="shareOldbookWith()"><span class="material-icons">person_add</span> Открыть доступ</button>
-                        </div>
-                        <p class="hint" id="ob-share-status"></p>
-                        <div id="ob-shares"></div>
-
-                        <h4>2. Принять книгу другого пользователя</h4>
-                        <p class="hint">Когда с вами поделились, нажмите кнопку и выберите файл <b>my_money_oldbook.json</b> в окне Google Диска — это и есть ваше подтверждение.</p>
-                        <button type="button" class="btn-primary" onclick="acceptOldbook()"><span class="material-icons">how_to_reg</span> Принять книгу другого пользователя</button>
-                        <div id="ob-links"></div>
-                    </div>
-                </div>
-
                 <!-- НАСТРОЙКИ -->
                 <div id="settings" class="tab" style="display:none;">
                     <div class="card sync-card" id="auth-section">
@@ -741,8 +624,22 @@
 
                     <div class="card card-wide theme-card">
                         <h3><span class="material-icons">palette</span> Темы оформления</h3>
-                        <p class="hint">Темы разложены по папкам по стилю: Windows 95, Windows Vista, Mac OS и ваши папки. Нажмите на папку, чтобы открыть её. У каждой темы свои звуки — при выборе вы их услышите. Свою тему можно создать на основе текущей: поменять цвета фона, окон, кнопок, текста и сохранить в нужную папку.</p>
+                        <p class="hint">Темы разложены по папкам по стилю: Windows 95, Windows 95_Экстра (рабочий стол с панелью задач и «Пуском»), Windows Vista, Mac OS и ваши папки. Нажмите на папку, чтобы открыть её. У каждой темы свои звуки — при выборе вы их услышите. Свою тему можно создать на основе текущей: поменять цвета фона, окон, кнопок, текста и сохранить в нужную папку.</p>
                         <div class="theme-browser" id="theme-picker"></div>
+                    </div>
+
+                    <!-- Обои рабочего стола (js/desk95.js): карточка видна только в теме «Windows 95_Пуск» и в папке «Windows 95_Экстра» -->
+                    <div class="card desk-wall-card" id="desk-wall-card">
+                        <h3><span class="material-icons">wallpaper</span> Обои рабочего стола</h3>
+                        <p class="hint">Картинка на рабочем столе этой темы. Есть 18 классических обоев Windows 95: облака, ромбы, пузыри, плитка, волны и другие. Если ничего не выбрано, у каждой темы свои обои.</p>
+                        <div class="dwc-row">
+                            <span class="dwc-thumb" aria-hidden="true"></span>
+                            <span class="dwc-info"><b class="dwc-name">—</b><span class="dwc-sub hint"></span></span>
+                        </div>
+                        <div class="dwc-btns">
+                            <button type="button" class="btn-primary" onclick="deskWallDialog()"><span class="material-icons">wallpaper</span> Изменить обои</button>
+                            <button type="button" class="btn-secondary dwc-reset" onclick="deskWallReset()"><span class="material-icons">restart_alt</span> Обои темы</button>
+                        </div>
                     </div>
 
                     <div class="card font-settings-card" id="font-settings-card">
@@ -816,7 +713,7 @@
 
                     <div class="card categories-card">
                         <h3><span class="material-icons">label</span> Мои категории</h3>
-                        <p class="hint">Свои категории появляются в подсказках «Записей» и Oldbook и сохраняются в аккаунте Google. Добавить можно и прямо из списка категорий при вводе записи.</p>
+                        <p class="hint">Свои категории появляются в подсказках «Записей» и сохраняются в аккаунте Google. Добавить можно и прямо из списка категорий при вводе записи.</p>
                         <div class="cat-add-form">
                             <input type="text" id="new-category" placeholder="Название, например «Бензин»" maxlength="40" onkeydown="if(event.key==='Enter'){addCategoryFromSettings();}">
                             <button type="button" class="btn-primary" onclick="addCategoryFromSettings()"><span class="material-icons">add</span> Добавить</button>
@@ -843,7 +740,46 @@
                         </div>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>4.3.0 <span class="cl-tag">текущая</span></h4>
+                                <h4>4.7.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Тема «Windows 95_Пуск» (и папка «Windows 95_Экстра»): у блоков внутри страниц больше нет синей панели с кнопками «закрыть», «развернуть», «на Стену». Вместо неё у каждого окна наверху меню в стиле Windows 95 — «Файл», «Правка», «Вид», «Блоки». Нажатие открывает меню: «Файл» — «Добавить новое значение…» (новая запись, подписка, цель и т. д. — зависит от страницы), «Добавить блок на рабочий стол», «Закрыть окно»; «Правка» — «Изменить размер» (маленький, средний, большой, авто — для одного блока или для всех); «Вид» — масштаб, «Развернуть» и «Свернуть» окно; «Блоки» — список блоков страницы: открыть в окне, перейти к блоку, свернуть / развернуть, повесить на Стену, значок на рабочем столе. Меню работает и с клавиатуры: Alt + первая буква, стрелки, Enter, Esc.</li>
+                                    <li>Меню «Пуск»: нажатие на страницу открывает диалоговое окно-табличку — слева значок и название блока, справа размер и кнопка «+ На стол». Нажатие на блок открывает в отдельном окне только этот блок, а не всю страницу. Страницу целиком открывает кнопка «Вся страница».</li>
+                                    <li>На панели задач справа, рядом с «Свернуть все», появились время и дата (Алматы, 24 часа). При наведении или долгом нажатии — день недели и секунды.</li>
+                                    <li>Во всех окнах в правом нижнем углу — кнопка с лупой: масштаб в свободном стиле (50–200 %, шаг 5, кнопки «−» и «+»), «100 %» и «Под экран» — масштаб подбирается по ширине экрана устройства и пересчитывается при повороте. У каждого окна масштаб свой, он запоминается на устройстве.</li>
+                                    <li>Отдельный блок можно положить на рабочий стол значком со стрелкой-ярлыком: через меню окна, таблицу блоков в «Пуске» или правой кнопкой / долгим нажатием на значок. Все значки (страниц и блоков) можно свободно перетаскивать по столу; положение запоминается. Правая кнопка на столе: «Упорядочить значки», «Обои рабочего стола…», «Свернуть все окна». Значок блока убирается клавишей Delete или через его меню.</li>
+                                    <li>Остальные темы не изменены.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.6.0 «Экстра»</h4>
+                                <ul>
+                                    <li>Тема «Windows 95_Пуск» переехала в новую папку «Windows 95_Экстра» (Настройки → Темы оформления). В папке ещё пять мягких тем без контрастных схем: «Экстра: Облака», «Мята», «Персик», «Лаванда» и «Туман» — у каждой свои цвета, обои и звуки.</li>
+                                    <li>Внизу экрана появилась панель задач как в Windows 95. Слева кнопка «Пуск»: меню с основными страницами; нажатие на страницу открывает диалоговое окно — «папку» с блоками этой страницы, нажатие на блок открывает страницу и показывает блок.</li>
+                                    <li>Каждая открытая страница — квадратная иконка без подписи на панели задач: нажатие сворачивает окно или возвращает его. Название страницы появляется при наведении мыши или при долгом нажатии пальцем. Справа на панели — кнопка «Свернуть все».</li>
+                                    <li>Страницы в этой теме переписаны: блока с балансом, датой и временем больше нет, блоки выглядят как окна обычных программ на сером рабочем поле.</li>
+                                    <li>Настройки → «Обои рабочего стола» (видно только в этих темах): кнопка «Изменить обои» открывает окно «Свойства: Экран» с 18 классическими обоями Windows 95, нарисованными заново.</li>
+                                    <li>Внизу Настроек — название версии и год обновления. Остальные темы не изменены.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.5.0</h4>
+                                <ul>
+                                    <li>Новая тема «Windows 95_Пуск» (Настройки → Темы оформления → Windows 95). После заставки и ПИН-кода открывается пустой рабочий стол без панели «Пуск»: на нём значки разделов в стиле Windows 95 — Записи, Стена, Подписки, Зарплата, Статистика, Отчёты, Цели, Котировки, Цены, Настройки.</li>
+                                    <li>Нажатие на значок с анимацией открывает страницу сайта в окне — в том же виде, что и обычно. Крестик в заголовке закрывает окно. На компьютере окна можно двигать, разворачивать и держать несколько сразу.</li>
+                                    <li>Круглая кнопка «Обновить» внизу справа в этой теме заменена квадратной кнопкой «Свернуть все»: все открытые окна сворачиваются, и вы попадаете на рабочий стол. Вернуть окно — нажатием на его значок.</li>
+                                    <li>Остальные темы не изменены. Тему можно включать и выключать на лету — открытая страница не пропадает.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.4.0</h4>
+                                <ul>
+                                    <li>Oldbook (семейная книга доходов и расходов) вынесен из сайта в отдельное приложение «Oldbook 95» — своя папка, свои скрипты, только оформление Windows 95. Из меню и сайта раздел убран.</li>
+                                    <li>Каталог OldBook.kz остался: теперь это постоянный блок на «Стене» (виден администратору). Поиск по номеру, по фото обложки и по названию работает как раньше.</li>
+                                    <li>Прежние записи Oldbook никуда не делись: они остаются в браузере и в файле на Google Диске и переносятся в Oldbook 95 через «Файл → Импорт».</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.3.0</h4>
                                 <ul>
                                     <li>Голосовой ввод переделан: теперь у него несколько голосовых помощников на выбор — по образцу распознавания фото. ИИ (Gemini слышит запись и сразу отдаёт текст, сумму, категорию, тип и день), веб-сервисы (Groq Whisper, OpenAI, Google Cloud Speech-to-Text), встроенное распознавание браузера и Whisper на устройстве (работает без интернета после загрузки модели). «Авто» пробует по порядку и при сбое переходит к следующему. Выбор — в «Новой записи» и в Настройках → «Голосовой ввод»; ключи Gemini и OpenAI общие с распознаванием фото.</li>
                                     <li>Запись звука с индикатором уровня и автоматической остановкой, когда вы замолчали; языки речи: русский, казахский, английский, французский, немецкий; сумма словами по-русски, по-казахски и по-английски (раньше не понимались числа 11–19), несколько чисел во фразе, валюта («пять долларов»), день («вчера», «позавчера»).</li>
@@ -1073,6 +1009,9 @@
                         <div class="lang-list" id="lang-settings"></div>
                         <p class="hint">После выбора приложение перезапустится на новом языке. Ваши записи, категории и комментарии не переводятся.</p>
                     </div>
+
+                    <!-- 4.6.0: название версии и год обновления — самое последнее в Настройках (js/script.js подставляет значения из js/admin.js) -->
+                    <p class="app-footer" id="app-footer">My Money · версия <b id="app-footer-ver">4.7.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
                 </div>
             </main>
         </div>
@@ -1089,10 +1028,12 @@
     <script src="js/i18n.js"></script>
     <script src="js/sound.js"></script>
     <script src="js/soundpicker.js"></script>
+    <!-- 4.6.0: обои рабочего стола — раньше тем: темы папки «Windows 95_Экстра» берут отсюда свои обои по умолчанию -->
+    <script src="js/desk95-walls.js"></script>
     <script src="js/themes.js"></script>
     <script src="js/scrollbars.js"></script>
     <script src="js/cloud.js"></script>
-    <script src="js/oldbook.js"></script>
+    <script src="js/dialogs.js"></script>
     <script src="js/extras.js"></script>
     <script src="js/importer.js"></script>
     <script src="js/layout.js"></script>
@@ -1114,5 +1055,12 @@
     <script src="js/sizes.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/script.js"></script>
+    <!-- 4.5: тема «Windows 95_Пуск» — значки и рабочий стол; идёт после script.js, подменяет showTab только пока тема выбрана -->
+    <script src="js/desk95-icons.js"></script>
+    <script src="js/desk95.js"></script>
+    <!-- 4.7: меню окон, значки блоков на рабочем столе, часы на панели задач и масштаб окон (используют общий объект window.DESK95 из desk95.js) -->
+    <script src="js/desk95-menu.js"></script>
+    <script src="js/desk95-desktop.js"></script>
+    <script src="js/desk95-tools.js"></script>
 </body>
 </html>

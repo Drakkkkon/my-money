@@ -1,6 +1,6 @@
 // --- АДМИНИСТРАТОР И ЖУРНАЛ ДЕЙСТВИЙ ---
-// 1) Администратор — аккаунт Google из ADMIN_EMAILS. Только ему видны раздел Oldbook (меню, поиск по каталогу, общий доступ)
-//    и блок «Администратор: пользователи» в Настройках. Это скрывает интерфейс на устройстве; настоящая защита списка
+// 1) Администратор — аккаунт Google из ADMIN_EMAILS. Только ему видны каталог OldBook.kz на «Стене» (блок с атрибутом
+//    data-admin-only, css/v4.css) и блок «Администратор: пользователи» в Настройках. Это скрывает интерфейс на устройстве; настоящая защита списка
 //    пользователей — на сервере журнала: он принимает только проверенный токен Google и отдаёт данные только администратору.
 // 2) Журнал действий. У сайта нет своего сервера, поэтому журнал ведёт Google Apps Script с Таблицей администратора
 //    (admin_server/Code.gs, инструкция ADMIN_SETUP_RU.txt; адрес — adminLogUrl в js/config.js). Отправка начинается ТОЛЬКО после
@@ -9,7 +9,9 @@
 //    ссылка на товар, название цели, список покупок), способ и итог распознавания фото, тип и категория новой записи.
 //    НЕ передаётся: суммы, комментарии, баланс, названия подписок, пароли, ключи распознавания.
 
-window.APP_VERSION = window.APP_VERSION || '4.3.0';
+window.APP_VERSION = window.APP_VERSION || '4.7.0';
+window.APP_VERSION_NAME = window.APP_VERSION_NAME || 'Экстра'; // название версии (подпись внизу Настроек)
+window.APP_YEAR = window.APP_YEAR || 2026;                  // год обновления
 const ADMIN_EMAILS = ['lego2009as@gmail.com'];
 const ADMIN_CONSENT_KEY = 'finance_activity_consent'; // 'yes' | 'no'
 const ADMIN_QUEUE_KEY = 'finance_activity_queue';
@@ -18,10 +20,10 @@ const ADMIN_BATCH = 50;
 
 const ADMIN_EVENT_LABELS = { open: 'Открыл приложение', login: 'Вошёл через Google', tab: 'Открыл раздел', search: 'Ввёл в поиск',
     scan: 'Распознал фото', scan_fail: 'Сбой распознавания', voice: 'Голосовой ввод', voice_fail: 'Сбой голосового ввода', entry: 'Новая запись' };
-const ADMIN_FIELD_LABELS = { 'obc-number': 'Oldbook: номер книги', 'obc-text': 'Oldbook: название/автор', 'quote-search-input': 'Котировки',
+const ADMIN_FIELD_LABELS = { 'obc-number': 'Каталог OldBook.kz: номер книги', 'obc-text': 'Каталог OldBook.kz: название/автор', 'quote-search-input': 'Котировки',
     'pr-search': 'Цены', 'goal-url': 'Цели: ссылка на товар', 'goal-title': 'Цели: название', 'shop-input': 'Список покупок' };
 const ADMIN_TAB_NAMES = { transactions: 'Записи', wall: 'Стена', subscriptions: 'Подписки', salary: 'Зарплата', statistics: 'Статистика',
-    reports: 'Отчёты', wishlist: 'Цели', quotes: 'Котировки', prices: 'Цены', oldbook: 'Oldbook', settings: 'Настройки' };
+    reports: 'Отчёты', wishlist: 'Цели', quotes: 'Котировки', prices: 'Цены', settings: 'Настройки' };
 
 function isAdminUser() {
     try {
@@ -29,13 +31,10 @@ function isAdminUser() {
         return !!email && ADMIN_EMAILS.includes(email);
     } catch (e) { return false; }
 }
-function menuAllowed(id) { return id !== 'oldbook' || isAdminUser(); } // раздел Oldbook — только администратору
 
 function applyAdminAccess() {
     const admin = isAdminUser();
     document.documentElement.setAttribute('data-admin', admin ? '1' : '0');
-    if (typeof renderMenus === 'function') renderMenus();
-    if (!admin && typeof currentTabId !== 'undefined' && currentTabId === 'oldbook' && typeof showTab === 'function') showTab('transactions');
     renderActivitySettings();
     renderAdminPanel();
     adminAskConsent();
@@ -211,7 +210,7 @@ function renderAdminPanel() {
     card.hidden = !isAdminUser();
     if (card.hidden) return;
     if (!adminLogUrl()) {
-        box.innerHTML = '<p class="hint">Журнал не подключён. Создайте сервер по инструкции <b>ADMIN_SETUP_RU.txt</b> и впишите его адрес в js/config.js (поле adminLogUrl). Пока адреса нет, раздел Oldbook работает, а список пользователей пуст.</p>';
+        box.innerHTML = '<p class="hint">Журнал не подключён. Создайте сервер по инструкции <b>ADMIN_SETUP_RU.txt</b> и впишите его адрес в js/config.js (поле adminLogUrl). Пока адреса нет, каталог OldBook.kz работает, а список пользователей пуст.</p>';
         return;
     }
     box.innerHTML = `

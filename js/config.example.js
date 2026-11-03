@@ -4,17 +4,13 @@
 //
 // googleClientId — «OAuth Client ID» (тип «Веб-приложение») из Google Cloud → Google Auth Platform → Clients.
 //   Пример: '123456789012-abcdefg1234567.apps.googleusercontent.com'
-// googleApiKey — «API key» (начинается с AIza…) из Google Cloud → APIs & Services → Credentials.
-// googleAppId  — «Project number» (номер проекта, только цифры) с главной страницы проекта в Google Cloud.
 //
 // adminLogUrl — необязательно: адрес сервера журнала и администратора (ADMIN_SETUP_RU.txt): 'https://script.google.com/macros/s/.../exec'
 // ocrKeys — необязательно: ключи распознавания фото { gemini: '...', claude: '...', openai: '...', gvision: '...', ocrspace: '...' }.
 //   Проще вписать их на устройстве: Настройки → «Распознавание фото» (там они хранятся только на этом устройстве).
 //
-// Правила: каждое значение в одинарных кавычках '...', после первых двух строк — запятая, после последней — нет.
+// Правила: каждое значение в одинарных кавычках '...', после каждой строки, кроме последней, — запятая.
 window.MONEY_CONFIG = {
     googleClientId: 'ВСТАВЬТЕ_СЮДА_CLIENT_ID.apps.googleusercontent.com',
-    googleApiKey: 'ВСТАВЬТЕ_СЮДА_API_KEY',
-    googleAppId: 'ВСТАВЬТЕ_СЮДА_НОМЕР_ПРОЕКТА',
     adminLogUrl: ''
 };

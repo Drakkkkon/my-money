@@ -94,9 +94,44 @@ function iosTheme(v) {
     return { sounds: 'tock', folder: 'ios', cssId: 'ios6', fontUi: IOS_FONT, fontText: IOS_FONT, ...v };
 }
 
+// «Windows 95_Экстра» (4.6.0) — пять мягких тем на основе «Windows 95_Пуск»: тот же рабочий стол с окнами, панелью задач и меню «Пуск»
+// (js/desk95.js, css/desk95.css — действуют при html[data-w95="desk95"], поэтому cssId у всех 'desk95'), но свои цвета, обои по умолчанию
+// (js/desk95-walls.js; можно сменить в Настройках → «Обои рабочего стола») и звуки. Контрастных схем нет: приглушённые цвета,
+// светлые окна, заголовки средней насыщенности.
+const DESK95X_WALL = (id) => {
+    const w = window.DESK95_WALLS && window.DESK95_WALLS.byId[id];
+    return w ? { wall: id, pattern: w.image, patternSize: w.size } : { wall: id };
+};
+const DESK95X_THEMES = [
+    { id: 'dx-clouds', name: 'Экстра: Облака', sounds: 'chime',
+      face: '#c9d3df', light: '#f4f7fb', hilite: '#dde5ee', shadow: '#8795a8', dark: '#2b3442', field: '#fbfcfe', hover: '#dfe8f4', grid: '#cbd5e1',
+      title: '#3f5f94', title2: '#6f93c9', desktop: '#8dbcee', select: '#3f5f94', ...DESK95X_WALL('clouds') },
+    { id: 'dx-mint', name: 'Экстра: Мята', sounds: 'water',
+      face: '#c4d6cf', light: '#f3f9f6', hilite: '#dbe7e2', shadow: '#82988f', dark: '#25322d', field: '#fafdfc', hover: '#dcebe5', grid: '#c4d6cf',
+      title: '#2f7a68', title2: '#5a9c88', desktop: '#8fa8a0', select: '#2f7a68', ...DESK95X_WALL('tiles') },
+    { id: 'dx-peach', name: 'Экстра: Персик', sounds: 'wood',
+      face: '#e4d3c2', light: '#fbf5ee', hilite: '#efe3d6', shadow: '#a68f79', dark: '#3a2c20', field: '#fffbf6', hover: '#f1e5d8', grid: '#decdbb',
+      title: '#a2563a', title2: '#c27b58', desktop: '#8f7545', select: '#a2563a', ...DESK95X_WALL('strawmat') },
+    { id: 'dx-lavender', name: 'Экстра: Лаванда', sounds: 'pad',
+      face: '#d3cde3', light: '#f7f5fc', hilite: '#e4e0ef', shadow: '#968fb0', dark: '#2b2740', field: '#fcfbfe', hover: '#e6e2f1', grid: '#d0cae0',
+      title: '#6a5aa8', title2: '#8777c4', desktop: '#8a85b8', select: '#6a5aa8', ...DESK95X_WALL('circles') },
+    { id: 'dx-fog', name: 'Экстра: Туман', sounds: 'rain',
+      face: '#d0d5da', light: '#f6f8f9', hilite: '#e2e6e9', shadow: '#8d96a0', dark: '#272d33', field: '#fbfcfc', hover: '#e1e7ec', grid: '#cdd3d9',
+      title: '#56687c', title2: '#7488a0', desktop: '#8499ad', select: '#56687c', ...DESK95X_WALL('pinstripe') }
+].map(t => ({ folder: 'desk95x', cssId: 'desk95', ...t }));
+
 const W95_THEMES = [
     { id: 'standard', name: 'Windows (стандартная)', sounds: 'classic',
         face: '#c0c0c0', title: '#000080', title2: '#1084d0', desktop: '#008080', select: '#000080' },
+    // «Windows 95_Пуск» — отдельная тема с другой логикой (js/desk95.js, css/desk95.css, значки — js/desk95-icons.js):
+    // после заставки и ПИН-кода пустой рабочий стол без панели «Пуск», на нём значки разделов в стиле Windows 95;
+    // нажатие открывает страницу в окне (с анимацией), крестик закрывает; внизу справа квадратная кнопка «Свернуть все»
+    // вместо круглой кнопки синхронизации. Другие темы не затронуты.
+    // С 4.6.0 тема лежит в своей папке «Windows 95_Экстра» вместе с пятью мягкими (не контрастными) темами на её основе;
+    // у всех шести одна логика (рабочий стол, окна, панель задач, «Пуск», обои), различаются цвета, обои и звуки.
+    { id: 'desk95', name: 'Windows 95_Пуск', sounds: 'classic', folder: 'desk95x',
+        face: '#c0c0c0', title: '#000080', title2: '#1084d0', desktop: '#008080', select: '#000080' },
+    ...DESK95X_THEMES,
     { id: 'brick', name: 'Кирпич', sounds: 'wood',
         face: '#c2bfa5', light: '#fbfaf1', hilite: '#dcd9c4', shadow: '#8a8670', dark: '#2a2820',
         title: '#800000', title2: '#b5523b', desktop: '#6e3b2e', select: '#800000' },
@@ -214,6 +249,7 @@ let currentThemeId = 'standard';
 // Папки в настройках: встроенные стили плюс папки, которые пользователь создал для своих тем
 const THEME_FOLDERS = [
     { id: 'win95', name: 'Windows 95' },
+    { id: 'desk95x', name: 'Windows 95_Экстра' },
     { id: 'vista', name: 'Windows Vista' },
     { id: 'mac', name: 'Mac OS' },
     { id: 'metro', name: 'Windows 8 Метро' },
@@ -323,6 +359,8 @@ function applyResolvedTheme(t, { save = true, preview = false, render = true } =
     const root = document.documentElement;
     root.setAttribute('data-w95', t.cssId || t.id);
     root.setAttribute('data-w95-mode', t.dark === true ? 'dark' : 'light');
+    // тема с рабочим столом («Windows 95_Пуск», js/desk95.js) включается и выключается по этому событию
+    try { window.dispatchEvent(new CustomEvent('w95-theme', { detail: { id: t.cssId || t.id } })); } catch (e) {}
     // вариант оформления внутри стиля (у «Метро»: light, neon, leopard)
     if (t.variant) root.setAttribute('data-w95-variant', t.variant); else root.removeAttribute('data-w95-variant');
     const flags = new Set(Object.keys(t.overrides || {}).map(k => THEME_COLOR_FLAGS[k]).filter(Boolean));

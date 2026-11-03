@@ -271,12 +271,6 @@ html[data-w95="ios6"] body .fab-sync {
 html[data-w95="ios6"] body .fab-sync .material-icons { color: #fff !important; text-shadow: 0 -1px 0 rgba(0, 30, 90, .5); }
 html[data-w95="ios6"] body .fab-sync:active { filter: brightness(.85); }
 
-/* ---------- Сегментированный переключатель («Кто» в Oldbook): единая полоса ---------- */
-html[data-w95="ios6"] body .ob-persons { display: flex !important; justify-content: center; gap: 0 !important; }
-html[data-w95="ios6"] body .ob-persons .icon-btn { flex: 0 1 112px; border-radius: 0 !important; margin-left: -1px !important; padding: 5px 10px !important; min-height: 32px; }
-html[data-w95="ios6"] body .ob-persons .icon-btn:first-child { border-radius: 7px 0 0 7px !important; margin-left: 0 !important; }
-html[data-w95="ios6"] body .ob-persons .icon-btn:last-child { border-radius: 0 7px 7px 0 !important; }
-
 /* ---------- Поля ввода ---------- */
 html[data-w95="ios6"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
 html[data-w95="ios6"] body textarea {
@@ -353,17 +347,33 @@ html[data-w95="ios6"] body input[type="range"]::-webkit-slider-thumb {
 }
 
 /* ---------- Группы: белые скруглённые таблицы на полосатом фоне ---------- */
-html[data-w95="ios6"] body .balance-main, html[data-w95="ios6"] body .balance-info,
-html[data-w95="ios6"] body #tx-list, html[data-w95="ios6"] body #subs-list, html[data-w95="ios6"] body #salary-list,
-html[data-w95="ios6"] body .table-scroll, html[data-w95="ios6"] body .export-sheet-table,
-html[data-w95="ios6"] body .kpi, html[data-w95="ios6"] body .chart-box, html[data-w95="ios6"] body .cat-list,
-html[data-w95="ios6"] body .changelog, html[data-w95="ios6"] body .ob-amount-display, html[data-w95="ios6"] body .ob-list,
-html[data-w95="ios6"] body .custom-categories, html[data-w95="ios6"] body .sound-slots, html[data-w95="ios6"] body #splash-weather,
-html[data-w95="ios6"] body .ob-share-row, html[data-w95="ios6"] body .stats-summary .stat-value, html[data-w95="ios6"] body .theme-swatch-desk,
-html[data-w95="ios6"] body .ocr-engine, html[data-w95="ios6"] body .voice-live, html[data-w95="ios6"] body .voice-result,
-html[data-w95="ios6"] body .obc-book, html[data-w95="ios6"] body .obc-notfound, html[data-w95="ios6"] body .wall-placeholder,
-html[data-w95="ios6"] body .tx-keypad-box, html[data-w95="ios6"] body .calc-display, html[data-w95="ios6"] body .calc-tape,
-html[data-w95="ios6"] body .import-preview, html[data-w95="ios6"] body .splash-stat {
+html[data-w95="ios6"] body .balance-main,
+html[data-w95="ios6"] body .balance-info,
+html[data-w95="ios6"] body #tx-list,
+html[data-w95="ios6"] body #subs-list,
+html[data-w95="ios6"] body #salary-list,
+html[data-w95="ios6"] body .table-scroll,
+html[data-w95="ios6"] body .export-sheet-table,
+html[data-w95="ios6"] body .kpi,
+html[data-w95="ios6"] body .chart-box,
+html[data-w95="ios6"] body .cat-list,
+html[data-w95="ios6"] body .changelog,
+html[data-w95="ios6"] body .custom-categories,
+html[data-w95="ios6"] body .sound-slots,
+html[data-w95="ios6"] body #splash-weather,
+html[data-w95="ios6"] body .stats-summary .stat-value,
+html[data-w95="ios6"] body .theme-swatch-desk,
+html[data-w95="ios6"] body .ocr-engine,
+html[data-w95="ios6"] body .voice-live,
+html[data-w95="ios6"] body .voice-result,
+html[data-w95="ios6"] body .obc-book,
+html[data-w95="ios6"] body .obc-notfound,
+html[data-w95="ios6"] body .wall-placeholder,
+html[data-w95="ios6"] body .tx-keypad-box,
+html[data-w95="ios6"] body .calc-display,
+html[data-w95="ios6"] body .calc-tape,
+html[data-w95="ios6"] body .import-preview,
+html[data-w95="ios6"] body .splash-stat {
     background: var(--ios-group-bg) !important;
     border: 1px solid var(--ios-group-border) !important;
     border-radius: 9px !important;
@@ -399,7 +409,7 @@ html[data-w95="ios6"] body .analytics-table th {
 }
 html[data-w95="ios6"] body .analytics-table td { border-color: var(--ios-group-line) !important; background: var(--ios-group-bg) !important; }
 html[data-w95="ios6"] body .export-sheet .export-table th { background: linear-gradient(to bottom, #a2adbd, #8d99ac) !important; color: #fff !important; }
-html[data-w95="ios6"] body .ob-person { color: #fff !important; border-radius: 5px !important; border-color: rgba(0, 0, 0, .3) !important; }
+
 html[data-w95="ios6"] body .app-wrapper .cl-tag { color: #fff !important; border-radius: 999px !important; background: var(--ios-blue) !important; border: 1px solid var(--ios-blue-border); }
 html[data-w95="ios6"] body .cl-version { border-left-color: var(--ios-blue-flat) !important; }
 html[data-w95="ios6"] body .google-avatar { border-radius: 50% !important; }

@@ -103,7 +103,7 @@ html[data-w95="mono"] body .export-sheet-close {
 html[data-w95="mono"] body .export-sheet-close .material-icons { font-size: 11px !important; color: #000 !important; opacity: 0; }
 html[data-w95="mono"] body .export-sheet-close:active { background: #000 !important; }
 
-/* Настоящие кнопки окна (список Oldbook): справа на белом поле поверх полосок */
+/* Настоящие кнопки окна: справа на белом поле поверх полосок */
 html[data-w95="mono"] body .card > h3.has-controls { padding-right: 4px !important; overflow: visible; }
 html[data-w95="mono"] body .card > h3.has-controls::after { background: var(--mono-stripes) center / 100% 11px no-repeat !important; margin-right: 64px !important; }
 html[data-w95="mono"] body .w95-ctls { right: 4px; gap: 3px; background: #fff; padding: 0 4px; }
@@ -179,7 +179,7 @@ html[data-w95="mono"] body button:focus-visible, html[data-w95="mono"] body labe
 }
 html[data-w95="mono"] body .btn-primary:focus-visible { outline: 3px solid #000 !important; outline-offset: 2px !important; }
 
-/* Клавиатура Oldbook, ПИН-код, кнопка синхронизации (цифры — чётким шрифтом: в пиксельном 5 похожа на S) */
+/* Цифровая клавиатура, ПИН-код, кнопка синхронизации (цифры — чётким шрифтом: в пиксельном 5 похожа на S) */
 html[data-w95="mono"] body .ob-keypad button, html[data-w95="mono"] body .pin-btn { font-family: var(--w95-font-text) !important; font-weight: 700 !important; }
 html[data-w95="mono"] body .ob-keypad button:active { padding: 0 !important; }
 html[data-w95="mono"] body .pin-btn { border-radius: 10px !important; box-shadow: var(--mono-shadow) !important; }
@@ -233,13 +233,22 @@ html[data-w95="mono"] body input[type="range"]::-webkit-slider-thumb {
 }
 
 /* ---------- Вдавленные панели и списки: просто белые с рамкой ---------- */
-html[data-w95="mono"] body .balance-main, html[data-w95="mono"] body .balance-info,
-html[data-w95="mono"] body #tx-list, html[data-w95="mono"] body #subs-list, html[data-w95="mono"] body #salary-list,
-html[data-w95="mono"] body .table-scroll, html[data-w95="mono"] body .export-sheet-table,
-html[data-w95="mono"] body .kpi, html[data-w95="mono"] body .chart-box, html[data-w95="mono"] body .cat-list,
-html[data-w95="mono"] body .changelog, html[data-w95="mono"] body .ob-amount-display, html[data-w95="mono"] body .ob-list,
-html[data-w95="mono"] body .custom-categories, html[data-w95="mono"] body .sound-slots, html[data-w95="mono"] body #splash-weather,
-html[data-w95="mono"] body .ob-share-row, html[data-w95="mono"] body .stats-summary .stat-value, html[data-w95="mono"] body .goal-progress,
+html[data-w95="mono"] body .balance-main,
+html[data-w95="mono"] body .balance-info,
+html[data-w95="mono"] body #tx-list,
+html[data-w95="mono"] body #subs-list,
+html[data-w95="mono"] body #salary-list,
+html[data-w95="mono"] body .table-scroll,
+html[data-w95="mono"] body .export-sheet-table,
+html[data-w95="mono"] body .kpi,
+html[data-w95="mono"] body .chart-box,
+html[data-w95="mono"] body .cat-list,
+html[data-w95="mono"] body .changelog,
+html[data-w95="mono"] body .custom-categories,
+html[data-w95="mono"] body .sound-slots,
+html[data-w95="mono"] body #splash-weather,
+html[data-w95="mono"] body .stats-summary .stat-value,
+html[data-w95="mono"] body .goal-progress,
 html[data-w95="mono"] body .google-avatar {
     background: #fff !important;
     border: 1px solid #000 !important;
@@ -261,7 +270,7 @@ html[data-w95="mono"] body .analytics-table th {
 }
 html[data-w95="mono"] body .analytics-table td { border: 1px solid #000 !important; }
 html[data-w95="mono"] body .export-sheet .export-table th { background: #fff !important; color: #000 !important; }
-html[data-w95="mono"] body .ob-person { background: #fff !important; color: #000 !important; border: 1px solid #000 !important; }
+
 html[data-w95="mono"] body .app-wrapper .cl-tag { background: #000 !important; color: #fff !important; }
 html[data-w95="mono"] body .cl-version { border-left: 2px solid #000 !important; }
 html[data-w95="mono"] body .menu-row-icon { color: #000 !important; }

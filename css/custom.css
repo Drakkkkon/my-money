@@ -49,11 +49,15 @@ html[data-c-face]:is([data-w95="aqua"], [data-w95="mono"]) body header .balance-
 html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body textarea,
 html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body select { background-color: var(--w95-field) !important; }
-html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body #tx-list, html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body #subs-list,
-html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body #salary-list, html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .ob-list,
-html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .balance-main, html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .balance-info,
-html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .kpi, html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .chart-box,
-html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .calc-display, html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .calc-tape,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body #tx-list,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body #subs-list,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body #salary-list,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .balance-main,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .balance-info,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .kpi,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .chart-box,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .calc-display,
+html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .calc-tape,
 html[data-c-field]:is([data-w95="aqua"], [data-w95="mono"]) body .tx-keypad-box { background: var(--w95-field) !important; }
 
 /* Заголовки окон в «Акве» */
@@ -90,12 +94,17 @@ html[data-c-face][data-w95="ios6"] body header, html[data-c-face][data-w95="ios6
 html[data-c-face][data-w95="ios6"] body .theme-folder-panel { background: var(--w95-face) !important; }
 html[data-c-face][data-w95="ios6"] body header .balance-card { background: transparent !important; }
 html[data-c-field][data-w95="ios6"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-html[data-c-field][data-w95="ios6"] body textarea, html[data-c-field][data-w95="ios6"] body select,
-html[data-c-field][data-w95="ios6"] body #tx-list, html[data-c-field][data-w95="ios6"] body #subs-list,
-html[data-c-field][data-w95="ios6"] body #salary-list, html[data-c-field][data-w95="ios6"] body .ob-list,
-html[data-c-field][data-w95="ios6"] body .balance-main, html[data-c-field][data-w95="ios6"] body .balance-info,
-html[data-c-field][data-w95="ios6"] body .kpi, html[data-c-field][data-w95="ios6"] body .chart-box,
-html[data-c-field][data-w95="ios6"] body .tx-item, html[data-c-field][data-w95="ios6"] body .sub-item { background-color: var(--w95-field) !important; }
+html[data-c-field][data-w95="ios6"] body textarea,
+html[data-c-field][data-w95="ios6"] body select,
+html[data-c-field][data-w95="ios6"] body #tx-list,
+html[data-c-field][data-w95="ios6"] body #subs-list,
+html[data-c-field][data-w95="ios6"] body #salary-list,
+html[data-c-field][data-w95="ios6"] body .balance-main,
+html[data-c-field][data-w95="ios6"] body .balance-info,
+html[data-c-field][data-w95="ios6"] body .kpi,
+html[data-c-field][data-w95="ios6"] body .chart-box,
+html[data-c-field][data-w95="ios6"] body .tx-item,
+html[data-c-field][data-w95="ios6"] body .sub-item { background-color: var(--w95-field) !important; }
 html[data-c-title][data-w95="ios6"] body .card > h3, html[data-c-title][data-w95="ios6"] body .header-top,
 html[data-c-title][data-w95="ios6"] body .export-sheet-head, html[data-c-title][data-w95="ios6"] body .tf-panel-head,
 html[data-c-title][data-w95="ios6"] body .sidebar-header {

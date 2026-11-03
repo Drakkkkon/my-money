@@ -74,6 +74,8 @@ html body .tx-receipt .material-icons { font-size: 14px !important; color: inher
 html body .tx-receipt.is-pending { color: var(--w95-muted) !important; text-decoration: none; }
 
 /* ---------- Каталог OldBook.kz ---------- */
+/* Блок на «Стене» только для администратора (js/admin.js ставит html[data-admin="1"]) */
+html:not([data-admin="1"]) body [data-admin-only] { display: none !important; }
 html body .obc-row { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
 html body .obc-row input { flex: 1 1 180px; min-width: 0; margin: 0 !important; }
 html body .obc-row button, html body .obc-row label { flex: 0 0 auto; width: auto; }

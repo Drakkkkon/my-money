@@ -6,13 +6,15 @@
 
 // Блоки с прокруткой внутри (полоса появляется, только когда содержимое не помещается)
 const W95_SCROLL_SELECTORS = [
-    '#tx-list', '#ob-list', '.changelog', '.export-sheet-table', '.custom-dropdown',
+    '#tx-list', '.changelog', '.export-sheet-table', '.custom-dropdown',
     '.sound-slots', '.custom-categories',
     // 3.8: длинные списки прокручиваются внутри своих блоков
     '#subs-list', '#salary-list', '.calc-tape', '.goals-list', '.q-list', '.sound-lib-list', '.icon-cat-list', '.cat-tiles',
     '.shop-list', '.pr-list', '.notify-log',
     // 3.10: вся страница приложения — ползунок справа во весь рост экрана
-    '.main-wrapper'
+    '.main-wrapper',
+    // 4.5: окно страницы в теме «Windows 95_Пуск» (js/desk95.js) — полоса внутри окна, двигается вместе с ним
+    '.desk-body'
 ].join(', ');
 const SB_INSET = 2;    // отступ от рамки блока
 const SB_MIN_THUMB = 34; // не меньше подушечки пальца

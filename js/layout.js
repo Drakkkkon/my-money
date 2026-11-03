@@ -152,16 +152,16 @@ function enhanceCards(root = document) {
             const ctls = document.createElement('span');
             ctls.className = 'w95-ctls';
             ctls.innerHTML =
-                (card.id && !card.classList.contains('wall-info') ? '<button type="button" class="w95-ctl w95-ctl-pin" onclick="toggleWallCard(this)" title="На стену" aria-label="Добавить блок на стену"><span class="material-icons">push_pin</span></button>' : '') +
+                (card.id && !card.classList.contains('wall-info') && !card.hasAttribute('data-wall-fixed') ? '<button type="button" class="w95-ctl w95-ctl-pin" onclick="toggleWallCard(this)" title="На стену" aria-label="Добавить блок на стену"><span class="material-icons">push_pin</span></button>' : '') +
                 (card.id && !card.classList.contains('wall-info') ? '<button type="button" class="w95-ctl w95-ctl-size" onclick="openCardSizeMenu(this)" title="Размер блока" aria-label="Размер блока" aria-haspopup="menu"></button>' : '') +
                 '<button type="button" class="w95-ctl w95-ctl-min" onclick="toggleCardCollapse(this)" title="Свернуть" aria-label="Свернуть блок"></button>' +
                 '<button type="button" class="w95-ctl w95-ctl-max" onclick="toggleMaximize(this)" title="Развернуть" aria-label="Развернуть на весь экран"></button>' +
                 '<span class="w95-ctl w95-ctl-close" aria-hidden="true"></span>';
             h.appendChild(ctls);
         } else {
-            // старый блок Oldbook: «_» тоже становится настоящей кнопкой, и появляется булавка «На стену»
+            // готовая панель кнопок в разметке: «_» тоже становится настоящей кнопкой, и появляется булавка «На стену»
             const ctlsBox = h.querySelector('.w95-ctls');
-            if (card.id && !ctlsBox.querySelector('.w95-ctl-pin')) {
+            if (card.id && !card.hasAttribute('data-wall-fixed') && !ctlsBox.querySelector('.w95-ctl-pin')) {
                 ctlsBox.insertAdjacentHTML('afterbegin', '<button type="button" class="w95-ctl w95-ctl-pin" onclick="toggleWallCard(this)" title="На стену" aria-label="Добавить блок на стену"><span class="material-icons">push_pin</span></button>');
             }
             if (card.id && !card.classList.contains('wall-info') && !ctlsBox.querySelector('.w95-ctl-size')) {

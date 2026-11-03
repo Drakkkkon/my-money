@@ -467,22 +467,12 @@ html body .card.is-maximized {
     padding: max(3px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)) !important;
     animation: w95MaxIn .18s ease-out both;
 }
-html body .card.is-maximized .ob-list { flex: 1 1 auto; max-height: none; }
+
 html body.has-maximized .fab-sync { display: none !important; }
 @keyframes w95MaxIn { from { opacity: .4; transform: scale(.97); } to { opacity: 1; transform: none; } }
 
-/* ---------- OLDBOOK ---------- */
-main > #oldbook { grid-template-columns: minmax(0, 1fr) !important; max-width: 920px; margin-inline: auto; }
-html body .ob-label { font-family: var(--w95-font-ui); font-size: 15px; margin: 4px 0 6px; }
-html body .ob-persons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 12px; }
-html body .ob-persons .icon-btn { min-width: 0; margin: 0; display: flex; align-items: center; justify-content: center; gap: 4px; }
-html body .ob-persons .icon-btn .material-icons { font-size: 18px; }
-html body .ob-amount-display {
-    background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 10px 14px; margin-bottom: 8px;
-    text-align: right; font-family: var(--w95-font-text); font-weight: 700; font-size: 30px; line-height: 1.2;
-    font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-html body .ob-amount-display.is-empty { color: var(--w95-muted) !important; }
+/* ---------- Цифровая клавиатура ---------- */
+
 html body .ob-keypad { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 14px; }
 html body .ob-keypad button {
     background: var(--w95-face) !important; color: var(--w95-text) !important; border: none !important; box-shadow: var(--w95-raised) !important;
@@ -494,47 +484,13 @@ html body .ob-keypad button:active { box-shadow: var(--w95-pressed) !important; 
 html body .ob-keypad .ob-key-wide { grid-column: span 2; }
 /* На ПК и планшете клавиатура размером с калькулятор, а не на всю ширину окна */
 @media (min-width: 769px) {
-    html body .ob-amount-display, html body .ob-keypad { max-width: 420px; }
+    html body .ob-keypad { max-width: 420px; }
     html body .ob-keypad button { height: 46px; }
 }
 html body .ob-keypad .material-icons { font-size: 22px; }
-html body .ob-form-card .btn-group { margin-top: 2px; }
 
-html body .ob-list-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-html body .ob-list-toolbar select { width: auto; min-width: 120px; margin: 0; flex: 0 0 auto; }
-html body .ob-totals { display: flex; gap: 12px; flex-wrap: wrap; font-family: var(--w95-font-text); font-weight: 700; font-size: 14px; }
 /* Список с границей: прокручивается внутри, не растягивает страницу */
-html body .ob-list {
-    max-height: 360px; overflow-y: auto; overscroll-behavior: contain;
-    background: var(--w95-field); box-shadow: var(--w95-sunken); padding: 3px;
-}
-html body .ob-person {
-    display: inline-block; padding: 1px 7px; margin-right: 6px; vertical-align: 1px;
-    font-family: var(--w95-font-ui); font-size: 12px; font-weight: 600; line-height: 1.4;
-    color: var(--w95-title-text) !important; border: 1px solid var(--w95-dark);
-}
-html body .ob-meta { font-size: 12px; color: var(--w95-muted) !important; }
 
-html body .ob-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 10px; margin-top: 4px; }
-html body .ob-chart h4, html body .ob-why-title { font-family: var(--w95-font-ui); font-size: 15px; margin: 8px 0 6px; }
-html body .ob-why-list { margin-top: 0; }
-html body .ob-why-row { display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px dotted var(--w95-grid); font-size: 13px; }
-html body .ob-why-row:last-child { border-bottom: none; }
-html body .ob-why-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
-html body .ob-why-sum { font-weight: 700; white-space: nowrap; }
-
-html body .ob-share-card h4 { font-family: var(--w95-font-ui); font-size: 15px; margin: 14px 0 4px; }
-html body .ob-share-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
-html body .ob-share-form input { flex: 1 1 220px; margin: 0 !important; min-width: 0; }
-html body .ob-share-form button { flex: 0 0 auto; width: auto; }
-html body .ob-share-row {
-    display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 6px 8px;
-    background: var(--w95-field); box-shadow: var(--w95-sunken);
-}
-html body .ob-share-email { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; font-size: 13px; }
-html body .ob-share-row button { width: auto; flex: 0 0 auto; min-height: 30px; padding: 3px 10px !important; font-size: 13px !important; }
-html body .ob-link-error { color: var(--expense) !important; font-size: 12px; }
-html body #ob-share-status:empty { display: none; }
 html body .sound-card .btn-block { margin-bottom: 8px; justify-content: flex-start !important; }
 
 /* ---------- ПОЛОСА ПРОКРУТКИ WINDOWS 95 (js/scrollbars.js) ---------- */
@@ -593,9 +549,6 @@ html body .cat-chip-del .material-icons { font-size: 15px !important; color: var
 html body .dropdown-item.is-custom { font-weight: 700; }
 html body .dropdown-item.dropdown-add { display: flex; align-items: center; gap: 4px; font-style: italic; border-top: 1px dotted var(--w95-grid) !important; }
 html body .dropdown-item.dropdown-add .material-icons { font-size: 16px; }
-html body .ob-category-row { display: flex; gap: 6px; align-items: stretch; margin-bottom: 12px; }
-html body .ob-category-row input { flex: 1 1 auto; margin: 0 !important; min-width: 0; }
-html body .ob-category-row .ob-cat-add { flex: 0 0 auto; width: 44px; padding: 0 !important; display: flex; align-items: center; justify-content: center; }
 
 /* ---------- Окно «Выбрать звуки» ---------- */
 html body .sound-picker { width: min(640px, 100%); }
@@ -648,7 +601,6 @@ html[data-w95-mode="dark"] body .splash-content::after { filter: invert(.82) hue
 html[data-w95-mode="dark"] body select { background-image: none !important; padding-right: 10px !important; }
 html[data-w95-mode="dark"] body input::placeholder { color: var(--w95-muted) !important; }
 html[data-w95-mode="dark"] body .card > h3 { text-shadow: 0 0 6px rgba(255, 255, 255, .25); }
-html[data-w95-mode="dark"] body .ob-person { border-color: rgba(255, 255, 255, .35); }
 
 /* ---------- Отступы на телефоне ---------- */
 @media (max-width: 768px) {

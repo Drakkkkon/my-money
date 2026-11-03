@@ -174,8 +174,6 @@ async function fetchGoogleProfile() {
     if (previous && previous.email && previous.email !== cloudUser.email) {
         localStorage.removeItem(CLOUD_KEYS.fileId);
         localStorage.removeItem(CLOUD_KEYS.remoteModified);
-        localStorage.removeItem('finance_ob_mirror_id');
-        localStorage.removeItem('finance_ob_mirror_key');
     }
     localStorage.setItem(CLOUD_KEYS.user, JSON.stringify(cloudUser));
     // Имя из Google подставляем только если пользователь ещё не задал своё
@@ -192,8 +190,7 @@ function signOutGoogle() {
     try { if (googleAccessToken && gisReady()) google.accounts.oauth2.revoke(googleAccessToken, () => {}); } catch (e) {}
     dropToken();
     cloudUser = null;
-    [CLOUD_KEYS.user, CLOUD_KEYS.fileId, CLOUD_KEYS.remoteModified, CLOUD_KEYS.lastSync,
-        'finance_ob_mirror_id', 'finance_ob_mirror_key'].forEach(k => localStorage.removeItem(k));
+    [CLOUD_KEYS.user, CLOUD_KEYS.fileId, CLOUD_KEYS.remoteModified, CLOUD_KEYS.lastSync].forEach(k => localStorage.removeItem(k));
     setCloudStatus('off');
     renderCloudUi();
 }
@@ -229,7 +226,7 @@ async function findDriveFile() {
         }
         localStorage.removeItem(CLOUD_KEYS.fileId);
     }
-    // Только свой файл: чужие книги Oldbook, открытые через доступ, сюда не попадают
+    // Только свой файл: чужие файлы, открытые через доступ, сюда не попадают
     const files = await driveQuery(`name='${DRIVE_FILE_NAME}' and 'me' in owners and trashed=false`, 'id,modifiedTime');
     if (files[0]) localStorage.setItem(CLOUD_KEYS.fileId, files[0].id);
     return files[0] || null;
@@ -282,12 +279,14 @@ async function writeDriveFile(id, data) {
 }
 
 // --- Снимки данных, отметки изменений и слияние ---
-// Списки, которые сливаются поштучно: записи, подписки, записи Oldbook и подключённые книги других пользователей.
+// Списки, которые сливаются поштучно: записи, подписки и прочее.
+// ob и links — прежние данные Oldbook: раздел вынесен в отдельное приложение (Oldbook95), здесь они только
+// сохраняются как есть, чтобы синхронизация не стёрла их из файла на Google Диске.
 const SYNC_LISTS = [
     { key: 'tx', get: () => transactions, set: v => { transactions = v; } },
     { key: 'subs', get: () => subscriptions, set: v => { subscriptions = v; } },
-    { key: 'ob', get: () => oldbookEntries, set: v => { oldbookEntries = v; } },
-    { key: 'links', get: () => oldbookLinks, set: v => { oldbookLinks = v; } },
+    { key: 'ob', get: () => legacyObEntries, set: v => { legacyObEntries = v; } },
+    { key: 'links', get: () => legacyObLinks, set: v => { legacyObLinks = v; } },
     { key: 'cats', get: () => customCategories, set: v => { customCategories = v; } },
     // свои темы оформления (js/themes.js)
     { key: 'themes', get: () => customThemes, set: v => { customThemes = v; if (typeof onCustomThemesChanged === 'function') onCustomThemesChanged(); } },
@@ -366,7 +365,7 @@ function localSnapshot() {
         app: 'my-money', format: 2, savedAt: Date.now(),
         profile: { name: profileName },
         tx: transactions, subs: subscriptions,
-        ob: oldbookEntries, links: oldbookLinks, cats: customCategories, themes: customThemes,
+        ob: legacyObEntries, links: legacyObLinks, cats: customCategories, themes: customThemes,
         soundlib: soundLibrary, goals: goalsList, quotes: userQuotes, shop: shopList, prices: priceRecords,
         savings, limit: manualLimit, goal: priorityGoal,
         sounds: customSoundMeta, themeSounds: themeSoundMeta, ui: uiPrefs,
@@ -488,13 +487,6 @@ async function runCloudSync({ manual = false } = {}) {
                 }
             }
         }
-        // Oldbook: своя книга для других пользователей и книги, которыми поделились с вами
-        try {
-            if (typeof isAdminUser !== 'function' || isAdminUser()) await syncOldbookShared(); // Oldbook — только у администратора
-        } catch (e) {
-            if (e.code === 'auth') throw e;
-            console.warn('Oldbook: обмен с другими аккаунтами не удался', e);
-        }
         // Свои звуки: загрузить новые файлы на Диск и скачать те, что выбраны на других устройствах
         try {
             if (typeof syncCustomSoundFiles === 'function') await syncCustomSoundFiles();
@@ -547,7 +539,7 @@ function setCloudStatus(state, message = '') {
 }
 
 function renderCloudUi() {
-    if (typeof applyAdminAccess === 'function') applyAdminAccess(); // Oldbook и журнал — только администратору / по согласию
+    if (typeof applyAdminAccess === 'function') applyAdminAccess(); // каталог OldBook.kz и журнал — только администратору / по согласию
     const out = document.getElementById('auth-logged-out');
     const inn = document.getElementById('auth-logged-in');
     if (!out || !inn) return;
@@ -629,289 +621,6 @@ function initCloud() {
     setInterval(() => {
         if (cloudUser && document.visibilityState === 'visible' && hasValidToken()) runCloudSync();
     }, 60000);
-}
-
-// --- OLDBOOK: общая книга с другими аккаунтами Google ---
-// Записи Oldbook копируются в отдельный файл my_money_oldbook.json (только Oldbook, без остальных финансов).
-// Обмен двусторонний и добровольный:
-//  1) владелец открывает доступ к своей книге по email (Google присылает письмо) — это его согласие на передачу;
-//  2) получатель подтверждает, выбрав эту книгу в окне Google Диска (Google Picker) — после этого его приложение
-//     может читать файл (доступ drive.file выдаётся только на выбранный файл).
-// Чужие книги только читаются и обновляются при каждой синхронизации.
-const OLDBOOK_FILE_NAME = 'my_money_oldbook.json';
-const OB_KEYS = { mirrorId: 'finance_ob_mirror_id', mirrorKey: 'finance_ob_mirror_key', remote: 'finance_ob_remote' };
-
-function oldbookRemoteCache() {
-    return readJsonKey(OB_KEYS.remote, {});
-}
-
-function saveOldbookRemoteCache(cache) {
-    try { localStorage.setItem(OB_KEYS.remote, JSON.stringify(cache)); } catch (e) {}
-}
-
-function oldbookOwnerName() {
-    return profileName || (cloudUser && (cloudUser.name || cloudUser.email)) || '';
-}
-
-function oldbookMirrorData() {
-    return {
-        app: 'my-money-oldbook', format: 1, savedAt: Date.now(),
-        owner: { email: cloudUser ? cloudUser.email : '', name: oldbookOwnerName() },
-        entries: oldbookEntries
-    };
-}
-
-function oldbookMirrorKey() {
-    return JSON.stringify([oldbookEntries, oldbookOwnerName()]);
-}
-
-async function findOwnOldbookMirror() {
-    const known = localStorage.getItem(OB_KEYS.mirrorId);
-    if (known) {
-        try {
-            const r = await driveFetch(`${DRIVE_API}/files/${encodeURIComponent(known)}?fields=id,trashed`);
-            const f = await r.json();
-            if (!f.trashed) return f.id;
-        } catch (e) {
-            if (e.code === 'auth') throw e;
-        }
-        localStorage.removeItem(OB_KEYS.mirrorId);
-    }
-    const files = await driveQuery(`name='${OLDBOOK_FILE_NAME}' and 'me' in owners and trashed=false`, 'id');
-    if (files[0]) {
-        localStorage.setItem(OB_KEYS.mirrorId, files[0].id);
-        return files[0].id;
-    }
-    return null;
-}
-
-async function ensureOldbookMirror() {
-    let id = await findOwnOldbookMirror();
-    if (!id) {
-        const f = await createDriveJsonFile(OLDBOOK_FILE_NAME, oldbookMirrorData(), 'Книга Oldbook приложения My Money (для совместного доступа)');
-        id = f.id;
-        localStorage.setItem(OB_KEYS.mirrorId, id);
-        localStorage.setItem(OB_KEYS.mirrorKey, oldbookMirrorKey());
-    }
-    return id;
-}
-
-async function syncOldbookShared() {
-    // 1) Своя книга: файл появляется, когда есть записи Oldbook или им уже поделились
-    const hasMirror = !!localStorage.getItem(OB_KEYS.mirrorId);
-    if (oldbookEntries.length || hasMirror) {
-        const key = oldbookMirrorKey();
-        if (!hasMirror || key !== localStorage.getItem(OB_KEYS.mirrorKey)) {
-            const id = await ensureOldbookMirror();
-            await writeDriveFile(id, oldbookMirrorData());
-            localStorage.setItem(OB_KEYS.mirrorKey, key);
-        }
-    }
-    // 2) Книги, которыми поделились с вами
-    await refreshLinkedOldbooks(false);
-}
-
-async function refreshLinkedOldbooks(force) {
-    const cache = oldbookRemoteCache();
-    const active = new Set();
-    for (const link of oldbookLinks) {
-        if (!link || !link.id) continue;
-        active.add(link.id);
-        const entry = cache[link.id] || { entries: [] };
-        try {
-            const r = await driveFetch(`${DRIVE_API}/files/${encodeURIComponent(link.id)}?fields=id,modifiedTime,trashed,owners(emailAddress,displayName)`);
-            const meta = await r.json();
-            const owner = (meta.owners && meta.owners[0]) || {};
-            if (meta.trashed) {
-                entry.error = 'Владелец удалил эту книгу';
-                entry.entries = [];
-                entry.modifiedTime = '';
-            } else if (force || meta.modifiedTime !== entry.modifiedTime) {
-                const data = await readDriveFile(link.id);
-                entry.entries = asList(data.entries);
-                entry.owner = (data.owner && data.owner.email) || owner.emailAddress || '';
-                entry.ownerName = (data.owner && data.owner.name) || owner.displayName || entry.owner;
-                entry.modifiedTime = meta.modifiedTime;
-                entry.error = '';
-            } else {
-                entry.error = '';
-            }
-        } catch (e) {
-            if (e.code === 'auth') throw e;
-            if (/HTTP (403|404)/.test(e.message || '')) {
-                // Доступ закрыт — записи владельца больше не показываем
-                entry.error = 'Нет доступа: владелец закрыл доступ или удалил книгу';
-                entry.entries = [];
-                entry.modifiedTime = '';
-            } else {
-                // Временная ошибка сети — показываем последние полученные записи
-                entry.error = 'Не удалось обновить: ' + (e.message || e);
-            }
-        }
-        cache[link.id] = entry;
-    }
-    Object.keys(cache).forEach(id => { if (!active.has(id)) delete cache[id]; });
-    saveOldbookRemoteCache(cache);
-    if (typeof renderOldbook === 'function') renderOldbook();
-}
-
-function setObShareStatus(text) {
-    const el = document.getElementById('ob-share-status');
-    if (el) el.textContent = text;
-}
-
-function oldbookCloudReady() {
-    if (!cloudUser) {
-        alert('Сначала войдите через Google: Настройки → «Аккаунт Google».');
-        return false;
-    }
-    if (!hasValidToken()) {
-        reconnectGoogle();
-        return false;
-    }
-    return true;
-}
-
-// Шаг 1 (владелец): открыть доступ к своей книге по email
-async function shareOldbookWith() {
-    const input = document.getElementById('ob-share-email');
-    const email = input ? input.value.trim().toLowerCase() : '';
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        alert('Введите email аккаунта Google, например katya@gmail.com');
-        return;
-    }
-    if (!oldbookCloudReady()) return;
-    if (email === String(cloudUser.email || '').toLowerCase()) {
-        alert('Это ваш собственный адрес.');
-        return;
-    }
-    setObShareStatus('Открываем доступ…');
-    try {
-        const id = await ensureOldbookMirror();
-        await writeDriveFile(id, oldbookMirrorData());
-        localStorage.setItem(OB_KEYS.mirrorKey, oldbookMirrorKey());
-        const message = `С вами поделились книгой Oldbook в приложении My Money (владелец: ${oldbookOwnerName()}). ` +
-            'Чтобы получать эти записи, откройте My Money → Oldbook → «Принять книгу другого пользователя» и выберите этот файл.';
-        await driveFetch(`${DRIVE_API}/files/${encodeURIComponent(id)}/permissions?sendNotificationEmail=true&emailMessage=${encodeURIComponent(message)}&fields=id`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'user', role: 'reader', emailAddress: email })
-        });
-        if (input) input.value = '';
-        setObShareStatus(`Доступ открыт для ${email}. Google отправит письмо; человек должен подтвердить: Oldbook → «Принять книгу другого пользователя».`);
-        if (typeof playSound === 'function') playSound('open');
-        renderOldbookShares();
-    } catch (e) {
-        console.warn(e);
-        setObShareStatus(e.code === 'auth' ? 'Вход устарел: нажмите круглую кнопку синхронизации и повторите.' : 'Не удалось открыть доступ: ' + (e.message || e));
-    }
-}
-
-// Список тех, кому открыт доступ к вашей книге
-async function renderOldbookShares() {
-    const box = document.getElementById('ob-shares');
-    if (!box) return;
-    const mirrorId = localStorage.getItem(OB_KEYS.mirrorId);
-    if (!cloudUser || !mirrorId || !hasValidToken()) {
-        box.innerHTML = '<p class="hint">Пока вы ни с кем не поделились своей книгой.</p>';
-        return;
-    }
-    try {
-        const r = await driveFetch(`${DRIVE_API}/files/${encodeURIComponent(mirrorId)}/permissions?fields=permissions(id,emailAddress,role,displayName)`);
-        const perms = ((await r.json()).permissions || []).filter(p => p.role !== 'owner');
-        box.innerHTML = perms.length
-            ? perms.map(p => `<div class="ob-share-row"><span class="material-icons">person</span><span class="ob-share-email">${escapeHtml(p.emailAddress || p.displayName || '')}</span>` +
-                `<button type="button" class="btn-secondary" onclick="unshareOldbook('${escapeHtml(p.id)}')">Закрыть доступ</button></div>`).join('')
-            : '<p class="hint">Пока вы ни с кем не поделились своей книгой.</p>';
-    } catch (e) {
-        box.innerHTML = '<p class="hint">Список доступа сейчас недоступен.</p>';
-    }
-}
-
-async function unshareOldbook(permissionId) {
-    if (!confirm('Закрыть этому человеку доступ к вашей книге Oldbook? Он перестанет получать ваши записи.')) return;
-    if (!oldbookCloudReady()) return;
-    const mirrorId = localStorage.getItem(OB_KEYS.mirrorId);
-    try {
-        await driveFetch(`${DRIVE_API}/files/${encodeURIComponent(mirrorId)}/permissions/${encodeURIComponent(permissionId)}`, { method: 'DELETE' });
-        if (typeof playSound === 'function') playSound('close');
-        renderOldbookShares();
-    } catch (e) {
-        alert('Не удалось закрыть доступ: ' + (e.message || e));
-    }
-}
-
-// Шаг 2 (получатель): подтвердить и подключить книгу, выбрав её в окне Google Диска
-function pickerConfig() {
-    const c = window.MONEY_CONFIG || {};
-    return { apiKey: String(c.googleApiKey || '').trim(), appId: String(c.googleAppId || '').trim() };
-}
-
-async function acceptOldbook() {
-    if (!oldbookCloudReady()) return;
-    const { apiKey, appId } = pickerConfig();
-    if (!/^AIza[\w-]{20,}$/.test(apiKey) || !/^\d{6,}$/.test(appId)) {
-        alert('Чтобы принимать книги других пользователей, впишите googleApiKey и googleAppId в файл js/config.js (инструкция: шаги про Google Picker).');
-        return;
-    }
-    try {
-        await loadScriptOnce('https://apis.google.com/js/api.js');
-        await new Promise((resolve, reject) => gapi.load('picker', { callback: resolve, onerror: reject }));
-    } catch (e) {
-        alert('Не удалось загрузить окно выбора Google Диска. Проверьте интернет.');
-        return;
-    }
-    const view = new google.picker.DocsView(google.picker.ViewId.DOCS)
-        .setOwnedByMe(false)
-        .setQuery(OLDBOOK_FILE_NAME)
-        .setMode(google.picker.DocsViewMode.LIST);
-    const picker = new google.picker.PickerBuilder()
-        .setAppId(appId)
-        .setOAuthToken(googleAccessToken)
-        .setDeveloperKey(apiKey)
-        .setLocale('ru')
-        .setTitle('Выберите книгу Oldbook, которой с вами поделились')
-        .addView(view)
-        .setCallback(data => { onOldbookPicked(data); })
-        .build();
-    if (typeof playSound === 'function') playSound('open');
-    picker.setVisible(true);
-}
-
-async function onOldbookPicked(data) {
-    if (!data || data.action !== google.picker.Action.PICKED) return;
-    const doc = data.docs && data.docs[0];
-    if (!doc || !doc.id) return;
-    if (doc.name && doc.name !== OLDBOOK_FILE_NAME) {
-        alert(`Это не книга Oldbook. Выберите файл ${OLDBOOK_FILE_NAME}.`);
-        return;
-    }
-    if (doc.id === localStorage.getItem(OB_KEYS.mirrorId)) {
-        alert('Это ваша собственная книга.');
-        return;
-    }
-    if (oldbookLinks.some(l => l.id === doc.id)) {
-        showToast('Эта книга уже подключена');
-        return;
-    }
-    oldbookLinks.push({ id: doc.id, addedAt: Date.now() });
-    updateUI(true);
-    try {
-        await refreshLinkedOldbooks(true);
-        showToast('Книга подключена: записи будут обновляться при синхронизации');
-    } catch (e) {
-        showToast('Книга подключена, данные загрузятся при следующей синхронизации');
-    }
-}
-
-function removeOldbookLink(id) {
-    if (!confirm('Отключить эту книгу? Её записи перестанут показываться у вас (у владельца ничего не удалится).')) return;
-    oldbookLinks = oldbookLinks.filter(l => l.id !== id);
-    const cache = oldbookRemoteCache();
-    delete cache[id];
-    saveOldbookRemoteCache(cache);
-    updateUI(true);
-    if (typeof playSound === 'function') playSound('close');
 }
 
 // --- Разовый перенос данных из старого аккаунта (вход по email, Firebase) ---

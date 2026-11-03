@@ -245,14 +245,29 @@ html[data-w95="metro"] body input[type="range"]::-webkit-slider-thumb { -webkit-
 html[data-w95="metro"] body input[type="range"]::-moz-range-thumb { width: 12px; height: 26px; background: var(--w95-text); border: none; border-radius: 0; }
 
 /* ---------- Списки и панели ---------- */
-html[data-w95="metro"] body #tx-list, html[data-w95="metro"] body #subs-list, html[data-w95="metro"] body #salary-list,
-html[data-w95="metro"] body .table-scroll, html[data-w95="metro"] body .export-sheet-table, html[data-w95="metro"] body .chart-box,
-html[data-w95="metro"] body .cat-list, html[data-w95="metro"] body .changelog, html[data-w95="metro"] body .ob-list,
-html[data-w95="metro"] body .custom-categories, html[data-w95="metro"] body .sound-slots, html[data-w95="metro"] body .tx-keypad-box,
-html[data-w95="metro"] body .calc-tape, html[data-w95="metro"] body .import-preview, html[data-w95="metro"] body .q-list,
-html[data-w95="metro"] body .goals-list, html[data-w95="metro"] body .shop-list, html[data-w95="metro"] body .pr-list,
-html[data-w95="metro"] body .icon-cat-list, html[data-w95="metro"] body .cat-tiles, html[data-w95="metro"] body .sound-lib-list,
-html[data-w95="metro"] body .notify-log, html[data-w95="metro"] body .receipt-items, html[data-w95="metro"] body .quote-results {
+html[data-w95="metro"] body #tx-list,
+html[data-w95="metro"] body #subs-list,
+html[data-w95="metro"] body #salary-list,
+html[data-w95="metro"] body .table-scroll,
+html[data-w95="metro"] body .export-sheet-table,
+html[data-w95="metro"] body .chart-box,
+html[data-w95="metro"] body .cat-list,
+html[data-w95="metro"] body .changelog,
+html[data-w95="metro"] body .custom-categories,
+html[data-w95="metro"] body .sound-slots,
+html[data-w95="metro"] body .tx-keypad-box,
+html[data-w95="metro"] body .calc-tape,
+html[data-w95="metro"] body .import-preview,
+html[data-w95="metro"] body .q-list,
+html[data-w95="metro"] body .goals-list,
+html[data-w95="metro"] body .shop-list,
+html[data-w95="metro"] body .pr-list,
+html[data-w95="metro"] body .icon-cat-list,
+html[data-w95="metro"] body .cat-tiles,
+html[data-w95="metro"] body .sound-lib-list,
+html[data-w95="metro"] body .notify-log,
+html[data-w95="metro"] body .receipt-items,
+html[data-w95="metro"] body .quote-results {
     background: transparent !important; box-shadow: none !important; border: none !important;
 }
 html[data-w95="metro"] body .date-group-header {

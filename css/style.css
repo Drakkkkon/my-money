@@ -361,8 +361,6 @@ html, body { font-family: var(--font-family, 'Inter', sans-serif) !important; }
     -webkit-user-select: none;
 }
 
-
-
 /* RESPONSIVE LOGIC */
 @media(min-width: 769px) {
     #slider-container { display: none !important; }
@@ -401,7 +399,6 @@ html, body { font-family: var(--font-family, 'Inter', sans-serif) !important; }
     background: rgba(25, 118, 210, 0.08);
 }
 
-
 /* Stability fixes: Android WebView viewport, responsive splash and reliable slider gestures */
 .splash-screen, .pin-screen {
     width: 100%;
@@ -433,7 +430,6 @@ html, body { font-family: var(--font-family, 'Inter', sans-serif) !important; }
     #splash-time { font-size: clamp(42px, 10vh, 64px) !important; }
     .slider-container { margin-bottom: 0; }
 }
-
 
 /* Desktop 16:9 layout: compact controls and independently bounded panels */
 @media (min-width: 1100px) and (min-aspect-ratio: 16/10) {
@@ -555,7 +551,6 @@ button:focus-visible, label.btn-secondary:focus-visible {
     main { padding: 12px; }
     .card { padding: 13px; }
 }
-
 
 /* DARK RED EXPENSE BUTTONS & DARK GREEN INCOME BUTTONS OVERRIDE */
 button.btn-expense,

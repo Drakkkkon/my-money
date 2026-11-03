@@ -24,7 +24,7 @@ const TIER_SKIP = 'h3, script, style, datalist, template, input[type="hidden"], 
 const TIER_ACTION = 'button, .btn-group, .btn-stack, .ob-keypad, .calc-tape-tools, [class*="-btns"], .tx-actions';
 function tierHasField(k) { return k.matches('input:not([type="hidden"]), select, textarea') || !!k.querySelector('input:not([type="hidden"]):not([type="file"]), select, textarea'); }
 function tierIsAction(k) { return k.matches(TIER_ACTION); }
-function tierIsHint(k) { return (k.matches('p, h4, .hint, .ob-label') && !k.querySelector('input, select, textarea, button')); }
+function tierIsHint(k) { return (k.matches('p, h4, .hint') && !k.querySelector('input, select, textarea, button')); }
 
 function tierCard(card) {
     const kids = [...card.children].filter(k => !k.matches(TIER_SKIP));

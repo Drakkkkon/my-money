@@ -4,6 +4,8 @@
 // «Блок на стене» с кнопкой «Вернуть». На стене у каждого блока: ширина 1–4 колонки и высота (кнопки или
 // уголок справа внизу — потянуть мышью или пальцем), «_» сворачивает, «□» разворачивает на весь экран.
 // Раскладка стены — uiPrefs.wall (js/layout.js), синхронизируется через Google Диск.
+// Постоянные блоки (атрибут data-wall-fixed в index.html, сейчас — каталог OldBook.kz) живут на стене всегда: их нельзя
+// убрать со стены, но размер меняется так же, как у остальных; на «Стене» они идут первыми.
 
 const WALL_HEIGHTS = [0, 260, 420, 640]; // 0 — по содержимому
 
@@ -13,6 +15,23 @@ function wallItem(id) {
 
 function wallBox() {
     return document.getElementById('wall');
+}
+
+function wallFixedCards() {
+    const wall = wallBox();
+    return wall ? [...wall.querySelectorAll(':scope > .card[data-wall-fixed]')] : [];
+}
+
+function wallIsFixed(id) {
+    return wallFixedCards().some(c => c.id === id);
+}
+
+// Постоянные блоки всегда есть в раскладке (и после синхронизации с другого устройства, где их записи нет)
+function ensureWallFixed() {
+    const fixed = wallFixedCards();
+    if (!fixed.length) return;
+    const own = fixed.map(c => wallItem(c.id) || { id: c.id, w: 4, h: 0 });
+    uiPrefs.wall = [...own, ...(uiPrefs.wall || []).filter(x => !fixed.some(c => c.id === x.id))];
 }
 
 // Блок → на стену; заметка на старом месте
@@ -35,6 +54,7 @@ function moveCardToWall(card) {
 }
 
 function moveCardBack(card) {
+    if (card.hasAttribute('data-wall-fixed')) return;
     const ph = document.querySelector(`.wall-placeholder[data-for="${CSS.escape(card.id)}"]`);
     card.classList.remove('on-wall');
     card.style.removeProperty('--wall-w');
@@ -84,7 +104,7 @@ function applyWallSize(card) {
 // Кнопка-булавка: на стену / со стены
 function toggleWallCard(btn) {
     const card = btn.closest('.card');
-    if (!card || !card.id) return;
+    if (!card || !card.id || card.hasAttribute('data-wall-fixed')) return;
     if (card.classList.contains('on-wall')) { unpinWallCard(card.id); return; }
     uiPrefs.wall = [...(uiPrefs.wall || []).filter(x => x.id !== card.id), { id: card.id, w: card.classList.contains('card-wide') ? 4 : 2, h: 0 }];
     moveCardToWall(card);
@@ -95,6 +115,7 @@ function toggleWallCard(btn) {
 }
 
 function unpinWallCard(id) {
+    if (wallIsFixed(id)) return;
     const card = document.getElementById(id);
     uiPrefs.wall = (uiPrefs.wall || []).filter(x => x.id !== id);
     if (card) moveCardBack(card);
@@ -152,13 +173,15 @@ function wallResizeStart(e, card) {
 
 function renderWallEmpty() {
     const info = document.getElementById('wall-empty');
-    if (info) info.hidden = (uiPrefs.wall || []).length > 0;
+    if (info) info.hidden = (uiPrefs.wall || []).some(x => !wallIsFixed(x.id));
 }
 
 // Раскладка стены из настроек (при запуске, после синхронизации и после перерисовки блоков)
 function applyWall() {
     const wall = wallBox();
     if (!wall) return;
+    ensureWallFixed();
+    wallFixedCards().forEach(card => { card.classList.add('on-wall'); card.classList.remove('is-collapsed'); addWallTools(card); });
     const want = (uiPrefs.wall || []).map(x => x.id);
     // убранные на другом устройстве — вернуть на место
     wall.querySelectorAll(':scope > .card.on-wall').forEach(card => { if (!want.includes(card.id)) moveCardBack(card); });

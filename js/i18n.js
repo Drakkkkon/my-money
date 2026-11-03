@@ -60,9 +60,9 @@ const I18N_CYR = /[А-Яа-яЁё]/;
 const I18N_SKIP = [
     'script', 'style', 'textarea', '.material-icons', '[data-i18n-skip]', 'datalist',
     '.tx-cat', '.tx-comment', '.goal-title', '.shop-name > span', '.pr-row-main > b', '.q-name > span', '.cat-chip-name',
-    '.cat-tiles', '.icon-cat-name', '.dropdown-item:not(.dropdown-add)', '.sound-lib-info > b', '.ob-list', '.ob-why-list',
-    '#user-email-display', '.receipt-item', '.receipt-raw', '.sub-info > strong', '.cat-list', '#ob-filter-person',
-    '.theme-swatch.is-custom .theme-swatch-name', '.goal-draft-fields', '#salary-list strong', '.ob-person', '.import-preview td',
+    '.cat-tiles', '.icon-cat-name', '.dropdown-item:not(.dropdown-add)', '.sound-lib-info > b',
+    '#user-email-display', '.receipt-item', '.receipt-raw', '.sub-info > strong', '.cat-list',
+    '.theme-swatch.is-custom .theme-swatch-name', '.goal-draft-fields', '#salary-list strong', '.import-preview td',
     '.price-table td:first-child', '.pr-row-main', '.shop-name > small:not(.shop-last)', '#profile-name', '.custom-categories', '.tf-panel-title', '.theme-folder.is-user .tf-name'
 ].join(', ');
 

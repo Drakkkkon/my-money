@@ -2,7 +2,7 @@
 
 // Заглушки на случай, если какой-то из файлов js/*.js не загрузился (нет сети, старая копия страницы):
 // приложение должно запуститься в любом случае, просто без этой части.
-['playSound', 'playStartupChime', 'renderOldbook', 'onOldbookTabShown', 'renderSoundSettings', 'applySavedTheme',
+['playSound', 'playStartupChime', 'renderSoundSettings', 'applySavedTheme',
     'openSoundPicker', 'initW95Scrollbars', 'renderGoals', 'migrateLegacyGoal', 'runGoalAutoSave', 'renderAllQuotes',
     'onQuotesTabShown', 'renderAllIconSettings', 'renderCategoryTiles', 'enhanceCards', 'applyHeaderPrefs', 'renderSoundLibrary',
     'renderShoppingAndPrices', 'renderPrices', 'renderBank', 'renderNotifySettings', 'openSubReminders', 'renderSplashExtra']
@@ -26,8 +26,10 @@ let priorityGoal = { name: '', amount: 0, icon: '🎯' };
 let manualLimit = 0;
 let savings = 0;
 let profileName = '';
-let oldbookEntries = [];   // свои записи Oldbook
-let oldbookLinks = [];     // книги Oldbook других пользователей, которыми с вами поделились
+// Прежние данные Oldbook: раздел вынесен в отдельное приложение (Oldbook95). Здесь они только хранятся как есть
+// (браузер + файл на Google Диске), чтобы ничего не пропало; ни в одном разделе не показываются.
+let legacyObEntries = [];  // finance_oldbook
+let legacyObLinks = [];    // finance_ob_links
 let customCategories = []; // свои категории пользователя: [{ id, name }]
 let myChart = null;
 
@@ -138,8 +140,8 @@ function loadData() {
         if (localStorage.getItem('finance_limit')) manualLimit = parseFloat(localStorage.getItem('finance_limit')) || 0;
         if (localStorage.getItem('finance_savings')) savings = parseFloat(localStorage.getItem('finance_savings')) || 0;
         profileName = localStorage.getItem('finance_profile_name') || '';
-        if (localStorage.getItem('finance_oldbook')) oldbookEntries = JSON.parse(localStorage.getItem('finance_oldbook')) || [];
-        if (localStorage.getItem('finance_ob_links')) oldbookLinks = JSON.parse(localStorage.getItem('finance_ob_links')) || [];
+        if (localStorage.getItem('finance_oldbook')) legacyObEntries = JSON.parse(localStorage.getItem('finance_oldbook')) || [];
+        if (localStorage.getItem('finance_ob_links')) legacyObLinks = JSON.parse(localStorage.getItem('finance_ob_links')) || [];
         if (localStorage.getItem('finance_categories')) customCategories = JSON.parse(localStorage.getItem('finance_categories')) || [];
     } catch(e) {
         console.error("Error loading local storage:", e);
@@ -210,7 +212,6 @@ function updateUI(pushToCloud = false) {
     renderGoals();
     generateReport();
     renderStatistics();
-    renderOldbook();
     renderCategorySettings();
     renderAllIconSettings();
     renderAllQuotes();
@@ -1251,8 +1252,8 @@ function saveDataLocally() {
     stampLocalChanges(); // отметки изменений для слияния с Google Диском (cloud.js)
     try {
         localStorage.setItem('finance_profile_name', profileName);
-        localStorage.setItem('finance_oldbook', JSON.stringify(oldbookEntries));
-        localStorage.setItem('finance_ob_links', JSON.stringify(oldbookLinks));
+        localStorage.setItem('finance_oldbook', JSON.stringify(legacyObEntries));
+        localStorage.setItem('finance_ob_links', JSON.stringify(legacyObLinks));
         localStorage.setItem('finance_categories', JSON.stringify(customCategories));
         if (typeof saveCustomThemesLocal === 'function') saveCustomThemesLocal(); // свои темы (updatedAt ставит stampLocalChanges)
         if (typeof persistSoundState === 'function') persistSoundState(); // свои звуки, звуки тем, «Мои звуки»
@@ -1333,8 +1334,8 @@ function clearAllData() {
         savings = 0;
         manualLimit = 0;
         priorityGoal = { name: '', amount: 0, icon: '🎯' };
-        oldbookEntries = [];
-        oldbookLinks = [];
+        legacyObEntries = [];
+        legacyObLinks = [];
         customCategories = [];
         if (typeof onCustomThemesChanged === 'function') { customThemes = []; onCustomThemesChanged(); }
         if (typeof clearCustomSoundsLocal === 'function') clearCustomSoundsLocal();
@@ -1348,7 +1349,6 @@ function clearAllData() {
 }
 
 function showTab(tabId, btn) {
-    if (tabId === 'oldbook' && typeof isAdminUser === 'function' && !isAdminUser()) tabId = 'transactions'; // Oldbook — только для администратора
     if (typeof adminLog === 'function' && tabId !== currentTabId) adminLog('tab', { id: tabId });
     document.querySelectorAll('.tab').forEach(t => {
         t.style.display = 'none';
@@ -1372,7 +1372,6 @@ function showTab(tabId, btn) {
     }
     
     if (typeof applyCardSizes === 'function') setTimeout(applyCardSizes, 0); // колонки видимого раздела
-    if (tabId === 'oldbook' && typeof onOldbookTabShown === 'function') onOldbookTabShown();
     if (tabId === 'quotes') onQuotesTabShown();
     if (tabId === 'prices') renderPrices(); // диаграмме нужен видимый холст
 
@@ -1396,7 +1395,6 @@ const MENU_ITEMS = [
     { id: 'wishlist', icon: 'star', label: 'Цели' },
     { id: 'quotes', icon: 'candlestick_chart', label: 'Котировки' },
     { id: 'prices', icon: 'sell', label: 'Цены' },
-    { id: 'oldbook', icon: 'menu_book', label: 'Oldbook' },
     { id: 'settings', icon: 'settings', label: 'Настройки', locked: true }
 ];
 const MENU_KEY = 'finance_menu';
@@ -1405,8 +1403,7 @@ let currentTabId = 'transactions';
 function getMenuState() {
     let state = null;
     try { state = JSON.parse(localStorage.getItem(MENU_KEY) || 'null'); } catch (e) {}
-    // раздел Oldbook виден только администратору (js/admin.js)
-    const known = MENU_ITEMS.map(i => i.id).filter(id => typeof menuAllowed !== 'function' || menuAllowed(id));
+    const known = MENU_ITEMS.map(i => i.id);
     let order = Array.isArray(state && state.order) ? state.order.filter(id => known.includes(id)) : [];
     known.forEach(id => { if (!order.includes(id)) order.push(id); }); // новые пункты из будущих версий
     let hidden = Array.isArray(state && state.hidden) ? state.hidden.filter(id => known.includes(id) && id !== 'settings') : [];
@@ -2139,6 +2136,22 @@ window.addEventListener('DOMContentLoaded', () => {
     initMenuDrag();
     const verEl = document.getElementById('app-version-now');
     if (verEl) verEl.textContent = window.APP_VERSION || '—';
+    // подпись внизу Настроек: версия, её название и год обновления (js/admin.js); на других языках текст свой
+    [['app-footer-ver', window.APP_VERSION], ['app-footer-name', window.APP_VERSION_NAME], ['app-footer-year', window.APP_YEAR]].forEach(([id, v]) => {
+        const el = document.getElementById(id);
+        if (el && v) el.textContent = v;
+    });
+    const foot = document.getElementById('app-footer');
+    if (foot && typeof appLang !== 'undefined') {
+        const v = window.APP_VERSION || '', y = window.APP_YEAR || '';
+        const T = {
+            en: `My Money · version <b>${v}</b> “Extra” · updated in <b>${y}</b>`,
+            kk: `My Money · <b>${v}</b> нұсқасы «Экстра» · <b>${y}</b> жылы жаңартылды`,
+            fr: `My Money · version <b>${v}</b> « Extra » · mise à jour en <b>${y}</b>`,
+            de: `My Money · Version <b>${v}</b> „Extra“ · aktualisiert <b>${y}</b>`
+        };
+        if (T[appLang]) foot.innerHTML = T[appLang];
+    }
 
     // Авто-пропуск заставки на ПК
     if (window.innerWidth >= 769) {
@@ -2284,10 +2297,6 @@ function hideCategories() {
     }, 200); 
 }
 
-// Категории Oldbook по умолчанию (подсказки в поле «На что»)
-const OB_DEFAULT_CATEGORIES = ['Продукты', 'Еда вне дома', 'Проезд', 'Одежда', 'Учёба', 'Кружки и секции',
-    'Развлечения', 'Подарки', 'Здоровье', 'Карманные деньги', 'Зарплата', 'Другое'];
-
 function customCategoryNames() {
     return customCategories.map(c => c && c.name).filter(Boolean);
 }
@@ -2309,7 +2318,7 @@ function addCustomCategory(rawName, { silent = false } = {}) {
         if (!silent) alert('Введите название категории.');
         return false;
     }
-    const exists = allCategories(categoryOptions.concat(OB_DEFAULT_CATEGORIES)).some(c => c.toLowerCase() === name.toLowerCase());
+    const exists = allCategories(categoryOptions).some(c => c.toLowerCase() === name.toLowerCase());
     if (exists) {
         if (!silent) showToast(`Категория «${name}» уже есть`);
         return false;
@@ -2340,9 +2349,6 @@ function renderCategorySettings() {
                 `<button type="button" class="cat-chip-del" onclick="deleteCustomCategory('${escapeHtml(c.id)}')" aria-label="Удалить категорию ${escapeHtml(c.name)}"><span class="material-icons">close</span></button></div>`).join('')
             : '<p class="hint">Своих категорий пока нет.</p>';
     }
-    // Подсказки в Oldbook: свои + стандартные
-    const dl = document.getElementById('ob-category-list');
-    if (dl) dl.innerHTML = allCategories(OB_DEFAULT_CATEGORIES).map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
 }
 
 function filterCategories() {

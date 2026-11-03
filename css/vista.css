@@ -109,7 +109,7 @@ html[data-w95="aero"] body .export-sheet-close {
 }
 html[data-w95="aero"] body .export-sheet-close .material-icons { opacity: 0; }
 
-/* Настоящие кнопки окна (список Oldbook) */
+/* Настоящие кнопки окна */
 html[data-w95="aero"] body .card > h3.has-controls::after { display: none !important; }
 html[data-w95="aero"] body .w95-ctls { right: 6px; top: -1px; transform: none; gap: 0; }
 html[data-w95="aero"] body .w95-ctl {
@@ -252,15 +252,27 @@ html[data-w95="aero"] body input[type="range"]::-webkit-slider-thumb { -webkit-a
 html[data-w95="aero"] body input[type="color"] { border: 1px solid #707070 !important; border-radius: 3px !important; background: var(--aero-btn) !important; box-shadow: none !important; }
 
 /* ---------- Панели и списки ---------- */
-html[data-w95="aero"] body .balance-main, html[data-w95="aero"] body .balance-info,
-html[data-w95="aero"] body #tx-list, html[data-w95="aero"] body #subs-list, html[data-w95="aero"] body #salary-list,
-html[data-w95="aero"] body .table-scroll, html[data-w95="aero"] body .export-sheet-table,
-html[data-w95="aero"] body .kpi, html[data-w95="aero"] body .chart-box, html[data-w95="aero"] body .cat-list,
-html[data-w95="aero"] body .changelog, html[data-w95="aero"] body .ob-amount-display, html[data-w95="aero"] body .ob-list,
-html[data-w95="aero"] body .custom-categories, html[data-w95="aero"] body .sound-slots, html[data-w95="aero"] body #splash-weather,
-html[data-w95="aero"] body .ob-share-row, html[data-w95="aero"] body .stats-summary .stat-value, html[data-w95="aero"] body .theme-swatch-desk,
-html[data-w95="aero"] body .tx-keypad-box, html[data-w95="aero"] body .calc-display, html[data-w95="aero"] body .calc-tape,
-html[data-w95="aero"] body .import-preview, html[data-w95="aero"] body .import-drop {
+html[data-w95="aero"] body .balance-main,
+html[data-w95="aero"] body .balance-info,
+html[data-w95="aero"] body #tx-list,
+html[data-w95="aero"] body #subs-list,
+html[data-w95="aero"] body #salary-list,
+html[data-w95="aero"] body .table-scroll,
+html[data-w95="aero"] body .export-sheet-table,
+html[data-w95="aero"] body .kpi,
+html[data-w95="aero"] body .chart-box,
+html[data-w95="aero"] body .cat-list,
+html[data-w95="aero"] body .changelog,
+html[data-w95="aero"] body .custom-categories,
+html[data-w95="aero"] body .sound-slots,
+html[data-w95="aero"] body #splash-weather,
+html[data-w95="aero"] body .stats-summary .stat-value,
+html[data-w95="aero"] body .theme-swatch-desk,
+html[data-w95="aero"] body .tx-keypad-box,
+html[data-w95="aero"] body .calc-display,
+html[data-w95="aero"] body .calc-tape,
+html[data-w95="aero"] body .import-preview,
+html[data-w95="aero"] body .import-drop {
     background: var(--w95-field) !important;
     border: 1px solid #b5b5b5 !important;
     border-radius: 3px !important;
@@ -285,7 +297,7 @@ html[data-w95="aero"] body .analytics-table th, html[data-w95="aero"] body .expo
     font-family: var(--w95-font-text) !important; font-weight: 400;
 }
 html[data-w95="aero"] body .analytics-table td { border: 1px solid #e5e5e5 !important; }
-html[data-w95="aero"] body .ob-person { color: #fff !important; border-radius: 3px !important; border-color: rgba(0, 0, 0, .3) !important; }
+
 html[data-w95="aero"] body .app-wrapper .cl-tag { color: #fff !important; border-radius: 3px !important; background: linear-gradient(#5aa3e6, #2a6cb3) !important; }
 html[data-w95="aero"] body .google-avatar { border-radius: 3px !important; }
 html[data-w95="aero"] body .menu-row-icon { color: #1b4f80 !important; }
