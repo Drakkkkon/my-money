@@ -7,7 +7,7 @@
     'use strict';
     const TARGETS = [
         'button:not(.w95-sb-btn):not(.slider-thumb)', 'label.btn-secondary', '.menu-row', '.theme-swatch', '.theme-folder', '.tx-item', '.sub-item',
-        '.dropdown-item', '.size-opt', '.cat-tile', '.pin-btn', '.goal-item', '.obc-item', 'summary'
+        '.dropdown-item', '.size-opt', '.cat-tile', '.pin-btn', '.goal-item', '.obc-item', '.lang-opt', '.font-card', 'summary'
     ].join(',');
     const reduce = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
 

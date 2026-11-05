@@ -492,7 +492,7 @@ function voiceOptionsHtml(selected) {
     const cur = selected || voicePrefs().engine;
     const groups = ['ai', 'web', 'browser', 'local'].map(g => `<optgroup label="${VOICE_GROUP_NAMES[g]}">${VOICE_ENGINES.filter(e => e.group === g).map(e =>
         `<option value="${e.id}" ${cur === e.id ? 'selected' : ''}>${escapeHtml(e.name)}${e.key && !voiceKeyOf(e.id) ? ' — нужен ключ' : ''}</option>`).join('')}</optgroup>`).join('');
-    return `<option value="auto" ${cur === 'auto' ? 'selected' : ''}>Авто (лучший из доступных)</option>${groups}`;
+    return `<option value="auto" ${cur === 'auto' ? 'selected' : ''}>Авто (лучший)</option>${groups}`;
 }
 function renderVoiceSelects() {
     document.querySelectorAll('select[data-voice-select]').forEach(sel => { sel.innerHTML = voiceOptionsHtml(); });
@@ -524,7 +524,7 @@ function renderVoiceSettings(force) {
             <div class="ocr-engine-head"><b data-i18n-skip>${escapeHtml(e.name)}</b> ${voiceBadge(e)}</div>
             <p class="hint">${escapeHtml(e.hint)}<br>Скорость: ${escapeHtml(e.speed)} · точность: ${escapeHtml(e.accuracy)}</p>
             ${e.key ? `<div class="ocr-key-row">
-                <input type="password" autocomplete="off" spellcheck="false" placeholder="Ключ (API key)${e.shared ? ' — общий с распознаванием фото' : ''}" value="${escapeHtml(keys[e.id] || '')}" onchange="voiceSetKey('${e.id}', this.value)">
+                <input type="password" autocomplete="off" spellcheck="false" placeholder="Ключ (API key)${e.shared ? ' — общий' : ''}" value="${escapeHtml(keys[e.id] || '')}" onchange="voiceSetKey('${e.id}', this.value)">
                 <a class="btn-secondary ocr-link" href="${escapeHtml(e.keyUrl)}" target="_blank" rel="noopener" title="Где взять ключ"><span class="material-icons">open_in_new</span></a></div>` : ''}
             ${e.models ? `<div class="ocr-key-row"><input type="text" list="voice-models-${e.id}" autocomplete="off" spellcheck="false" placeholder="Модель: ${escapeHtml(e.model)}" data-i18n-skip value="${escapeHtml((prefs.models || {})[e.id] || '')}" onchange="voiceSetModel('${e.id}', this.value)">
                 <datalist id="voice-models-${e.id}">${e.models.map(m => `<option value="${escapeHtml(m)}">`).join('')}</datalist></div>` : ''}
@@ -550,7 +550,7 @@ function renderVoiceSettings(force) {
         <div class="ocr-engine">
             <div class="ocr-engine-head"><b data-i18n-skip>Claude (Anthropic)</b> <span class="ocr-badge is-ai">ИИ</span><span class="ocr-badge ${voiceKeyOf('claude') ? 'is-ready' : 'is-nokey'}">${voiceKeyOf('claude') ? 'ключ есть' : 'нужен ключ'}</span></div>
             <p class="hint">Claude не слушает звук, но отлично разбирает готовый текст фразы. Ключ общий с распознаванием фото (console.anthropic.com).</p>
-            <div class="ocr-key-row"><input type="password" autocomplete="off" spellcheck="false" placeholder="Ключ (API key) — общий с распознаванием фото" value="${escapeHtml(keys.claude || '')}" onchange="voiceSetKey('claude', this.value)">
+            <div class="ocr-key-row"><input type="password" autocomplete="off" spellcheck="false" placeholder="Ключ (API key) — общий" value="${escapeHtml(keys.claude || '')}" onchange="voiceSetKey('claude', this.value)">
                 <a class="btn-secondary ocr-link" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" title="Где взять ключ"><span class="material-icons">open_in_new</span></a></div>
         </div>
         <button type="button" class="btn-secondary btn-block" id="voice-test-btn" onclick="voiceSettingsTest()"><span class="material-icons">mic</span> Проверить микрофон и помощника</button>

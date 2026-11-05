@@ -381,7 +381,7 @@ function ocrOptionsHtml(kind, selected) {
     const cur = selected || ocrPrefs()[kind];
     const groups = ['ai', 'web', 'local'].map(g => `<optgroup label="${OCR_GROUP_NAMES[g]}">${OCR_ENGINES.filter(e => e.group === g).map(e =>
         `<option value="${e.id}" ${cur === e.id ? 'selected' : ''}>${escapeHtml(e.name)}${e.key && !ocrKeyOf(e.id) ? ' — нужен ключ' : ''}</option>`).join('')}</optgroup>`).join('');
-    return `<option value="auto" ${cur === 'auto' ? 'selected' : ''}>Авто (лучший из доступных)</option>${groups}`;
+    return `<option value="auto" ${cur === 'auto' ? 'selected' : ''}>Авто (лучший)</option>${groups}`;
 }
 function renderOcrSelects() {
     document.querySelectorAll('select[data-ocr-kind]').forEach(sel => { sel.innerHTML = ocrOptionsHtml(sel.dataset.ocrKind); });

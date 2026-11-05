@@ -197,9 +197,10 @@ html[data-w95="android"] body .size-opt-dim { opacity: .75; }
 /* ---------- 4. Кнопки ---------- */
 html[data-w95="android"] body :is(.btn-primary, .btn-secondary, .btn-income, .btn-expense, .export-btn, .pay-btn, .icon-btn, .tx-actions button, .sub-actions button,
       .export-sheet-actions > button, .ob-keypad button, .seg-btn, .q-act, .hdr-edit-btn):not(.w95-ctl),
-html[data-w95="android"] body label.btn-secondary, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt) {
-    position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: 40px; padding: 0 22px !important; box-sizing: border-box;
+html[data-w95="android"] body label.btn-secondary, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt):not(.font-card) {
+    position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 40px; padding: 6px 16px !important; box-sizing: border-box; line-height: 1.2; text-align: center;
+    overflow-wrap: normal !important; word-break: normal !important; hyphens: manual !important;
     background-color: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important;
     border: none !important; border-radius: 999px !important; box-shadow: none !important; text-shadow: none !important;
     font-family: var(--md-font) !important; font-size: 14px !important; font-weight: 500 !important; letter-spacing: .1px; text-transform: none;
@@ -207,17 +208,17 @@ html[data-w95="android"] body label.btn-secondary, html[data-w95="android"] body
 }
 html[data-w95="android"] body :is(.btn-primary, .btn-secondary, .btn-income, .btn-expense, .export-btn, .pay-btn, .icon-btn, .tx-actions button, .sub-actions button,
       .export-sheet-actions > button, .seg-btn, .q-act, .hdr-edit-btn) *,
-html[data-w95="android"] body label.btn-secondary *, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt) * { color: inherit !important; text-shadow: none !important; }
+html[data-w95="android"] body label.btn-secondary *, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt):not(.font-card) * { color: inherit !important; text-shadow: none !important; }
 html[data-w95="android"] body :is(.btn-primary, .btn-secondary, .btn-income, .btn-expense, .export-btn, .pay-btn, .icon-btn, .tx-actions button, .sub-actions button,
       .export-sheet-actions > button, .seg-btn, .q-act, .hdr-edit-btn):not(.w95-ctl):hover,
-html[data-w95="android"] body label.btn-secondary:hover, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt):hover {
+html[data-w95="android"] body label.btn-secondary:hover, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt):not(.font-card):hover {
     box-shadow: var(--md-st-hover), var(--md-e1) !important;
 }
 html[data-w95="android"] body :is(.btn-primary, .btn-secondary, .btn-income, .btn-expense, .export-btn, .pay-btn, .icon-btn, .tx-actions button, .sub-actions button,
       .export-sheet-actions > button, .seg-btn, .q-act, .hdr-edit-btn):not(.w95-ctl):active,
-html[data-w95="android"] body label.btn-secondary:active, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt):active {
+html[data-w95="android"] body label.btn-secondary:active, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt):not(.font-card):active {
     box-shadow: var(--md-st-press) !important; border-radius: 14px !important;
-    transform: none !important; padding: 0 22px !important;
+    transform: none !important; padding: 6px 16px !important;
 }
 /* Главная кнопка — залитая главным цветом */
 html[data-w95="android"] body .btn-primary, html[data-w95="android"] body #settings button.btn-primary, html[data-w95="android"] body .export-sheet-actions > .btn-primary, html[data-w95="android"] body .icon-btn.selected, html[data-w95="android"] body .seg-btn.is-on, html[data-w95="android"] body .seg-btn.active {
@@ -798,3 +799,91 @@ html[data-w95="android"] body a { color: var(--md-primary); }
     html[data-w95="android"] body *, html[data-w95="android"] body *::before, html[data-w95="android"] body *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     html[data-w95="android"] body .slider-text { animation: none !important; background-position: 50% 0 !important; }
 }
+
+/* =========================================================================
+   18. ПОДПИСИ, ПЛИТКИ ШРИФТОВ, ПОЛЯ, ВЫБОР ЯЗЫКА (4.8.1)
+   ========================================================================= */
+/* 18.1 Круглые кнопки-значки: без внутреннего отступа (иначе значок вылезает за кнопку) */
+html[data-w95="android"] body :is(.tx-icon-btn, .icon-btn):not(.w95-ctl):not(.q-act):not(.x1) { padding: 0 !important; min-width: 44px; }
+/* 18.2 Группы кнопок: слово не рвётся по буквам, при нехватке места кнопка уходит на новую строку, подпись — в две строки */
+html[data-w95="android"] body .btn-group { flex-wrap: wrap; }
+html[data-w95="android"] body .btn-group > :is(button, label), html[data-w95="android"] body #settings .btn-group > :is(button, label) { min-width: min-content !important; flex: 1 1 120px; }
+html[data-w95="android"] body .btn-block { text-wrap: balance; }
+/* 18.3 Калькулятор: «Доход» и «Расход» помещаются целиком, значок + и − скрывается на узких экранах, цифровые клавиши без переноса */
+html[data-w95="android"] body .forms .tx-actions > .btn-group > button { padding: 0 8px !important; gap: 4px; white-space: nowrap; font-size: 14px !important; }
+@media (min-width: 331px) and (max-width: 440px) { html[data-w95="android"] body .forms .tx-actions > .btn-group > button .material-icons { display: none !important; } }
+html[data-w95="android"] body .ob-keypad button:not(.w95-ctl):not(.x1) { padding: 0 !important; white-space: nowrap; }
+/* 18.4 Поля: подсказка и значение не обрезаются грубо (многоточие), компактные «поле в строке» */
+html[data-w95="android"] body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), html[data-w95="android"] body select { text-overflow: ellipsis; }
+html[data-w95="android"] body select { font-size: 14px; padding: 0 36px 0 14px !important; background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50% !important; white-space: nowrap; }
+html[data-w95="android"] body .field-inline input { flex: 0 0 112px; width: 112px; padding: 8px 12px !important; min-height: 48px; font-size: 16px; }
+html[data-w95="android"] body .field-inline input[type="time"], html[data-w95="android"] body .field-inline input[type="date"] { flex-basis: 128px; width: 128px; padding-right: 8px !important; }
+html[data-w95="android"] body .field-inline > span { min-width: 0; line-height: 1.25; }
+html[data-w95="android"] body input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+html[data-w95="android"] body input[type="number"]::-webkit-inner-spin-button, html[data-w95="android"] body input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+/* 18.5 Плитки шрифтов: ровные тональные плитки вместо овалов, образец не вылезает */
+html[data-w95="android"] body .font-gallery { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)) !important; gap: 8px !important; }
+html[data-w95="android"] body .font-card, html[data-w95="android"] body #settings .font-card {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 3px; width: auto; min-height: 0 !important; padding: 12px !important; box-sizing: border-box; min-width: 0;
+    background-color: var(--md-tile) !important; color: var(--md-on-surface) !important; border: 2px solid transparent !important; border-radius: 20px !important; box-shadow: none !important;
+    text-align: left; cursor: pointer; overflow: hidden;
+    transition: background-color .2s var(--md-ease), border-color .2s var(--md-ease), border-radius .25s var(--md-spring);
+}
+html[data-w95="android"] body .font-card:hover, html[data-w95="android"] body #settings .font-card:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body .font-card:active, html[data-w95="android"] body #settings .font-card:active { border-radius: 28px !important; box-shadow: var(--md-st-press) !important; }
+html[data-w95="android"] body .font-card.is-on, html[data-w95="android"] body #settings .font-card.is-on { background-color: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important; border-color: var(--md-primary) !important; box-shadow: none !important; outline: none !important; }
+html[data-w95="android"] body .font-card-sample { font-size: 16px !important; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+html[data-w95="android"] body .font-card-name { font-size: 13px !important; font-weight: 600 !important; line-height: 1.2; font-family: var(--md-font) !important; color: inherit !important; }
+html[data-w95="android"] body .font-card-group { font-size: 11px !important; line-height: 1.2; color: var(--md-on-variant) !important; font-family: var(--md-font) !important; }
+html[data-w95="android"] body .font-card.is-on .font-card-group { color: inherit !important; opacity: .8; }
+html[data-w95="android"] body .font-custom-row { gap: 8px; }
+/* 18.6 Выбор языка: список Material — тональные плитки со значком-монограммой слева и круглым переключателем справа,
+   плитки «соединены» (у крайних скругление больше), выбранный язык залит цветом контейнера */
+html[data-w95="android"] body .lang-list { display: flex !important; flex-direction: column; gap: 3px !important; margin: 4px 0 12px !important; }
+html[data-w95="android"] body .lang-opt {
+    position: relative; display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 10px 16px 10px 12px !important; box-sizing: border-box; cursor: pointer;
+    background-color: var(--md-tile) !important; color: var(--md-on-surface) !important; border: none !important; border-radius: 8px !important; box-shadow: none !important; outline: none !important;
+    font-family: var(--md-font) !important; font-size: 16px !important; font-weight: 500 !important; line-height: 1.25; overflow-wrap: normal; text-shadow: none !important;
+    transition: background-color .2s var(--md-ease), border-radius .3s var(--md-spring), box-shadow .2s var(--md-ease);
+}
+html[data-w95="android"] body .lang-opt:first-child { border-radius: 24px 24px 8px 8px !important; }
+html[data-w95="android"] body .lang-opt:last-child { border-radius: 8px 8px 24px 24px !important; }
+html[data-w95="android"] body .lang-opt:only-child { border-radius: 24px !important; }
+html[data-w95="android"] body .lang-opt:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body .lang-opt:active { border-radius: 24px !important; box-shadow: var(--md-st-press) !important; }
+html[data-w95="android"] body .lang-opt > span { flex: 1 1 auto; min-width: 0; order: 2; }
+/* монограмма языка: кружок с кодом (значок-аватар), код берётся по значению переключателя */
+html[data-w95="android"] body .lang-opt::before {
+    content: '··'; order: 1; flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50% !important; box-sizing: border-box;
+    background: var(--md-primary-container); color: var(--md-on-primary-container); font-size: 13px; font-weight: 700; letter-spacing: .3px;
+    transition: background-color .2s var(--md-ease), color .2s var(--md-ease);
+}
+html[data-w95="android"] body .lang-opt:has(input[value="ru"])::before { content: 'RU'; }
+html[data-w95="android"] body .lang-opt:has(input[value="ru-old"])::before { content: 'Ѣѣ'; font-size: 16px; }
+html[data-w95="android"] body .lang-opt:has(input[value="en"])::before { content: 'EN'; }
+html[data-w95="android"] body .lang-opt:has(input[value="kk"])::before { content: 'ҚАЗ'; font-size: 11px; letter-spacing: 0; }
+html[data-w95="android"] body .lang-opt:has(input[value="fr"])::before { content: 'FR'; }
+html[data-w95="android"] body .lang-opt:has(input[value="de"])::before { content: 'DE'; }
+/* переключатель справа */
+html[data-w95="android"] body .lang-opt input[type="radio"] { order: 3; width: 24px !important; min-width: 24px !important; height: 24px !important; margin: 0 !important; }
+html[data-w95="android"] body .lang-opt input[type="radio"]:checked::after { left: 4px; top: 4px; width: 12px; height: 12px; }
+html[data-w95="android"] body .lang-opt.is-on { background-color: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important; font-weight: 600 !important; box-shadow: none !important; }
+html[data-w95="android"] body .lang-opt.is-on::before { background: var(--md-primary); color: var(--md-on-primary); }
+html[data-w95="android"] body .lang-opt.is-on input[type="radio"] { border-color: var(--md-primary) !important; }
+html[data-w95="android"] body .lang-card .hint { margin-top: 4px; }
+/* 18.7 Значки внутри кнопок не сжимаются, журнал уведомлений — тональная плитка */
+html[data-w95="android"] body :is(button, label.btn-secondary, summary) > .material-icons { flex: none; }
+html[data-w95="android"] body .notify-log { background: var(--md-tile) !important; box-shadow: none !important; border: none !important; border-radius: 20px !important; padding: 4px 14px !important; }
+html[data-w95="android"] body .notify-log-row { border-bottom: 1px solid var(--md-outline-variant) !important; font-size: 13px !important; padding: 9px 0 !important; }
+html[data-w95="android"] body .notify-log-row:last-child { border-bottom: none !important; }
+/* 18.8 Кнопка «где взять ключ» рядом с полем — квадратная тональная кнопка-значок высотой с поле; время — целиком (в т. ч. «10:00 AM») */
+html[data-w95="android"] body .btn-secondary.ocr-link:not(.x1) { flex: none; width: 52px !important; min-width: 52px !important; height: 52px; min-height: 52px !important; padding: 0 !important; border-radius: 16px !important; }
+html[data-w95="android"] body .field-inline input[type="time"], html[data-w95="android"] body .field-inline input[type="date"] { flex-basis: 148px !important; width: 148px !important; }
+/* 18.9 Плитки категорий: длинное название («Инвентаризация») помещается в плитку, при нехватке места переносится по слогам */
+html[data-w95="android"] body .cat-tile:not(.x1) { padding: 6px 0 !important; }
+html[data-w95="android"] body .cat-tile-name { font-size: 10.5px !important; line-height: 1.15; letter-spacing: -.1px; padding: 0; margin: 0 -5px !important; max-width: none !important; width: calc(100% + 10px); overflow-wrap: break-word !important; hyphens: auto; }
+/* 18.10 Валюта рядом с суммой: «₸ KZT» помещается целиком */
+html[data-w95="android"] body .amount-row select { flex: 0 0 104px; width: 104px; padding: 0 28px 0 12px !important; background-position: calc(100% - 17px) 50%, calc(100% - 11px) 50% !important; }
+/* 18.11 Строка «подпись + выпадающий список»: подпись сверху, список на всю ширину — значение не обрезается */
+html[data-w95="android"] body .field-inline:has(> select) { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 6px; }
+html[data-w95="android"] body .field-inline:has(> select) > select { width: 100%; flex: none; }
