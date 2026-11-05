@@ -94,6 +94,49 @@ function iosTheme(v) {
     return { sounds: 'tock', folder: 'ios', cssId: 'ios6', fontUi: IOS_FONT, fontText: IOS_FONT, ...v };
 }
 
+// «Android» (4.8.0) — по мотивам современного Android (Material 3 Expressive, «Material You»): тональные цвета вместо рамок,
+// крупные скругления, пилюли-индикаторы в меню, переключатели с кружком, плавающая кнопка, «стеклянные» панели.
+// Цвета — тональные палитры Material 3 (поверхность → контейнеры → акцент); из них собраны поля обычной темы:
+//   desktop = фон (surface), face = карточки (surface container), light = самый светлый слой, hilite = слой выше карточки,
+//   field = поля ввода (surface highest), title = главный цвет (primary), title2 = контейнер главного цвета,
+//   select = вторичный контейнер (активный пункт меню), titleText = текст на главном цвете, shadow / dark = контуры.
+// Форма — css/android.css (все правила под html[data-w95="android"]), остальные темы этот файл не затрагивает.
+// Пять вариантов отличаются цветом: v — название варианта (html[data-w95-variant]) для третьего цвета палитры в css/android.css.
+const ANDROID_FONT = "'Google Sans Flex', 'Google Sans', 'Roboto Flex', 'Roboto', 'Noto Sans', system-ui, sans-serif";
+const ANDROID_PALETTES = [
+    { id: 'android', name: 'Android: Лаванда', v: 'violet', dark: false, sounds: 'material',
+      primary: '#6750a4', onPrimary: '#ffffff', primaryContainer: '#eaddff', secondaryContainer: '#e8def8',
+      surface: '#fef7ff', surfaceLowest: '#ffffff', surfaceContainer: '#f3edf7', surfaceHigh: '#ece6f0', surfaceHighest: '#e6e0e9',
+      onSurface: '#1d1b20', onSurfaceVariant: '#49454f', outline: '#79747e', outlineVariant: '#cac4d0', income: '#146c2e', expense: '#b3261e' },
+    { id: 'android-ocean', name: 'Android: Океан', v: 'ocean', dark: false, sounds: 'material',
+      primary: '#005ac8', onPrimary: '#ffffff', primaryContainer: '#dde1ff', secondaryContainer: '#dde1ff',
+      surface: '#f8f9ff', surfaceLowest: '#ffffff', surfaceContainer: '#ededf5', surfaceHigh: '#e7e8f0', surfaceHighest: '#e1e2ea',
+      onSurface: '#1b1b21', onSurfaceVariant: '#454652', outline: '#757683', outlineVariant: '#c4c6d4', income: '#146c2e', expense: '#b3261e' },
+    { id: 'android-mint', name: 'Android: Мята', v: 'mint', dark: false, sounds: 'material',
+      primary: '#056c48', onPrimary: '#ffffff', primaryContainer: '#9cf4c9', secondaryContainer: '#caead9',
+      surface: '#f2fcf6', surfaceLowest: '#ffffff', surfaceContainer: '#e7f0eb', surfaceHigh: '#e1eae5', surfaceHighest: '#dce5e0',
+      onSurface: '#161d19', onSurfaceVariant: '#3c4a43', outline: '#6c7a72', outlineVariant: '#bacac1', income: '#146c2e', expense: '#b3261e' },
+    { id: 'android-sunset', name: 'Android: Закат (тёмная)', v: 'sunset', dark: true, sounds: 'material',
+      primary: '#ffb691', onPrimary: '#552100', primaryContainer: '#862300', secondaryContainer: '#653d28',
+      surface: '#19120e', surfaceLowest: '#150c07', surfaceContainer: '#251e1b', surfaceHigh: '#302825', surfaceHighest: '#3b3330',
+      onSurface: '#eae1dc', onSurfaceVariant: '#d4c3bc', outline: '#9d8e86', outlineVariant: '#51443e', income: '#80d485', expense: '#ffb4a9' },
+    { id: 'android-orchid', name: 'Android: Ночная роза (тёмная)', v: 'orchid', dark: true, sounds: 'material',
+      primary: '#ffafcf', onPrimary: '#5e0033', primaryContainer: '#8d0053', secondaryContainer: '#643a4b',
+      surface: '#191114', surfaceLowest: '#150b0f', surfaceContainer: '#251e20', surfaceHigh: '#30282b', surfaceHighest: '#3b3336',
+      onSurface: '#eae0e3', onSurfaceVariant: '#d4c2c8', outline: '#9d8c92', outlineVariant: '#524348', income: '#80d485', expense: '#ffb4a9' }
+];
+function androidTheme(p) {
+    return {
+        id: p.id, name: p.name, folder: 'android', cssId: 'android', variant: p.v, sounds: p.sounds,
+        dark: p.dark ? true : p.outlineVariant, darkEdge: p.outlineVariant,
+        desktop: p.surface, face: p.surfaceContainer, light: p.surfaceLowest, hilite: p.surfaceHigh, field: p.surfaceHighest,
+        shadow: p.outline, text: p.onSurface, muted: p.onSurfaceVariant, titleText: p.onPrimary,
+        hover: p.surfaceHigh, grid: p.outlineVariant, income: p.income, expense: p.expense,
+        title: p.primary, title2: p.primaryContainer, select: p.secondaryContainer,
+        pattern: 'none', patternSize: 'auto', fontUi: ANDROID_FONT, fontText: ANDROID_FONT
+    };
+}
+
 // «Windows 95_Экстра» (4.6.0) — пять мягких тем на основе «Windows 95_Пуск»: тот же рабочий стол с окнами, панелью задач и меню «Пуск»
 // (js/desk95.js, css/desk95.css — действуют при html[data-w95="desk95"], поэтому cssId у всех 'desk95'), но свои цвета, обои по умолчанию
 // (js/desk95-walls.js; можно сменить в Настройках → «Обои рабочего стола») и звуки. Контрастных схем нет: приглушённые цвета,
@@ -241,7 +284,10 @@ const W95_THEMES = [
     // «iOS 6» — по мотивам iPhone и iPad 2012 года: глянцевые сине-серые панели, сгруппированные таблицы на полосатом фоне,
     // переключатели ВКЛ/ВЫКЛ, чёрная глянцевая панель вкладок. Форма — в css/ios6.css (только при html[data-w95="ios6"]).
     // Две темы: светлая и тёмный «лён»; остальные темы не затронуты.
-    ...IOS_VARIANTS.map(v => iosTheme(v))
+    ...IOS_VARIANTS.map(v => iosTheme(v)),
+    // «Android» (4.8.0) — Material 3 Expressive: тональные карточки, пилюли в меню, переключатели-кружки, плавающая кнопка.
+    // Пять вариантов (3 светлых и 2 тёмных) в одной папке; форма — css/android.css (только при html[data-w95="android"]).
+    ...ANDROID_PALETTES.map(p => androidTheme(p))
 ];
 
 let currentThemeId = 'standard';
@@ -253,7 +299,8 @@ const THEME_FOLDERS = [
     { id: 'vista', name: 'Windows Vista' },
     { id: 'mac', name: 'Mac OS' },
     { id: 'metro', name: 'Windows 8 Метро' },
-    { id: 'ios', name: 'iOS' }
+    { id: 'ios', name: 'iOS' },
+    { id: 'android', name: 'Android' }
 ];
 const CUSTOM_FOLDER_DEFAULT = 'Мои темы';
 

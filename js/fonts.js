@@ -8,7 +8,7 @@
 
 const FONT_GROUPS = [
     { id: 'win95', name: 'Windows 95' }, { id: 'vista', name: 'Windows Vista' },
-    { id: 'mac', name: 'Mac OS' }, { id: 'metro', name: 'Windows 8 Метро' }, { id: 'ios', name: 'iOS' }
+    { id: 'mac', name: 'Mac OS' }, { id: 'metro', name: 'Windows 8 Метро' }, { id: 'ios', name: 'iOS' }, { id: 'android', name: 'Android' }
 ];
 const FONT_LIB = [
     // общие — для всех тем
@@ -27,7 +27,10 @@ const FONT_LIB = [
     // Windows 8 Метро
     { id: 'montserrat', name: 'Montserrat', family: "'Montserrat'", group: 'metro', css: 'Montserrat:wght@300;400;600' },
     // iOS (Helvetica-подобный шрифт с кириллицей)
-    { id: 'arimo', name: 'Arimo (как Helvetica)', family: "'Arimo'", group: 'ios', css: 'Arimo:wght@400;700' }
+    { id: 'arimo', name: 'Arimo (как Helvetica)', family: "'Arimo'", group: 'ios', css: 'Arimo:wght@400;700' },
+    // Android: шрифт Pixel / Android 16 (Google Sans Flex подключён в index.html) и Roboto Flex
+    { id: 'google-sans-flex', name: 'Google Sans Flex', family: "'Google Sans Flex'", group: 'android', css: 'Google+Sans+Flex:wght@400;500;700' },
+    { id: 'roboto-flex', name: 'Roboto Flex', family: "'Roboto Flex'", group: 'android', css: 'Roboto+Flex:wght@400;500;700' }
 ];
 const FONT_FALLBACK = "'Segoe UI', Tahoma, Roboto, Arial, sans-serif";
 const CUSTOM_FONTS_KEY = 'finance_custom_fonts';
@@ -48,7 +51,7 @@ let customFonts = [];
 try { customFonts = JSON.parse(localStorage.getItem(CUSTOM_FONTS_KEY) || '[]') || []; } catch (e) { customFonts = []; }
 
 // ---------- Загрузка шрифтов ----------
-const loadedFontCss = new Set(['pixelify', 'open-sans']); // уже подключены в index.html
+const loadedFontCss = new Set(['pixelify', 'open-sans', 'google-sans-flex']); // уже подключены в index.html
 function loadFontCss(ids) {
     const need = FONT_LIB.filter(f => ids.includes(f.id) && !loadedFontCss.has(f.id));
     if (!need.length) return;

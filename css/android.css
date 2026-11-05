@@ -1,0 +1,800 @@
+/* =========================================================================
+   ТЕМА «ANDROID» (4.8.0) — по мотивам современного Android: Material 3 Expressive («Material You»).
+   Тональные поверхности вместо рамок, крупные скругления (28 px у карточек), меню-«пилюля» с индикатором,
+   поля с цветной рамкой при вводе, переключатели Material, плавающая кнопка, «стеклянные» панели и волна-отклик при нажатии.
+   Всё нарисовано CSS и простыми SVG-масками: файлов, значков и звуков Google в сайте нет
+   (значки — Material Icons, как и во всём приложении; шрифт Google Sans Flex подключается с Google Fonts, запасной — Roboto).
+   Каждое правило начинается с html[data-w95="android"], поэтому остальные темы этот файл не затрагивает.
+   Цвета берутся из js/themes.js (--w95-*): desktop = фон, face = карточки, light = светлый слой, hilite = слой выше карточки,
+   field = поля ввода, title = главный цвет, title2 = контейнер главного цвета, select = вторичный контейнер.
+   Оттенки «поверх» (на контейнере, нажатие, наведение) считаются здесь через color-mix, поэтому свои цвета из редактора тем
+   (Настройки → «Создать тему на основе текущей») подхватываются сами. Пять вариантов отличаются только цветами и третьим
+   акцентом (html[data-w95-variant]); тёмные — html[data-w95-mode="dark"].
+   Форма и размеры рассчитаны и на ПК, и на телефон; на сенсорном экране кнопки не меньше 48 px.
+   ========================================================================= */
+
+/* ---------- 1. Токены ---------- */
+html[data-w95="android"] body {
+    --md-primary: var(--w95-title);
+    --md-on-primary: var(--w95-title-text);
+    --md-primary-container: var(--w95-title-2);
+    --md-secondary-container: var(--w95-select);
+    --md-ink: #000;
+    --md-on-primary-container: color-mix(in oklab, var(--md-primary) 30%, var(--md-ink));
+    --md-on-secondary-container: color-mix(in oklab, var(--md-primary) 24%, var(--md-ink));
+    --md-tertiary: var(--md-primary);
+    --md-tertiary-container: var(--md-primary-container);
+    --md-on-tertiary-container: var(--md-on-primary-container);
+    --md-surface: var(--w95-desktop);
+    --md-container: var(--w95-face);
+    --md-container-high: var(--w95-hilite);
+    --md-container-highest: var(--w95-field);
+    --md-tile: var(--w95-light);
+    --md-on-surface: var(--w95-text);
+    --md-on-variant: var(--w95-muted);
+    --md-outline: var(--w95-shadow);
+    --md-outline-variant: var(--w95-grid);
+    --md-error: var(--w95-expense);
+    --md-income: var(--w95-income);
+    --md-hover: color-mix(in srgb, var(--md-on-surface) 8%, transparent);
+    --md-press: color-mix(in srgb, var(--md-on-surface) 12%, transparent);
+    --md-glass: color-mix(in oklab, var(--md-container) 78%, transparent);
+    /* слой состояния (наведение, нажатие): внутренняя «тень» во всю площадь, не мешает фону и волне */
+    --md-st-hover: inset 0 0 0 999px var(--md-hover);
+    --md-st-press: inset 0 0 0 999px var(--md-press);
+    --md-st-hover-on-primary: inset 0 0 0 999px color-mix(in srgb, var(--md-on-primary) 10%, transparent);
+    --md-st-press-on-primary: inset 0 0 0 999px color-mix(in srgb, var(--md-on-primary) 16%, transparent);
+    --md-scrim: rgba(0, 0, 0, .42);
+    --md-e1: 0 1px 2px rgba(0, 0, 0, .16), 0 1px 3px 1px rgba(0, 0, 0, .08);
+    --md-e2: 0 1px 2px rgba(0, 0, 0, .16), 0 2px 6px 2px rgba(0, 0, 0, .10);
+    --md-e3: 0 1px 3px rgba(0, 0, 0, .18), 0 4px 8px 3px rgba(0, 0, 0, .10);
+    --md-ease: cubic-bezier(.2, 0, 0, 1);
+    --md-spring: cubic-bezier(.34, 1.45, .55, 1);
+    --md-font: var(--w95-font-text);
+    --w95-font-ui: var(--w95-font-text);
+    font-weight: 400;
+}
+html[data-w95="android"][data-w95-mode="dark"] body {
+    --md-ink: #fff;
+    --md-tile: var(--w95-hilite);
+    --md-scrim: rgba(0, 0, 0, .6);
+    --md-e1: 0 1px 2px rgba(0, 0, 0, .4), 0 1px 3px 1px rgba(0, 0, 0, .25);
+    --md-e2: 0 1px 2px rgba(0, 0, 0, .4), 0 2px 6px 2px rgba(0, 0, 0, .3);
+    --md-e3: 0 1px 3px rgba(0, 0, 0, .45), 0 4px 8px 3px rgba(0, 0, 0, .3);
+}
+/* третий акцент палитры (Material: tertiary) у каждого варианта */
+html[data-w95="android"][data-w95-variant="violet"] body { --md-tertiary: #7d5260; --md-tertiary-container: #ffd8e4; --md-on-tertiary-container: #31111d; }
+html[data-w95="android"][data-w95-variant="ocean"] body { --md-tertiary: #9b3978; --md-tertiary-container: #ffd7ed; --md-on-tertiary-container: #4a0030; }
+html[data-w95="android"][data-w95-variant="mint"] body { --md-tertiary: #006a78; --md-tertiary-container: #99f0ff; --md-on-tertiary-container: #002431; }
+html[data-w95="android"][data-w95-variant="sunset"] body { --md-tertiary: #c9cc6b; --md-tertiary-container: #424c00; --md-on-tertiary-container: #e5e886; }
+html[data-w95="android"][data-w95-variant="orchid"] body { --md-tertiary: #ffb597; --md-tertiary-container: #773215; --md-on-tertiary-container: #ffdbcd; }
+
+/* ---------- 2. Основа: фон, шрифт, выделение, фокус ---------- */
+html[data-w95="android"], html[data-w95="android"] body {
+    background-color: var(--md-surface) !important;
+    background-image: none !important;
+    color: var(--md-on-surface) !important;
+    font-family: var(--md-font) !important;
+    font-size: 15px;
+    letter-spacing: .1px;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+html[data-w95="android"] body .main-wrapper {
+    background-color: var(--md-surface) !important;
+    background-image:
+        radial-gradient(70% 38% at 100% 0%, color-mix(in oklab, var(--md-primary-container) 42%, transparent), transparent 72%),
+        radial-gradient(60% 34% at 0% 100%, color-mix(in oklab, var(--md-tertiary-container) 30%, transparent), transparent 72%) !important;
+}
+html[data-w95="android"] body .app-wrapper * { font-family: inherit; }
+html[data-w95="android"] body .app-wrapper .material-icons, html[data-w95="android"] body .material-icons { font-family: 'Material Icons' !important; letter-spacing: 0; }
+html[data-w95="android"] body ::selection { background: color-mix(in oklab, var(--md-primary) 32%, transparent); color: inherit; }
+html[data-w95="android"] body :focus-visible { outline: 3px solid color-mix(in oklab, var(--md-primary) 60%, transparent) !important; outline-offset: 2px; }
+html[data-w95="android"] body input:focus-visible, html[data-w95="android"] body select:focus-visible, html[data-w95="android"] body textarea:focus-visible { outline: none !important; }
+html[data-w95="android"] body .app-wrapper * { transition-timing-function: var(--md-ease); }
+
+/* ---------- 3. Карточки (блоки): тональный «лист» без рамки ---------- */
+html[data-w95="android"] body .card,
+html[data-w95="android"] body main > .tab > .card,
+html[data-w95="android"] body .tx-container > .forms,
+html[data-w95="android"] body .tx-container > .history,
+html[data-w95="android"] body header,
+html[data-w95="android"] body header[class] {
+    background: var(--md-container) !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 28px !important;
+    padding: 20px !important;
+    color: var(--md-on-surface);
+    overflow: visible;
+}
+html[data-w95="android"] body header, html[data-w95="android"] body header[class] { background: transparent !important; padding: 0 !important; border-radius: 0 !important; }
+html[data-w95="android"] body .card.is-maximized { border-radius: 0 !important; }
+html[data-w95="android"] body .card > h3 {
+    display: flex !important; align-items: center; gap: 12px; position: relative;
+    min-height: 40px; margin: 0 0 14px !important; padding: 0 !important;
+    background: transparent !important; border: none !important; box-shadow: none !important;
+    color: var(--md-on-surface) !important;
+    font-family: var(--md-font) !important; font-size: 18px !important; font-weight: 500 !important; line-height: 1.25; letter-spacing: 0;
+    text-shadow: none !important; text-transform: none; white-space: normal !important; overflow-wrap: break-word; hyphens: auto;
+}
+html[data-w95="android"] body .card > h3::after, html[data-w95="android"] body .header-top::after { display: none !important; content: none !important; }
+html[data-w95="android"] body .card > h3 > .material-icons:first-child {
+    flex: none; width: 40px; height: 40px; display: inline-grid !important; place-items: center;
+    border-radius: 14px !important; font-size: 22px !important;
+    background: var(--md-primary-container) !important; color: var(--md-on-primary-container) !important;
+}
+html[data-w95="android"] body .card > h3 *:not(.w95-ctls):not(.w95-ctls *):not(.material-icons) { color: inherit !important; }
+html[data-w95="android"] body .card > h3.has-controls { padding: 0 !important; }
+html[data-w95="android"] body .card.is-maximized > h3 { border-radius: 0 !important; }
+/* в узких карточках лишние кнопки заголовка (закрепить, развернуть) прячутся, чтобы название не налезало на них */
+html[data-w95="android"] body .card > h3 { container-type: inline-size; container-name: cardh; }
+@container cardh (max-width: 345px) {
+    html[data-w95="android"] body .w95-ctl.w95-ctl-pin, html[data-w95="android"] body #settings .w95-ctl.w95-ctl-pin, html[data-w95="android"] body #reports .w95-ctl.w95-ctl-pin, html[data-w95="android"] body .w95-ctl.w95-ctl-max, html[data-w95="android"] body #settings .w95-ctl.w95-ctl-max, html[data-w95="android"] body #reports .w95-ctl.w95-ctl-max { display: none !important; }
+}
+@container cardh (max-width: 250px) {
+    html[data-w95="android"] body .w95-ctl.w95-ctl-min, html[data-w95="android"] body #settings .w95-ctl.w95-ctl-min, html[data-w95="android"] body #reports .w95-ctl.w95-ctl-min { display: none !important; }
+}
+
+/* Кнопки блока в заголовке (закрепить, размер, свернуть, развернуть) — круглые значки-кнопки */
+html[data-w95="android"] body .w95-ctls { position: static !important; transform: none !important; margin-left: auto; display: flex !important; align-items: center; gap: 2px; flex: none; }
+html[data-w95="android"] body span.w95-ctl-close, html[data-w95="android"] body #settings span.w95-ctl-close, html[data-w95="android"] body #reports span.w95-ctl-close { display: none !important; }
+html[data-w95="android"] body .w95-ctl, html[data-w95="android"] body #settings .w95-ctl, html[data-w95="android"] body #reports .w95-ctl {
+    position: relative; flex: none; width: 36px !important; height: 36px !important; margin: 0 !important; padding: 0 !important; min-height: 0 !important;
+    display: inline-flex !important; align-items: center; justify-content: center; cursor: pointer;
+    background: transparent !important; border: none !important; border-radius: 50% !important; box-shadow: none !important;
+    color: var(--md-on-variant) !important; transition: background-color .2s var(--md-ease), color .2s var(--md-ease), border-radius .2s var(--md-spring);
+}
+html[data-w95="android"] body .w95-ctl:hover, html[data-w95="android"] body #settings .w95-ctl:hover, html[data-w95="android"] body #reports .w95-ctl:hover { background: var(--md-hover) !important; color: var(--md-on-surface) !important; box-shadow: none !important; }
+html[data-w95="android"] body .w95-ctl:active, html[data-w95="android"] body #settings .w95-ctl:active, html[data-w95="android"] body #reports .w95-ctl:active { background: var(--md-press) !important; border-radius: 12px !important; box-shadow: none !important; }
+html[data-w95="android"] body .w95-ctl::before, html[data-w95="android"] body .card.is-maximized .w95-ctl-max::before { display: none !important; content: none !important; }
+html[data-w95="android"] body .w95-ctl-min::after, html[data-w95="android"] body .w95-ctl-max::after, html[data-w95="android"] body .card.is-maximized .w95-ctl-max::after {
+    content: '' !important; position: static !important; left: auto !important; top: auto !important; right: auto !important; bottom: auto !important;
+    width: 20px !important; height: 20px !important; border: none !important; transform: none !important; display: block !important; opacity: 1 !important;
+    background: currentColor !important; box-shadow: none !important; filter: none !important;
+    -webkit-mask: var(--md-ic) center / contain no-repeat; mask: var(--md-ic) center / contain no-repeat;
+}
+html[data-w95="android"] body .w95-ctl-min { --md-ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7.41 15.41 12 10.83l4.59 4.58L18 14l-6-6-6 6z'/%3E%3C/svg%3E"); }
+html[data-w95="android"] body .card.is-collapsed .w95-ctl-min, html[data-w95="android"] body .card.collapsed .w95-ctl-min { --md-ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z'/%3E%3C/svg%3E"); }
+html[data-w95="android"] body .w95-ctl-max { --md-ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 11V3h-8l3.29 3.29-10 10L3 13v8h8l-3.29-3.29 10-10z'/%3E%3C/svg%3E"); }
+html[data-w95="android"] body .card.is-maximized .w95-ctl-max { --md-ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M22 3.41 16.71 8.7 20 12h-8V4l3.29 3.29L20.59 2 22 3.41zM3.41 22l5.29-5.29L12 20v-8H4l3.29 3.29L2 20.59 3.41 22z'/%3E%3C/svg%3E"); }
+html[data-w95="android"] body .w95-ctl-pin .material-icons { font-size: 20px !important; color: inherit !important; transform: rotate(35deg); }
+html[data-w95="android"] body .w95-ctl-pin.is-on { background: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important; }
+html[data-w95="android"] body .w95-ctl-pin.is-on .material-icons { color: var(--md-on-secondary-container) !important; transform: none; }
+/* Кнопка размера: значок показывает текущий размер (1×2, 2×2, 2×4), «как было» — пунктиром */
+html[data-w95="android"] body .w95-ctl-size { --i: currentColor; }
+html[data-w95="android"] body .w95-ctl-size::after, html[data-w95="android"] body .size-glyph {
+    border-radius: 3px !important; border-width: 2px !important; color: inherit;
+}
+html[data-w95="android"] body .w95-ctl-size::after {
+    position: absolute !important; left: 50% !important; top: 50% !important; display: block !important; opacity: 1 !important;
+    transform: translate(-50%, -50%) !important; background-color: transparent !important; filter: none !important;
+}
+html[data-w95="android"] body .w95-ctl-size[data-size="s"]::after { width: 9px !important; height: 14px !important; }
+html[data-w95="android"] body .w95-ctl-size[data-size="m"]::after { width: 14px !important; height: 14px !important; }
+html[data-w95="android"] body .w95-ctl-size[data-size="l"]::after { width: 14px !important; height: 18px !important; }
+html[data-w95="android"] body .w95-ctl-size:not([data-size])::after { width: 14px !important; height: 14px !important; }
+
+/* Меню размера — меню Material: плотный контейнер, строки 48 px, выбранная — цветная «пилюля» */
+html[data-w95="android"] body .card-size-menu {
+    padding: 8px !important; min-width: 220px; gap: 2px !important;
+    background: var(--md-container-high) !important; color: var(--md-on-surface) !important;
+    border: none !important; border-radius: 20px !important; box-shadow: var(--md-e3) !important;
+    animation: mdMenuIn .22s var(--md-ease);
+}
+html[data-w95="android"] body .size-opt {
+    min-height: 48px !important; padding: 0 16px !important; gap: 14px !important; border-radius: 14px !important;
+    background: transparent !important; color: var(--md-on-surface) !important; font-size: 15px !important; font-weight: 500;
+    transition: background-color .15s var(--md-ease);
+}
+html[data-w95="android"] body .size-opt:hover { background: var(--md-hover) !important; color: var(--md-on-surface) !important; }
+html[data-w95="android"] body .size-opt:hover .size-glyph { --i: var(--md-on-surface); }
+html[data-w95="android"] body .size-opt.is-on { background: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important; box-shadow: none !important; font-weight: 600; }
+html[data-w95="android"] body .size-opt.is-on .size-glyph { --i: var(--md-on-secondary-container); }
+html[data-w95="android"] body .size-opt-dim { opacity: .75; }
+@keyframes mdMenuIn { from { opacity: 0; transform: scale(.92) translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- 4. Кнопки ---------- */
+html[data-w95="android"] body :is(.btn-primary, .btn-secondary, .btn-income, .btn-expense, .export-btn, .pay-btn, .icon-btn, .tx-actions button, .sub-actions button,
+      .export-sheet-actions > button, .ob-keypad button, .seg-btn, .q-act, .hdr-edit-btn):not(.w95-ctl),
+html[data-w95="android"] body label.btn-secondary, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt) {
+    position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 40px; padding: 0 22px !important; box-sizing: border-box;
+    background-color: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important;
+    border: none !important; border-radius: 999px !important; box-shadow: none !important; text-shadow: none !important;
+    font-family: var(--md-font) !important; font-size: 14px !important; font-weight: 500 !important; letter-spacing: .1px; text-transform: none;
+    cursor: pointer; transition: background-color .2s var(--md-ease), box-shadow .2s var(--md-ease), border-radius .25s var(--md-spring), transform .2s var(--md-spring);
+}
+html[data-w95="android"] body :is(.btn-primary, .btn-secondary, .btn-income, .btn-expense, .export-btn, .pay-btn, .icon-btn, .tx-actions button, .sub-actions button,
+      .export-sheet-actions > button, .seg-btn, .q-act, .hdr-edit-btn) *,
+html[data-w95="android"] body label.btn-secondary *, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt) * { color: inherit !important; text-shadow: none !important; }
+html[data-w95="android"] body :is(.btn-primary, .btn-secondary, .btn-income, .btn-expense, .export-btn, .pay-btn, .icon-btn, .tx-actions button, .sub-actions button,
+      .export-sheet-actions > button, .seg-btn, .q-act, .hdr-edit-btn):not(.w95-ctl):hover,
+html[data-w95="android"] body label.btn-secondary:hover, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt):hover {
+    box-shadow: var(--md-st-hover), var(--md-e1) !important;
+}
+html[data-w95="android"] body :is(.btn-primary, .btn-secondary, .btn-income, .btn-expense, .export-btn, .pay-btn, .icon-btn, .tx-actions button, .sub-actions button,
+      .export-sheet-actions > button, .seg-btn, .q-act, .hdr-edit-btn):not(.w95-ctl):active,
+html[data-w95="android"] body label.btn-secondary:active, html[data-w95="android"] body #settings button:not(.menu-row-btn):not(.tf-panel-close):not(.theme-folder):not(.theme-swatch):not(.w95-ctl):not(.size-opt):active {
+    box-shadow: var(--md-st-press) !important; border-radius: 14px !important;
+    transform: none !important; padding: 0 22px !important;
+}
+/* Главная кнопка — залитая главным цветом */
+html[data-w95="android"] body .btn-primary, html[data-w95="android"] body #settings button.btn-primary, html[data-w95="android"] body .export-sheet-actions > .btn-primary, html[data-w95="android"] body .icon-btn.selected, html[data-w95="android"] body .seg-btn.is-on, html[data-w95="android"] body .seg-btn.active {
+    background-color: var(--md-primary) !important; color: var(--md-on-primary) !important;
+}
+html[data-w95="android"] body .btn-primary:hover, html[data-w95="android"] body .export-sheet-actions > .btn-primary:hover { box-shadow: var(--md-st-hover-on-primary), var(--md-e1) !important; }
+html[data-w95="android"] body .btn-primary:active { box-shadow: var(--md-st-press-on-primary) !important; }
+/* Доход и расход: тональные кнопки зелёного и красного, пара — соединённая группа с разными скруглениями */
+html[data-w95="android"] body .btn-income, html[data-w95="android"] body #add-btns .btn-income, html[data-w95="android"] body #salary .btn-income {
+    background-color: color-mix(in oklab, var(--md-income) 26%, var(--md-container)) !important; color: var(--md-income) !important;
+    box-shadow: none !important; border: none !important; font-weight: 600 !important;
+}
+html[data-w95="android"] body .btn-expense, html[data-w95="android"] body #add-btns .btn-expense {
+    background-color: color-mix(in oklab, var(--md-error) 16%, var(--md-container)) !important; color: var(--md-error) !important;
+    box-shadow: none !important; border: none !important; font-weight: 600 !important;
+}
+html[data-w95="android"] body #salary .btn-income *, html[data-w95="android"] body #add-btns .btn-income * { color: var(--md-income) !important; }
+html[data-w95="android"] body #add-btns .btn-expense * { color: var(--md-error) !important; }
+html[data-w95="android"] body #salary .btn-income:hover, html[data-w95="android"] body #add-btns .btn-income:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body #add-btns .btn-expense:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body #salary .btn-income:active, html[data-w95="android"] body #add-btns .btn-income:active, html[data-w95="android"] body #add-btns .btn-expense:active { box-shadow: var(--md-st-press) !important; }
+html[data-w95="android"] body #add-btns { gap: 3px !important; }
+html[data-w95="android"] body #add-btns .btn-income { border-radius: 999px 10px 10px 999px !important; }
+html[data-w95="android"] body #add-btns .btn-expense { border-radius: 10px 999px 999px 10px !important; }
+html[data-w95="android"] body #add-btns .btn-income:active { border-radius: 14px !important; }
+html[data-w95="android"] body #add-btns .btn-expense:active { border-radius: 14px !important; }
+/* Круглые кнопки-значки (голос, комментарий, ластик, фото) */
+html[data-w95="android"] body .tx-icon-btn, html[data-w95="android"] body .icon-btn { min-width: 48px; min-height: 48px; padding: 0 !important; }
+html[data-w95="android"] body .tx-actions button, html[data-w95="android"] body .sub-actions button { min-width: 40px; min-height: 40px; padding: 0 !important; background-color: transparent !important; color: var(--md-on-variant) !important; }
+html[data-w95="android"] body .tx-actions button .material-icons, html[data-w95="android"] body .sub-actions button .material-icons { font-size: 20px !important; }
+html[data-w95="android"] body .tx-item .tx-actions button:hover, html[data-w95="android"] body .sub-item .sub-actions button:hover { background-color: var(--md-hover) !important; box-shadow: none !important; }
+/* Выбранная кнопка */
+html[data-w95="android"] body .icon-btn.selected { box-shadow: var(--md-e1) !important; }
+/* Свободные кнопки без своего класса в карточках: тот же вид, что у btn-secondary */
+html[data-w95="android"] body .cat-chip {
+    min-height: 32px; padding: 0 6px 0 12px !important; gap: 4px; border-radius: 10px !important;
+    background-color: var(--md-container-high) !important; color: var(--md-on-surface) !important; border: 1px solid var(--md-outline-variant) !important;
+    font-size: 13px !important;
+}
+
+/* Цифровая клавиатура суммы — круглые клавиши */
+html[data-w95="android"] body .ob-keypad { gap: 8px !important; }
+html[data-w95="android"] body .ob-keypad button {
+    min-height: 52px; border-radius: 18px !important; font-size: 20px !important; font-weight: 500 !important; padding: 0 !important;
+    background-color: var(--md-tile) !important; color: var(--md-on-surface) !important;
+}
+html[data-w95="android"] body .ob-keypad button:active { border-radius: 26px !important; padding: 0 !important; }
+html[data-w95="android"] body .tx-keypad-box { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+
+/* Плавающая кнопка синхронизации (FAB): крупный «скруглённый квадрат» третьего цвета */
+html[data-w95="android"] body .fab-sync {
+    width: 64px !important; height: 64px !important; border-radius: 22px !important; border: none !important;
+    background: var(--md-tertiary-container) !important; color: var(--md-on-tertiary-container) !important;
+    box-shadow: var(--md-e3) !important; display: flex !important; align-items: center; justify-content: center; padding: 0 !important;
+    transition: border-radius .3s var(--md-spring), box-shadow .2s var(--md-ease), transform .2s var(--md-spring);
+}
+html[data-w95="android"] body .fab-sync .material-icons { color: var(--md-on-tertiary-container) !important; font-size: 28px !important; }
+html[data-w95="android"] body .fab-sync:hover { box-shadow: 0 2px 4px rgba(0, 0, 0, .2), 0 8px 16px 4px rgba(0, 0, 0, .14) !important; }
+html[data-w95="android"] body .fab-sync:active { border-radius: 32px !important; transform: scale(.94); }
+
+/* ---------- 5. Поля ввода ---------- */
+html[data-w95="android"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+html[data-w95="android"] body textarea {
+    background-color: var(--md-container-highest) !important; color: var(--md-on-surface) !important;
+    border: 2px solid transparent !important; border-radius: 16px !important; box-shadow: none !important;
+    font-family: var(--md-font) !important; font-size: 16px; line-height: 1.4; padding: 12px 16px !important; min-height: 52px; box-sizing: border-box;
+    transition: border-color .2s var(--md-ease), background-color .2s var(--md-ease);
+}
+html[data-w95="android"] body textarea { min-height: 96px; }
+html[data-w95="android"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):hover,
+html[data-w95="android"] body textarea:hover, html[data-w95="android"] body select:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):focus,
+html[data-w95="android"] body textarea:focus, html[data-w95="android"] body select:focus {
+    outline: none !important; border-color: var(--md-primary) !important; box-shadow: none !important;
+}
+html[data-w95="android"] body input::placeholder, html[data-w95="android"] body textarea::placeholder { color: color-mix(in oklab, var(--md-on-variant) 78%, transparent) !important; opacity: 1; }
+html[data-w95="android"] body input[type="datetime-local"], html[data-w95="android"] body input[type="date"], html[data-w95="android"] body input[type="time"] { color-scheme: light; }
+html[data-w95="android"][data-w95-mode="dark"] body input[type="datetime-local"], html[data-w95="android"][data-w95-mode="dark"] body input[type="date"], html[data-w95="android"][data-w95-mode="dark"] body input[type="time"] { color-scheme: dark; }
+html[data-w95="android"] body select {
+    -webkit-appearance: none; appearance: none;
+    background-color: var(--md-container-highest) !important; color: var(--md-on-surface) !important;
+    border: 2px solid transparent !important; border-radius: 16px !important; box-shadow: none !important;
+    font-family: var(--md-font) !important; font-size: 15px; font-weight: 500; min-height: 52px; padding: 0 44px 0 16px !important; box-sizing: border-box;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--md-on-variant) 50%),
+        linear-gradient(135deg, var(--md-on-variant) 50%, transparent 50%) !important;
+    background-position: calc(100% - 22px) 50%, calc(100% - 16px) 50% !important;
+    background-size: 6px 6px, 6px 6px !important; background-repeat: no-repeat !important;
+    cursor: pointer;
+}
+html[data-w95="android"] body select option { background: var(--md-container-high); color: var(--md-on-surface); }
+html[data-w95="android"] body .amount-row { gap: 8px; }
+html[data-w95="android"] body .amount-row input { font-size: 22px !important; font-weight: 500; }
+html[data-w95="android"] body .field-inline > span { color: var(--md-on-variant) !important; font-size: 13px; font-weight: 500; }
+
+/* Переключатели Material (галочки настроек): дорожка 52×32 и кружок с галочкой */
+html[data-w95="android"] body label.hdr-part > input[type="checkbox"], html[data-w95="android"] body #import-skip-dup {
+    -webkit-appearance: none; appearance: none; position: relative; flex: none; display: inline-block; vertical-align: middle; cursor: pointer;
+    width: 52px !important; min-width: 52px !important; height: 32px !important; min-height: 0 !important; padding: 0 !important; margin: 0 14px 0 0 !important;
+    background: var(--md-container-highest) !important; border: 2px solid var(--md-outline) !important; border-radius: 16px !important; box-shadow: none !important;
+    transition: background-color .25s var(--md-ease), border-color .25s var(--md-ease);
+}
+html[data-w95="android"] body label.hdr-part > input[type="checkbox"]::before, html[data-w95="android"] body #import-skip-dup::before {
+    content: ''; position: absolute; top: 50%; left: 6px; width: 16px; height: 16px; margin-top: -8px; border-radius: 50% !important;
+    background: var(--md-outline);
+    transition: left .3s var(--md-spring), width .25s var(--md-spring), height .25s var(--md-spring), margin-top .25s var(--md-spring), background-color .25s var(--md-ease);
+}
+html[data-w95="android"] body label.hdr-part > input[type="checkbox"]::after, html[data-w95="android"] body #import-skip-dup::after {
+    content: ''; position: absolute; top: 50%; left: 28px; width: 16px; height: 16px; margin-top: -8px; opacity: 0; transform: scale(.4);
+    background: var(--md-primary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E") center / 14px no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E") center / 14px no-repeat;
+    transition: opacity .2s, transform .3s var(--md-spring);
+}
+html[data-w95="android"] body label.hdr-part > input[type="checkbox"]:checked, html[data-w95="android"] body #import-skip-dup:checked { background: var(--md-primary) !important; border-color: var(--md-primary) !important; }
+html[data-w95="android"] body label.hdr-part > input[type="checkbox"]:checked::before, html[data-w95="android"] body #import-skip-dup:checked::before { left: 24px; width: 24px; height: 24px; margin-top: -12px; background: var(--md-on-primary); }
+html[data-w95="android"] body label.hdr-part > input[type="checkbox"]:checked::after, html[data-w95="android"] body #import-skip-dup:checked::after { left: 28px; width: 16px; opacity: 1; transform: none; }
+html[data-w95="android"] body label.hdr-part > input[type="checkbox"]:active::before, html[data-w95="android"] body #import-skip-dup:active::before { width: 28px; }
+html[data-w95="android"] body label.hdr-part { display: flex; align-items: center; gap: 0; min-height: 48px; }
+
+/* Галочки и переключатели-точки: квадрат 18 px со скруглением 2 px и круг */
+html[data-w95="android"] body input[type="checkbox"]:not(#import-skip-dup):not(label.hdr-part > input),
+html[data-w95="android"] body input[type="radio"] {
+    -webkit-appearance: none; appearance: none; position: relative; flex: none; width: 20px !important; min-width: 20px !important; height: 20px !important; min-height: 0 !important;
+    padding: 0 !important; margin: 0 10px 0 0 !important; vertical-align: middle; cursor: pointer;
+    background: transparent !important; border: 2px solid var(--md-on-variant) !important; border-radius: 4px !important; box-shadow: none !important;
+    transition: background-color .2s var(--md-ease), border-color .2s var(--md-ease);
+}
+html[data-w95="android"] body input[type="radio"] { border-radius: 50% !important; }
+html[data-w95="android"] body input[type="checkbox"]:not(#import-skip-dup):not(label.hdr-part > input):checked { background: var(--md-primary) !important; border-color: var(--md-primary) !important; }
+html[data-w95="android"] body input[type="checkbox"]:not(#import-skip-dup):not(label.hdr-part > input):checked::after {
+    content: ''; position: absolute; left: 4px; top: 0; width: 5px; height: 10px; border: solid var(--md-on-primary); border-width: 0 2px 2px 0; transform: rotate(45deg);
+    border-radius: 0 !important;
+}
+html[data-w95="android"] body input[type="radio"]:checked { border-color: var(--md-primary) !important; }
+html[data-w95="android"] body input[type="radio"]:checked::after { content: ''; position: absolute; left: 3px; top: 3px; width: 10px; height: 10px; border-radius: 50% !important; background: var(--md-primary); }
+/* Ползунок: толстая дорожка и высокая «ручка-пилюля» (как в Material 3 Expressive) */
+html[data-w95="android"] body input[type="range"] {
+    -webkit-appearance: none; appearance: none; height: 16px; padding: 0 !important; min-height: 0 !important; border: none !important; border-radius: 8px !important; box-shadow: none !important;
+    background: var(--md-secondary-container) !important; cursor: pointer;
+}
+html[data-w95="android"] body input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 6px; height: 40px; border-radius: 3px !important; background: var(--md-primary); border: none; box-shadow: 0 0 0 3px var(--md-container);
+}
+html[data-w95="android"] body input[type="range"]::-moz-range-thumb { width: 6px; height: 40px; border-radius: 3px !important; background: var(--md-primary); border: none; }
+html[data-w95="android"] body input[type="color"] { border: 2px solid var(--md-outline-variant) !important; border-radius: 12px !important; background: var(--md-container-highest) !important; padding: 2px !important; }
+
+/* ---------- 6. Навигация на ПК: боковая панель (Navigation drawer) ---------- */
+html[data-w95="android"] body .sidebar {
+    background: color-mix(in oklab, var(--md-surface) 55%, var(--md-container)) !important;
+    border: none !important; box-shadow: none !important; padding: 0 !important;
+    border-radius: 0 28px 28px 0 !important;
+}
+html[data-w95="android"] body .sidebar-header {
+    background: transparent !important; border: none !important; box-shadow: none !important;
+    min-height: 0; padding: 24px 24px 12px !important; gap: 14px !important; justify-content: flex-start !important;
+}
+html[data-w95="android"] body .sidebar-header h2 {
+    color: var(--md-on-surface) !important; font-family: var(--md-font) !important; font-size: 21px !important; white-space: nowrap; font-weight: 500 !important;
+    letter-spacing: 0; text-shadow: none !important; line-height: 1.2;
+}
+html[data-w95="android"] body .sidebar-header .app-logo, html[data-w95="android"] body .header-top .app-logo, html[data-w95="android"] body .mobile-logo-title .app-logo { width: 40px; height: 40px; border-radius: 14px !important; box-shadow: none; }
+html[data-w95="android"] body .sidebar-nav { margin: 0 !important; padding: 8px 12px 16px !important; gap: 2px !important; background: transparent !important; border: none !important; overflow-y: auto; }
+html[data-w95="android"] body .sidebar-nav button {
+    position: relative; min-height: 56px; padding: 0 20px 0 16px !important; gap: 12px !important; align-items: center;
+    background: transparent !important; border: none !important; border-radius: 28px !important; box-shadow: none !important;
+    color: var(--md-on-variant) !important; font-family: var(--md-font) !important; font-size: 15px !important; font-weight: 500 !important; letter-spacing: .1px;
+    transition: background-color .2s var(--md-ease), color .2s var(--md-ease);
+}
+html[data-w95="android"] body .sidebar-nav button *, html[data-w95="android"] body .mobile-nav button * { color: inherit !important; font-family: inherit !important; }
+html[data-w95="android"] body .sidebar-nav button .material-icons { font-size: 24px !important; transform: none !important; }
+html[data-w95="android"] body .sidebar-nav button:hover { background: var(--md-hover) !important; color: var(--md-on-surface) !important; }
+html[data-w95="android"] body .sidebar-nav button.active {
+    background: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important; font-weight: 600 !important;
+}
+html[data-w95="android"] body .sidebar-nav button.active:hover { box-shadow: var(--md-st-hover) !important; }
+
+/* ---------- 7. Навигация на телефоне: плавающая «стеклянная» панель (Navigation bar) ---------- */
+@media (max-width: 768px) {
+    html[data-w95="android"] { --mobile-nav-h: 156px; }
+    html[data-w95="android"] body .mobile-nav {
+        left: 10px !important; right: 10px !important; bottom: calc(10px + env(safe-area-inset-bottom)) !important; width: auto !important;
+        padding: 8px 6px !important; gap: 2px 0 !important; grid-auto-rows: 58px !important;
+        background: var(--md-glass) !important; border: 1px solid color-mix(in oklab, var(--md-outline-variant) 60%, transparent) !important;
+        border-radius: 30px !important; box-shadow: var(--md-e3) !important;
+        -webkit-backdrop-filter: blur(22px) saturate(1.5); backdrop-filter: blur(22px) saturate(1.5);
+    }
+    html[data-w95="android"] body .mobile-nav button {
+        background: transparent !important; border: none !important; box-shadow: none !important; border-radius: 16px !important;
+        color: var(--md-on-variant) !important; font-family: var(--md-font) !important; font-size: 11px !important; font-weight: 500 !important; letter-spacing: .2px;
+        gap: 3px !important; padding: 2px 0 !important;
+    }
+    html[data-w95="android"] body .mobile-nav button .material-icons {
+        width: 56px; height: 30px; line-height: 30px; text-align: center; border-radius: 15px !important; font-size: 22px !important; transform: none !important;
+        transition: background-color .25s var(--md-ease), color .2s var(--md-ease), width .3s var(--md-spring);
+    }
+    html[data-w95="android"] body .mobile-nav button.active { background: transparent !important; color: var(--md-on-surface) !important; font-weight: 700 !important; }
+    html[data-w95="android"] body .mobile-nav button.active .material-icons { background: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important; }
+    html[data-w95="android"] body .mobile-nav button:active .material-icons { background: var(--md-press); }
+    html[data-w95="android"] body header, html[data-w95="android"] body header[class] { margin: 0 !important; }
+    html[data-w95="android"] body .card { border-radius: 26px !important; padding: 18px !important; }
+}
+/* Меню-гамбургер и меню слева (Настройки → «Разметка и меню») */
+html[data-menu="burger"][data-w95="android"] body .burger-btn {
+    width: 48px !important; height: 48px !important; border-radius: 16px !important; top: 10px; left: 10px;
+    background: var(--md-glass) !important; box-shadow: var(--md-e2) !important; border: none !important;
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+}
+html[data-menu="burger"][data-w95="android"] body .burger-btn .material-icons { color: var(--md-on-surface) !important; }
+html[data-menu="burger"][data-w95="android"] body .app-wrapper > aside.sidebar {
+    background: var(--md-container-high) !important; border-radius: 0 28px 28px 0 !important; box-shadow: var(--md-e3) !important;
+}
+html[data-menu="burger"][data-w95="android"] body .app-wrapper > aside.sidebar .sidebar-header { padding: 14px 16px 14px 70px !important; }
+html[data-menu="burger"][data-w95="android"] body .app-wrapper > aside.sidebar .sidebar-nav button { min-height: 52px; border-radius: 26px !important; }
+html[data-menu="burger"].menu-open[data-w95="android"] body .menu-backdrop { background: var(--md-scrim); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+@media (max-width: 768px) {
+    html[data-menu="left"][data-w95="android"] body .app-wrapper > aside.sidebar { background: var(--md-container) !important; border-radius: 0 24px 24px 0 !important; padding: 8px 4px !important; }
+    html[data-menu="left"][data-w95="android"] body .app-wrapper > aside.sidebar .sidebar-nav button { border-radius: 16px !important; }
+    html[data-menu="left"][data-w95="android"] body .app-wrapper > aside.sidebar .sidebar-nav button .material-icons {
+        width: 48px; height: 28px; line-height: 28px; border-radius: 14px !important; text-align: center;
+    }
+    html[data-menu="left"][data-w95="android"] body .app-wrapper > aside.sidebar .sidebar-nav button.active { background: transparent !important; }
+    html[data-menu="left"][data-w95="android"] body .app-wrapper > aside.sidebar .sidebar-nav button.active .material-icons { background: var(--md-secondary-container); color: var(--md-on-secondary-container) !important; }
+}
+
+/* ---------- 8. Шапка: приложение-бар и карточка «Текущий баланс» ---------- */
+html[data-w95="android"] body .header-top {
+    display: flex; align-items: center; gap: 12px; background: transparent !important; border: none !important; box-shadow: none !important;
+    min-height: 0; padding: 4px 4px 12px !important; margin: 0 !important; color: var(--md-on-surface) !important; text-shadow: none !important;
+}
+html[data-w95="android"] body .header-top .mobile-logo-title { display: flex; align-items: center; gap: 12px; }
+html[data-w95="android"] body .header-top .mobile-title, html[data-w95="android"] body .header-top h2 {
+    color: var(--md-on-surface) !important; font-family: var(--md-font) !important; font-size: 24px !important; font-weight: 500 !important; letter-spacing: 0; text-shadow: none !important; margin: 0;
+}
+@media (min-width: 769px) { html[data-w95="android"]:not([data-menu="burger"]) body .header-top { display: none !important; } }
+html[data-w95="android"] body .balance-card {
+    background: var(--md-primary-container) !important; color: var(--md-on-primary-container) !important;
+    border-radius: 32px !important; padding: 8px !important; position: relative; overflow: hidden !important;
+    background-image: radial-gradient(60% 90% at 100% 0%, color-mix(in oklab, var(--md-primary) 16%, transparent), transparent 70%) !important;
+}
+html[data-w95="android"] body .balance-card > * { position: relative; }
+html[data-w95="android"] body .balance-card * { color: var(--md-on-primary-container) !important; }
+html[data-w95="android"] body .balance-grid { gap: 8px !important; }
+html[data-w95="android"] body .balance-main, html[data-w95="android"] body .balance-info {
+    background: transparent !important; border: none !important; box-shadow: none !important; border-radius: 24px !important; padding: 16px 18px !important;
+}
+html[data-w95="android"] body .balance-info { background: color-mix(in oklab, var(--md-on-primary-container) 9%, transparent) !important; }
+html[data-w95="android"] body .balance-label { font-size: 14px !important; font-weight: 500 !important; opacity: .78; letter-spacing: .1px; }
+html[data-w95="android"] body #balance { font-size: clamp(34px, 6vw, 52px) !important; font-weight: 500 !important; letter-spacing: -.5px; line-height: 1.1; margin: 4px 0 10px !important; }
+html[data-w95="android"] body #hdr-time { font-size: clamp(30px, 5vw, 44px) !important; font-weight: 500 !important; letter-spacing: -.5px; line-height: 1.1; }
+@media (max-width: 768px) {
+    html[data-w95="android"] body #balance { font-size: clamp(24px, 7.4vw, 32px) !important; white-space: normal !important; overflow: visible !important; text-overflow: clip !important; overflow-wrap: anywhere; letter-spacing: -.8px; }
+    html[data-w95="android"] body #hdr-time { font-size: clamp(26px, 8vw, 34px) !important; }
+    html[data-w95="android"] body .balance-main, html[data-w95="android"] body .balance-info { padding: 14px 14px !important; }
+    html[data-w95="android"] body .balance-main .limits p { font-size: 13px; padding: 4px 10px; margin: 0 6px 4px 0 !important; }
+}
+html[data-w95="android"] body .balance-main .limits, html[data-w95="android"] body .balance-info .info-lines { border: none !important; padding: 0 !important; margin: 0 !important; font-size: 14px; }
+html[data-w95="android"] body .balance-main .limits { display: flex; flex-wrap: wrap; gap: 6px; }
+html[data-w95="android"] body .balance-main .limits p { display: inline-flex; align-items: center; gap: 6px; width: auto; margin: 0 8px 4px 0 !important; padding: 4px 12px; border-radius: 12px !important; background: color-mix(in oklab, var(--md-on-primary-container) 10%, transparent); }
+html[data-w95="android"] body .hdr-edit-btn {
+    min-height: 40px !important; width: 40px; height: 40px; padding: 0 !important; border-radius: 50% !important;
+    background-color: color-mix(in oklab, var(--md-on-primary-container) 12%, transparent) !important; color: var(--md-on-primary-container) !important;
+}
+html[data-w95="android"] body .hdr-edit-btn .material-icons { font-size: 20px !important; }
+
+/* ---------- 9. Списки операций и подписок: «соединённые» плитки ---------- */
+html[data-w95="android"] body #tx-list, html[data-w95="android"] body #subs-list, html[data-w95="android"] body #salary-list {
+    background: transparent !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; overflow: visible;
+}
+html[data-w95="android"] body .date-group-header {
+    background: transparent !important; border: none !important; box-shadow: none !important; border-radius: 0 !important;
+    margin: 16px 0 6px !important; padding: 0 8px !important; color: var(--md-on-variant) !important;
+}
+html[data-w95="android"] body .date-group-header:first-child { margin-top: 0 !important; }
+html[data-w95="android"] body .date-group-header h4 { color: var(--md-primary) !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: .4px; margin: 0 0 2px !important; }
+html[data-w95="android"] body .date-group-header p { font-size: 13px; }
+html[data-w95="android"] body .date-group-header * { text-shadow: none !important; }
+html[data-w95="android"] body .tx-item, html[data-w95="android"] body .sub-item {
+    background: var(--md-tile) !important; border: none !important; border-radius: 8px !important; box-shadow: none !important;
+    padding: 14px 16px 14px 18px !important; margin: 0 0 2px !important; gap: 8px;
+}
+html[data-w95="android"] body #tx-list .date-group-header + .tx-item, html[data-w95="android"] body #subs-list .sub-item:first-child, html[data-w95="android"] body #salary-list .sub-item:first-child { border-radius: 22px 22px 8px 8px !important; }
+html[data-w95="android"] body #tx-list .tx-item:last-child, html[data-w95="android"] body #tx-list .tx-item:has(+ .date-group-header), html[data-w95="android"] body #subs-list .sub-item:last-child, html[data-w95="android"] body #salary-list .sub-item:last-child { border-radius: 8px 8px 22px 22px !important; margin-bottom: 4px !important; }
+html[data-w95="android"] body #tx-list .date-group-header + .tx-item:last-child, html[data-w95="android"] body #tx-list .date-group-header + .tx-item:has(+ .date-group-header),
+html[data-w95="android"] body #subs-list .sub-item:only-child, html[data-w95="android"] body #salary-list .sub-item:only-child { border-radius: 22px !important; }
+html[data-w95="android"] body .tx-item:active, html[data-w95="android"] body .sub-item:active { box-shadow: var(--md-st-press) !important; transform: none !important; }
+html[data-w95="android"] body .tx-item.income, html[data-w95="android"] body .tx-item.expense, html[data-w95="android"] body #subs-list .sub-item { border-left: none !important; }
+html[data-w95="android"] body .tx-item .tx-cat { font-size: 16px; font-weight: 500; color: var(--md-on-surface) !important; }
+html[data-w95="android"] body .tx-item .tx-info, html[data-w95="android"] body .sub-item .sub-info { color: var(--md-on-variant) !important; }
+html[data-w95="android"] body .tx-item .tx-info span, html[data-w95="android"] body .tx-item .tx-info .tx-comment { color: var(--md-on-variant) !important; }
+html[data-w95="android"] body .tx-item .tx-cat, html[data-w95="android"] body .tx-item .tx-cat * { color: var(--md-on-surface) !important; }
+html[data-w95="android"] body .tx-amount { font-size: 16px !important; font-weight: 600; }
+html[data-w95="android"] body .tx-actions { margin-left: 4px !important; gap: 0 !important; }
+html[data-w95="android"] body .tx-actions button .material-icons[style*="d32f2f"] { color: var(--md-error) !important; }
+
+/* Группы-«плитки»: таблицы, показатели, диаграммы, списки внутри карточек */
+html[data-w95="android"] body .table-scroll, html[data-w95="android"] body .export-sheet-table, html[data-w95="android"] body .kpi, html[data-w95="android"] body .chart-box, html[data-w95="android"] body .cat-list, html[data-w95="android"] body .changelog, html[data-w95="android"] body .custom-categories, html[data-w95="android"] body .sound-slots,
+html[data-w95="android"] body .stats-summary .stat-value, html[data-w95="android"] body .ocr-engine, html[data-w95="android"] body .voice-live, html[data-w95="android"] body .voice-result, html[data-w95="android"] body .obc-book, html[data-w95="android"] body .obc-notfound, html[data-w95="android"] body .wall-placeholder,
+html[data-w95="android"] body .calc-display, html[data-w95="android"] body .calc-tape, html[data-w95="android"] body .import-preview {
+    background: var(--md-tile) !important; border: none !important; border-radius: 20px !important; box-shadow: none !important;
+}
+html[data-w95="android"] body .obc-item { background: var(--md-tile) !important; border: none !important; border-radius: 16px !important; box-shadow: none !important; }
+html[data-w95="android"] body .table-scroll { overflow: auto; }
+html[data-w95="android"] body .analytics-table { border-collapse: separate; border-spacing: 0; width: 100%; }
+html[data-w95="android"] body .analytics-table th {
+    background: var(--md-container-high) !important; color: var(--md-on-variant) !important; border: none !important; box-shadow: none !important; text-shadow: none !important;
+    font-size: 12px; font-weight: 600; letter-spacing: .5px; padding: 12px 10px !important; text-align: left;
+}
+html[data-w95="android"] body .analytics-table td { background: transparent !important; border: none !important; border-bottom: 1px solid var(--md-outline-variant) !important; padding: 12px 10px !important; }
+html[data-w95="android"] body .analytics-table tr:last-child td { border-bottom: none !important; }
+html[data-w95="android"] body .export-sheet .export-table th { background: var(--md-container-high) !important; color: var(--md-on-variant) !important; }
+html[data-w95="android"] body .changelog { padding: 8px 18px !important; }
+html[data-w95="android"] body .cl-version { border-left: 3px solid var(--md-primary) !important; border-radius: 0 !important; padding-left: 14px; }
+html[data-w95="android"] body .app-wrapper .cl-tag { border-radius: 8px !important; background: var(--md-primary) !important; color: var(--md-on-primary) !important; font-size: 11px; padding: 2px 8px; }
+
+/* ---------- 10. Диалоги (bottom sheet на телефоне, окно по центру на ПК), выпадающие списки, подсказки ---------- */
+html[data-w95="android"] body .export-sheet-overlay { background: var(--md-scrim) !important; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+html[data-w95="android"] body .export-sheet {
+    background: var(--md-container-high) !important; color: var(--md-on-surface) !important; border: none !important;
+    border-radius: 28px 28px 0 0 !important; padding: 28px 24px 20px !important; box-shadow: var(--md-e3) !important; position: relative;
+    animation: mdSheetIn .4s var(--md-ease) both !important;
+}
+html[data-w95="android"] body .export-sheet::before {
+    content: ''; position: absolute; left: 50%; top: 10px; width: 32px; height: 4px; margin-left: -16px; border-radius: 2px !important; background: var(--md-outline); opacity: .5;
+}
+html[data-w95="android"] body .export-sheet * { color: var(--md-on-surface); }
+html[data-w95="android"] body .export-sheet-head { background: transparent !important; border: none !important; box-shadow: none !important; margin: 0 0 12px !important; padding: 0 !important; min-height: 0; }
+html[data-w95="android"] body .export-sheet-head h3 { font-size: 24px !important; font-weight: 400 !important; margin: 0; color: var(--md-on-surface) !important; letter-spacing: 0; }
+html[data-w95="android"] body .export-sheet-close {
+    width: 40px !important; height: 40px !important; min-height: 0 !important; padding: 0 !important; border-radius: 50% !important; background: transparent !important; box-shadow: none !important;
+    display: inline-flex !important; align-items: center; justify-content: center; color: var(--md-on-variant) !important;
+}
+html[data-w95="android"] body .export-sheet-close:hover { background: var(--md-hover) !important; }
+html[data-w95="android"] body .export-sheet-close .material-icons { color: var(--md-on-variant) !important; font-size: 24px !important; }
+html[data-w95="android"] body .export-sheet-actions { justify-content: flex-end; gap: 8px !important; margin-top: 8px; }
+html[data-w95="android"] body .export-sheet-actions > button { flex: 0 1 auto !important; }
+html[data-w95="android"] body .export-sheet-actions > button:not(.btn-primary) { background-color: transparent !important; color: var(--md-primary) !important; }
+@media (min-width: 700px) {
+    html[data-w95="android"] body .export-sheet-overlay { align-items: center !important; }
+    html[data-w95="android"] body .export-sheet { border-radius: 28px !important; }
+    html[data-w95="android"] body .export-sheet::before { display: none; }
+}
+@keyframes mdSheetIn { from { opacity: 0; transform: translateY(40px) scale(.98); } to { opacity: 1; transform: none; } }
+html[data-w95="android"] body .custom-dropdown {
+    background: var(--md-container-high) !important; border: none !important; border-radius: 16px !important; box-shadow: var(--md-e3) !important; overflow: hidden; padding: 6px;
+}
+html[data-w95="android"] body .dropdown-item { border: none !important; border-radius: 12px !important; min-height: 44px; display: flex; align-items: center; padding: 0 14px !important; color: var(--md-on-surface) !important; }
+html[data-w95="android"] body .dropdown-item:hover { background: var(--md-hover) !important; color: var(--md-on-surface) !important; }
+html[data-w95="android"] body .app-toast {
+    background: var(--w95-text) !important; color: var(--w95-desktop) !important; border: none !important; border-radius: 14px !important;
+    box-shadow: var(--md-e3) !important; font-family: var(--md-font); font-weight: 500; font-size: 14px; padding: 14px 20px !important;
+}
+html[data-w95="android"] body .app-toast * { color: inherit !important; }
+
+/* ---------- 11. Прогресс, ярлыки, значки внутри карточек ---------- */
+html[data-w95="android"] body .goal-progress { background: var(--md-secondary-container) !important; border: none !important; border-radius: 999px !important; box-shadow: none !important; height: 12px !important; padding: 0 !important; overflow: hidden; }
+html[data-w95="android"] body .goal-bar { background: var(--md-primary) !important; border-radius: 999px !important; box-shadow: none !important; }
+html[data-w95="android"] body .ocr-badge { background: var(--md-tertiary-container) !important; color: var(--md-on-tertiary-container) !important; border: none !important; border-radius: 8px !important; box-shadow: none !important; font-weight: 600; }
+html[data-w95="android"] body .google-avatar { border-radius: 50% !important; }
+html[data-w95="android"] body .cat-tile, html[data-w95="android"] body .icon-cat-btn, html[data-w95="android"] body .emoji-cell, html[data-w95="android"] body .goal-item {
+    background-color: var(--md-tile) !important; border: none !important; border-radius: 18px !important; box-shadow: none !important; color: var(--md-on-surface) !important;
+}
+html[data-w95="android"] body .cat-tile:hover, html[data-w95="android"] body .icon-cat-btn:hover, html[data-w95="android"] body .emoji-cell:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body .cat-tile:active, html[data-w95="android"] body .icon-cat-btn:active, html[data-w95="android"] body .emoji-cell:active { border-radius: 24px !important; box-shadow: var(--md-st-press) !important; }
+html[data-w95="android"] body .cat-tile.is-selected, html[data-w95="android"] body .cat-tile.selected, html[data-w95="android"] body .cat-tile.active, html[data-w95="android"] body .icon-cat-btn.is-selected, html[data-w95="android"] body .icon-cat-btn.selected, html[data-w95="android"] body .emoji-cell.is-selected, html[data-w95="android"] body .emoji-cell.selected {
+    background-color: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important;
+}
+html[data-w95="android"] body .cat-tiles { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; gap: 8px !important; }
+html[data-w95="android"] body .receipt-cam-btn { border-radius: 20px !important; background: var(--md-primary) !important; color: var(--md-on-primary) !important; border: none !important; box-shadow: none !important; }
+html[data-w95="android"] body .receipt-cam-btn .material-icons { color: var(--md-on-primary) !important; }
+html[data-w95="android"] body .receipt-gallery-btn { min-width: 48px; min-height: 48px; padding: 0 !important; }
+html[data-w95="android"] body .receipt-bar-text b { font-size: 16px; font-weight: 500; }
+
+/* Цели (список приоритетных вещей) */
+html[data-w95="android"] body .goals-list { gap: 12px !important; padding: 0 !important; max-height: none !important; }
+html[data-w95="android"] body .goal-item { padding: 12px !important; gap: 12px !important; border-radius: 24px !important; align-items: stretch !important; }
+html[data-w95="android"] body .goal-item.is-top { outline: none !important; background-color: color-mix(in oklab, var(--md-primary-container) 55%, var(--md-tile)) !important; }
+html[data-w95="android"] body .goal-item.is-done .goal-bar { background: var(--md-income) !important; }
+html[data-w95="android"] body .goal-img, html[data-w95="android"] body .goal-draft-img {
+    width: 84px !important; height: 84px !important; border-radius: 18px !important; background: var(--md-surface-lowest, var(--w95-light)) !important; box-shadow: none !important; border: none !important;
+}
+html[data-w95="android"] body .goal-img img, html[data-w95="android"] body .goal-draft-img img { border-radius: 18px !important; }
+html[data-w95="android"] body .goal-title { font-family: var(--md-font) !important; font-size: 15px !important; font-weight: 600 !important; color: var(--md-on-surface) !important; }
+html[data-w95="android"] body .goal-rank {
+    background: var(--md-primary) !important; color: var(--md-on-primary) !important; border-radius: 999px !important; min-width: 24px !important; padding: 0 8px !important; line-height: 20px !important; font-size: 12px !important;
+}
+html[data-w95="android"] body .goal-link { color: var(--md-primary) !important; text-decoration: none !important; }
+html[data-w95="android"] body .goal-nums { font-size: 13px !important; color: var(--md-on-variant) !important; }
+html[data-w95="android"] body .goal-nums b, html[data-w95="android"] body .goal-pct { color: var(--md-on-surface) !important; }
+html[data-w95="android"] body .goal-plan { color: var(--md-on-variant) !important; }
+html[data-w95="android"] body .goal-actions { gap: 6px !important; align-items: center !important; }
+html[data-w95="android"] body .goal-actions .btn-secondary { width: 40px !important; height: 36px !important; min-height: 36px !important; border-radius: 12px !important; padding: 0 !important; }
+html[data-w95="android"] body .goal-actions .btn-secondary .material-icons { font-size: 20px !important; }
+html[data-w95="android"] body .goal-dollar {
+    width: 40px !important; height: 40px !important; border-radius: 50% !important; border: none !important; box-shadow: none !important;
+    background: var(--md-primary) !important; color: var(--md-on-primary) !important; font-family: var(--md-font) !important; font-size: 18px !important; font-weight: 700 !important;
+    transition: border-radius .25s var(--md-spring), box-shadow .2s var(--md-ease);
+}
+html[data-w95="android"] body .goal-dollar:hover { box-shadow: var(--md-st-hover-on-primary), var(--md-e1) !important; }
+html[data-w95="android"] body .goal-dollar:active { border-radius: 14px !important; }
+
+/* ---------- 12. Настройки: строки меню, папки и мини-превью тем ---------- */
+html[data-w95="android"] body .menu-row {
+    background: var(--md-tile) !important; border: none !important; border-radius: 16px !important; box-shadow: none !important; min-height: 52px; padding: 6px 10px !important;
+}
+html[data-w95="android"] body .menu-row.is-hidden { opacity: .6; }
+html[data-w95="android"] body .menu-row.is-dragging { box-shadow: var(--md-e3) !important; }
+html[data-w95="android"] body .menu-row-icon { color: var(--md-primary) !important; }
+html[data-w95="android"] body .menu-row-label { font-size: 15px; font-weight: 500; }
+html[data-w95="android"] body .menu-row-btn, html[data-w95="android"] body #settings button.menu-row-btn {
+    border-radius: 50% !important; width: 40px; height: 40px; min-height: 0 !important; padding: 0 !important; background: transparent !important; box-shadow: none !important;
+}
+html[data-w95="android"] body #settings button.menu-row-btn:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body .menu-editor { gap: 4px; }
+
+html[data-w95="android"] body #settings #theme-picker .theme-folders { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+html[data-w95="android"] body #settings #theme-picker .theme-folder {
+    background: var(--md-tile) !important; border: none !important; border-radius: 22px !important; padding: 14px 6px 10px !important; gap: 6px;
+    transition: background-color .2s var(--md-ease), border-radius .3s var(--md-spring);
+}
+html[data-w95="android"] body #settings #theme-picker .theme-folder:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body #settings #theme-picker .theme-folder:active { border-radius: 14px !important; }
+html[data-w95="android"] body #settings #theme-picker .theme-folder.is-open { background: var(--md-secondary-container) !important; }
+html[data-w95="android"] body #settings #theme-picker .theme-folder.is-open .tf-name { background: transparent; color: var(--md-on-secondary-container) !important; outline: none; }
+html[data-w95="android"] body .tf-name { font-family: var(--md-font) !important; font-size: 13px; font-weight: 600; }
+html[data-w95="android"] body .tf-count { color: var(--md-on-variant) !important; }
+html[data-w95="android"] body #settings #theme-picker .theme-folder.is-current .tf-icon::after {
+    content: '✓'; right: -8px; bottom: -4px; width: 20px; height: 20px; line-height: 20px; border: none !important; border-radius: 50% !important;
+    background: var(--md-primary); color: var(--md-on-primary); font-size: 12px;
+}
+/* значок папки — тональная «папка» Material */
+html[data-w95="android"] body .tf-back { background: color-mix(in oklab, var(--md-primary) 62%, var(--md-container)) !important; border: none !important; border-radius: 8px !important; }
+html[data-w95="android"] body .tf-back::before { background: color-mix(in oklab, var(--md-primary) 62%, var(--md-container)) !important; border: none !important; border-radius: 6px 6px 0 0 !important; }
+html[data-w95="android"] body .tf-paper { background: var(--md-tile) !important; border: none !important; border-radius: 3px !important; }
+html[data-w95="android"] body .tf-front { background: var(--md-primary) !important; border: none !important; border-radius: 8px !important; box-shadow: none !important; }
+html[data-w95="android"] body .theme-folder-panel {
+    background: var(--md-tile) !important; border: none !important; border-radius: 28px !important; box-shadow: none !important; padding: 14px 14px 16px !important;
+}
+html[data-w95="android"] body .tf-panel-head {
+    background: transparent !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 0 10px !important; padding: 4px 4px 4px 8px !important; min-height: 40px;
+}
+html[data-w95="android"] body .tf-panel-title { color: var(--md-on-surface) !important; font-family: var(--md-font) !important; font-size: 18px; font-weight: 500; text-shadow: none !important; }
+html[data-w95="android"] body #settings #theme-picker .tf-panel-close {
+    width: 40px !important; height: 40px !important; border-radius: 50% !important; background: transparent !important; box-shadow: none !important; position: static !important; transform: none !important;
+    display: inline-flex !important; align-items: center; justify-content: center;
+}
+html[data-w95="android"] body #settings #theme-picker .tf-panel-close:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body #settings #theme-picker .tf-panel-close .material-icons { color: var(--md-on-variant) !important; font-size: 22px !important; }
+html[data-w95="android"] body .theme-picker { gap: 10px; }
+html[data-w95="android"] body .theme-swatch {
+    background: var(--md-container) !important; border: 2px solid transparent !important; border-radius: 22px !important; box-shadow: none !important; padding: 8px !important; min-height: 0;
+    transition: border-color .2s var(--md-ease), background-color .2s var(--md-ease), border-radius .3s var(--md-spring);
+}
+html[data-w95="android"] body .theme-swatch:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body .theme-swatch:active { border-radius: 16px !important; }
+html[data-w95="android"] body .theme-swatch.is-active { border-color: var(--md-primary) !important; background: var(--md-secondary-container) !important; box-shadow: 0 0 0 2px var(--md-primary) !important; }
+html[data-w95="android"] body .theme-swatch.is-active .theme-swatch-name { text-decoration: none !important; font-weight: 700; color: var(--md-on-secondary-container, var(--md-on-surface)) !important; }
+html[data-w95="android"] body .theme-swatch-name { font-family: var(--md-font) !important; font-size: 12px; font-weight: 500; color: var(--md-on-surface) !important; margin-top: 6px; }
+html[data-w95="android"] body .theme-swatch-desk { border-radius: 14px !important; border: none !important; box-shadow: none !important; background-color: var(--w95-desktop); }
+html[data-w95="android"] body .theme-swatch-win { border-radius: 8px !important; box-shadow: 0 1px 3px rgba(0, 0, 0, .25) !important; overflow: hidden; }
+html[data-w95="android"] body .theme-swatch-title { border-radius: 0 !important; }
+html[data-w95="android"] body .theme-swatch-field { border-radius: 3px !important; }
+html[data-w95="android"] body .theme-actions > button { flex: 1 1 220px; }
+html[data-w95="android"] body .te-color input[type="color"] { width: 44px; height: 32px; }
+html[data-w95="android"] body .te-color { align-items: center; gap: 10px; }
+
+/* ---------- 13. Заставка (экран блокировки) и ползунок «разблокировать» ---------- */
+html[data-w95="android"] body .splash-screen {
+    background:
+        radial-gradient(90% 60% at 85% 0%, color-mix(in oklab, var(--md-primary-container) 95%, var(--md-surface)), transparent 72%),
+        radial-gradient(80% 55% at 0% 100%, color-mix(in oklab, var(--md-tertiary-container) 85%, var(--md-surface)), transparent 72%),
+        var(--md-surface) !important;
+    color: var(--md-on-surface) !important; font-family: var(--md-font) !important;
+}
+html[data-w95="android"] body .splash-screen, html[data-w95="android"] body .splash-screen * { color: var(--md-on-surface) !important; text-shadow: none !important; }
+html[data-w95="android"] body .splash-content { background: transparent !important; box-shadow: none !important; border: none !important; padding: 0 12px !important; }
+html[data-w95="android"] body .splash-content::before, html[data-w95="android"] body .splash-content::after { display: none !important; content: none !important; }
+html[data-w95="android"] body #splash-greeting { font-family: var(--md-font) !important; font-size: 24px !important; font-weight: 400 !important; opacity: .9; }
+html[data-w95="android"] body #splash-time {
+    background: transparent !important; box-shadow: none !important; border: none !important; padding: 0 !important; min-width: 0;
+    font-family: var(--md-font) !important; font-size: clamp(76px, 22vw, 108px) !important; font-weight: 500 !important; letter-spacing: -3px !important; line-height: 1;
+    color: var(--md-on-primary-container) !important;
+}
+html[data-w95="android"] body #splash-date { font-size: 18px !important; font-weight: 500; opacity: .85 !important; letter-spacing: .2px; }
+html[data-w95="android"] body #splash-weather, html[data-w95="android"] body .splash-stat {
+    background: color-mix(in oklab, var(--md-container-highest) 70%, transparent) !important; border: none !important; border-radius: 20px !important; box-shadow: none !important;
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+}
+html[data-w95="android"] body #splash-weather { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 15px !important; }
+html[data-w95="android"] body .splash-quote {
+    background: color-mix(in oklab, var(--md-container-highest) 70%, transparent) !important; border: none !important; border-radius: 14px !important; box-shadow: none !important;
+}
+html[data-w95="android"] body .splash-quote .q-change.is-up { color: var(--md-income) !important; }
+html[data-w95="android"] body .splash-quote .q-change.is-down { color: var(--md-error) !important; }
+html[data-w95="android"] body .slider-container {
+    height: 72px !important; width: min(300px, 82vw) !important; border-radius: 36px !important; border: none !important;
+    background: var(--md-secondary-container) !important; box-shadow: none !important; -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+html[data-w95="android"] body .slider-text {
+    font-family: var(--md-font) !important; font-size: 16px !important; font-weight: 500 !important; letter-spacing: .3px !important; text-transform: none !important;
+    background: linear-gradient(90deg, color-mix(in oklab, var(--md-on-secondary-container) 45%, transparent) 0%, var(--md-on-secondary-container) 50%, color-mix(in oklab, var(--md-on-secondary-container) 45%, transparent) 100%) 0 0 / 220% 100% no-repeat !important;
+    -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important; color: transparent !important;
+}
+html[data-w95="android"] body .slider-thumb {
+    top: 6px !important; left: 6px !important; width: 60px !important; height: 60px !important; border-radius: 50% !important; border: none !important;
+    background: var(--md-primary) !important; box-shadow: var(--md-e2) !important;
+}
+html[data-w95="android"] body .slider-thumb .material-icons { color: var(--md-on-primary) !important; font-size: 28px; }
+html[data-w95="android"] body .splash-btn { background: var(--md-primary) !important; border-radius: 50% !important; }
+html[data-w95="android"] body .splash-btn .material-icons { color: var(--md-on-primary) !important; }
+
+/* ---------- 14. ПИН-код: круглые клавиши ---------- */
+html[data-w95="android"] body .pin-screen {
+    background:
+        radial-gradient(90% 50% at 50% 0%, color-mix(in oklab, var(--md-primary-container) 90%, var(--md-surface)), transparent 72%),
+        var(--md-surface) !important;
+    color: var(--md-on-surface) !important;
+}
+html[data-w95="android"] body .pin-screen h2 { color: var(--md-on-surface) !important; font-family: var(--md-font) !important; font-size: 24px; font-weight: 400; text-shadow: none !important; }
+html[data-w95="android"] body .pin-screen *:not(.material-icons) { color: var(--md-on-surface) !important; }
+html[data-w95="android"] body .pin-dots { gap: 18px !important; }
+html[data-w95="android"] body .pin-dots .dot { width: 16px !important; height: 16px !important; background: transparent !important; border: 2px solid var(--md-outline) !important; border-radius: 50% !important; box-shadow: none !important; transition: transform .25s var(--md-spring), background-color .2s; }
+html[data-w95="android"] body .pin-dots .dot.filled { background: var(--md-primary) !important; border-color: var(--md-primary) !important; transform: scale(1.15); }
+html[data-w95="android"] body .pin-btn {
+    width: 76px !important; height: 76px !important; border-radius: 50% !important; border: none !important; box-shadow: none !important;
+    background: var(--md-container-high) !important; color: var(--md-on-surface) !important; font-family: var(--md-font) !important; font-size: 30px !important; font-weight: 400 !important;
+    transition: border-radius .25s var(--md-spring), background-color .2s;
+}
+html[data-w95="android"] body .pin-btn:active { border-radius: 26px !important; background: var(--md-secondary-container) !important; padding: 0 !important; }
+html[data-w95="android"] body .pin-btn * { color: inherit !important; }
+
+/* ---------- 15. Полосы прокрутки: тонкие «пилюли» ---------- */
+html[data-w95="android"] body .w95-sb-track { border-radius: 4px !important; background: transparent !important; background-image: none !important; box-shadow: none !important; width: 8px; }
+html[data-w95="android"] body .w95-sb-btn { display: none !important; }
+html[data-w95="android"] body .w95-sb-thumb { left: 1px; right: 1px; border-radius: 999px !important; background: color-mix(in oklab, var(--md-on-variant) 50%, transparent) !important; box-shadow: none !important; border: none !important; }
+html[data-w95="android"] body .w95-sb-thumb:hover, html[data-w95="android"] body .w95-sb-thumb:active { background: var(--md-primary) !important; }
+@media (hover: hover) and (pointer: fine) {
+    html[data-w95="android"] body ::-webkit-scrollbar { width: 12px; height: 12px; }
+    html[data-w95="android"] body ::-webkit-scrollbar-track { background: transparent !important; background-image: none !important; }
+    html[data-w95="android"] body ::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--md-on-variant) 45%, transparent) !important; border-radius: 999px !important; border: 3px solid transparent; background-clip: padding-box !important; box-shadow: none !important; }
+    html[data-w95="android"] body ::-webkit-scrollbar-thumb:hover { background: var(--md-primary) !important; background-clip: padding-box !important; }
+    html[data-w95="android"] body ::-webkit-scrollbar-corner { background: transparent !important; }
+}
+
+/* ---------- 16. Волна-отклик при нажатии (js/android.js ставит --rx, --ry и класс md-rip) ---------- */
+@property --md-rr { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --md-ra { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+@keyframes mdRipple { from { --md-rr: 0px; --md-ra: 22%; } to { --md-rr: var(--rmax, 240px); --md-ra: 0%; } }
+html[data-w95="android"] body .md-rip {
+    background-image: radial-gradient(circle var(--md-rr) at var(--rx, 50%) var(--ry, 50%), color-mix(in srgb, currentColor var(--md-ra), transparent) 0, color-mix(in srgb, currentColor var(--md-ra), transparent) 98%, transparent 100%) !important;
+    animation: mdRipple .55s cubic-bezier(.2, 0, 0, 1) both;
+}
+html[data-w95="android"] body .md-rip:is(select, input, textarea) { animation: none; }
+
+/* ---------- 17. Мелочи: «Стена», подсказки, голос, импорт, выбор файла ---------- */
+html[data-w95="android"] body .wall-tools { gap: 2px; }
+html[data-w95="android"] body .wall-tool { border-radius: 50% !important; background: transparent !important; box-shadow: none !important; }
+html[data-w95="android"] body .wall-placeholder { border: 2px dashed var(--md-outline-variant) !important; background: transparent !important; }
+html[data-w95="android"] body .import-drop { border: 2px dashed var(--md-outline) !important; border-radius: 24px !important; background: color-mix(in oklab, var(--md-primary-container) 30%, transparent) !important; }
+html[data-w95="android"] body .voice-btn.is-listening { background-color: var(--md-error) !important; color: #fff !important; box-shadow: 0 0 0 6px color-mix(in oklab, var(--md-error) 25%, transparent) !important; animation: mdPulse 1.4s ease-in-out infinite; }
+@keyframes mdPulse { 50% { box-shadow: 0 0 0 12px color-mix(in oklab, var(--md-error) 8%, transparent); } }
+html[data-w95="android"] body .voice-bars i { border-radius: 3px !important; background: var(--md-error); }
+html[data-w95="android"] body .voice-live.is-busy .voice-bars i { background: var(--md-primary); }
+html[data-w95="android"] body .voice-res-text, html[data-w95="android"] body .voice-res-retry { border-radius: 14px !important; }
+html[data-w95="android"] body .calc-tape-row:hover { background: var(--md-hover) !important; }
+html[data-w95="android"] body .stat-value { color: var(--md-on-surface); }
+html[data-w95="android"] body hr { border: none; border-top: 1px solid var(--md-outline-variant); }
+html[data-w95="android"] body .hint, html[data-w95="android"] body .google-setup-hint { color: var(--md-on-variant); }
+html[data-w95="android"] body a { color: var(--md-primary); }
+
+/* Сенсорное управление: цели не меньше 48 px */
+@media (pointer: coarse) {
+    html[data-w95="android"] body :is(.btn-primary, .btn-secondary, .btn-income, .btn-expense, .export-btn, .pay-btn, .icon-btn):not(.w95-ctl), html[data-w95="android"] body label.btn-secondary { min-height: 48px; }
+    html[data-w95="android"] body .tx-actions button, html[data-w95="android"] body .sub-actions button { min-width: 44px; min-height: 44px; }
+    html[data-w95="android"] body input:not([type="hidden"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), html[data-w95="android"] body select { min-height: 56px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html[data-w95="android"] body *, html[data-w95="android"] body *::before, html[data-w95="android"] body *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    html[data-w95="android"] body .slider-text { animation: none !important; background-position: 50% 0 !important; }
+}

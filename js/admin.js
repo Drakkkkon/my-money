@@ -9,7 +9,7 @@
 //    ссылка на товар, название цели, список покупок), способ и итог распознавания фото, тип и категория новой записи.
 //    НЕ передаётся: суммы, комментарии, баланс, названия подписок, пароли, ключи распознавания.
 
-window.APP_VERSION = window.APP_VERSION || '4.7.0';
+window.APP_VERSION = window.APP_VERSION || '4.8.0';
 window.APP_VERSION_NAME = window.APP_VERSION_NAME || 'Экстра'; // название версии (подпись внизу Настроек)
 window.APP_YEAR = window.APP_YEAR || 2026;                  // год обновления
 const ADMIN_EMAILS = ['lego2009as@gmail.com'];

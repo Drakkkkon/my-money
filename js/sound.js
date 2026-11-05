@@ -385,6 +385,19 @@ const SOUND_PACKS = {
             pad(c, [261.63, 329.63, 392], { start: 0.4, dur: 1.4, gain: 0.03, type: 'sine', attack: 0.25 });
         }
     },
+    // «Android»: мягкие «капли» касания, короткие восходящие и нисходящие нотки и светлая мелодия запуска в духе системных
+    // звуков телефона на Android (всё синтезируется здесь, своя мелодия, не файлы Google)
+    material: {
+        click: c => { tone(c, { freq: 1568, endFreq: 1318.5, dur: 0.035, type: 'sine', gain: 0.07, attack: 0.002 }); tone(c, { freq: 3136, dur: 0.02, gain: 0.015, attack: 0.001 }); },
+        open: c => { tone(c, { freq: 587.33, endFreq: 880, dur: 0.12, type: 'sine', gain: 0.08, attack: 0.006 }); tone(c, { freq: 1174.66, start: 0.06, dur: 0.14, type: 'sine', gain: 0.035, attack: 0.006 }); },
+        close: c => { tone(c, { freq: 880, endFreq: 587.33, dur: 0.12, type: 'sine', gain: 0.08, attack: 0.006 }); tone(c, { freq: 440, start: 0.05, dur: 0.14, type: 'sine', gain: 0.035, attack: 0.006 }); },
+        menu: c => { tone(c, { freq: 1396.9, endFreq: 1174.66, dur: 0.04, type: 'sine', gain: 0.065, attack: 0.002 }); tone(c, { freq: 2093, start: 0.015, dur: 0.03, gain: 0.02, attack: 0.001 }); },
+        scroll: c => tone(c, { freq: 2349.3, dur: 0.01, type: 'sine', gain: 0.016, attack: 0.001 }),
+        startup: c => {
+            [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => { tone(c, { freq: f, start: i * 0.1, dur: 0.55, type: 'sine', gain: 0.06, attack: 0.008 }); tone(c, { freq: f * 2, start: i * 0.1, dur: 0.3, type: 'sine', gain: 0.012, attack: 0.008 }); });
+            pad(c, [261.63, 392, 523.25], { start: 0.4, dur: 1.5, gain: 0.03, type: 'sine', attack: 0.2 });
+        }
+    },
     // «Классика 1-бит»: простые прямоугольные «пики», как у компьютеров с однобитным звуком (своя мелодия)
     beep: {
         click: c => tone(c, { freq: 1046.5, dur: 0.018, type: 'square', gain: 0.04, attack: 0.001 }),
