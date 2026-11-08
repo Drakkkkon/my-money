@@ -97,6 +97,7 @@ function addWallTools(card) {
 function applyWallSize(card) {
     const it = wallItem(card.id) || { w: 2, h: 0 };
     card.style.setProperty('--wall-w', it.w);
+    card.classList.toggle('wall-compact', !!it.c && Number(it.w) === 1); // 4.10.0: компактный (узкий) блок, css/pages.css
     if (it.h) card.style.height = it.h + 'px'; else card.style.removeProperty('height');
     setTimeout(() => window.dispatchEvent(new Event('resize')), 30); // диаграммы подстраиваются
 }
@@ -106,7 +107,14 @@ function toggleWallCard(btn) {
     const card = btn.closest('.card');
     if (!card || !card.id || card.hasAttribute('data-wall-fixed')) return;
     if (card.classList.contains('on-wall')) { unpinWallCard(card.id); return; }
-    uiPrefs.wall = [...(uiPrefs.wall || []).filter(x => x.id !== card.id), { id: card.id, w: card.classList.contains('card-wide') ? 4 : 2, h: 0 }];
+    pinCardToWall(card, false);
+}
+
+// Блок → на стену. compact — узкий блок (одна колонка, не шире ~340 px на ПК), иначе — оригинальный размер блока
+function pinCardToWall(card, compact) {
+    if (!card || !card.id || card.hasAttribute('data-wall-fixed') || card.classList.contains('on-wall')) return;
+    const w = compact ? 1 : (card.classList.contains('card-wide') ? 4 : 2);
+    uiPrefs.wall = [...(uiPrefs.wall || []).filter(x => x.id !== card.id), { id: card.id, w, h: 0, ...(compact ? { c: true } : {}) }];
     moveCardToWall(card);
     renderWallEmpty();
     commitUiPrefs();
@@ -128,7 +136,7 @@ function wallCycle(id, key) {
     const it = wallItem(id);
     const card = document.getElementById(id);
     if (!it || !card) return;
-    if (key === 'w') it.w = it.w >= 4 ? 1 : it.w + 1;
+    if (key === 'w') { it.w = it.w >= 4 ? 1 : it.w + 1; delete it.c; }
     else {
         const i = WALL_HEIGHTS.findIndex(v => v >= it.h);
         it.h = WALL_HEIGHTS[(i < 0 ? 0 : i + (WALL_HEIGHTS[i] === it.h ? 1 : 0)) % WALL_HEIGHTS.length];
@@ -155,6 +163,8 @@ function wallResizeStart(e, card) {
         const h = Math.max(160, Math.min(1600, Math.round(start.h + ev.clientY - start.y)));
         it.w = cols < 4 ? Math.min(4, w) : w;
         it.h = h;
+        delete it.c;
+        card.classList.remove('wall-compact');
         card.style.setProperty('--wall-w', it.w);
         card.style.height = h + 'px';
     };

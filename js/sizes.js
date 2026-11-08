@@ -60,8 +60,8 @@ function cardSizeOf(id) {
 // Классы и подписи блока (без колонок)
 function applyCardSize(card) {
     if (!card || !card.id || card.classList.contains('on-wall')) return;
-    // 4.9.0: в режиме «страницы вместо блоков» (js/pages.js) размеры не действуют: блок на всю страницу (сами значения не стираются)
-    if (typeof pagesActive === 'function' && pagesActive()) {
+    // 4.9.0: в режиме «страницы вместо блоков» и в меню Настроек (js/pages.js) размеры не действуют: блок целиком (сами значения не стираются)
+    if (typeof pagesIgnoreLayout === 'function' && pagesIgnoreLayout(card)) {
         card.classList.remove('card-sized');
         card.removeAttribute('data-size');
         card.style.removeProperty('--card-rows');

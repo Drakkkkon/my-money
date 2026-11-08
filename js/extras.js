@@ -19,16 +19,18 @@ function txKey(key) {
 // ---------- Перелистывание разделов свайпом влево / вправо ----------
 function visibleMenuIds() {
     if (typeof getMenuState !== 'function') return [];
+    // 4.10.0: тот же список, что в меню (в режиме «страницы» — Записи, Стена, блоки-страницы, Настройки)
+    if (typeof menuNavItems === 'function') return menuNavItems().map(i => i.id);
     const state = getMenuState();
     return state.order.filter(id => !state.hidden.includes(id));
 }
 
 function swipeToTab(dir) {
     const ids = visibleMenuIds();
-    const idx = ids.indexOf(typeof currentTabId === 'string' ? currentTabId : '');
+    const idx = ids.indexOf(typeof currentNavId === 'string' ? currentNavId : (typeof currentTabId === 'string' ? currentTabId : ''));
     const next = ids[idx + dir];
     if (idx < 0 || !next) return false;
-    showTab(next, null);
+    if (typeof openMenuItem === 'function') openMenuItem(next, null); else showTab(next, null);
     const tab = document.getElementById(next);
     if (tab) {
         tab.classList.remove('tab-enter', 'tab-swipe-next', 'tab-swipe-prev');

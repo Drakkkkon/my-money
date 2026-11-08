@@ -153,21 +153,18 @@
                         <!-- Чек по фото (js/receipt.js) -->
                         <div class="card receipt-card" id="receipt-card">
                             <h3><span class="material-icons">photo_camera</span> Чек по фото</h3>
+                            <!-- Одна кнопка: без capture система сама предлагает «Камера» или «Галерея/Файлы» -->
                             <div class="receipt-bar">
-                                <label class="receipt-cam-btn" title="Сфотографировать чек">
+                                <label class="receipt-cam-btn" title="Сфотографировать чек или выбрать фото">
                                     <span class="material-icons">photo_camera</span>
-                                    <input type="file" accept="image/*" capture="environment" onchange="receiptFromInput(event)">
+                                    <input type="file" accept="image/*" onchange="receiptFromInput(event)">
                                 </label>
                                 <div class="receipt-bar-text">
                                     <b>Сфотографируйте чек</b>
-                                    <span>Сумма и покупки запишутся сами</span>
+                                    <span>Или выберите фото. Сумма и покупки запишутся сами</span>
                                 </div>
-                                <label class="btn-secondary receipt-gallery-btn" title="Выбрать фото из галереи">
-                                    <span class="material-icons">image</span>
-                                    <input type="file" accept="image/*" onchange="receiptFromInput(event)">
-                                </label>
                             </div>
-                            <label class="field-inline ocr-pick-inline"><span>Способ</span><select data-ocr-kind="receipt" onchange="onOcrSelectChange(this)" aria-label="Способ распознавания чека"></select></label>
+                            <p class="hint ai-pick-hint" data-tier="2">Способ распознавания выбирается в <a href="#" class="ai-pick-link" onclick="openSettingsCard('ocr-card'); return false;">Настройках → «Распознавание фото»</a>.</p>
                         </div>
                         <div class="forms card">
                             <h3><span class="material-icons">edit_note</span> Новая запись</h3>
@@ -193,8 +190,8 @@
                             </div>
                             <!-- Категории картинками (js/emoji.js; вид — Настройки → «Картинки категорий») -->
                             <div class="cat-tiles" id="cat-tiles" data-tier="2" role="group" aria-label="Категории"></div>
-                            <!-- Голосовой помощник (js/voiceengines.js): выбор — здесь (большой размер блока) и в Настройках → «Голосовой ввод» -->
-                            <label class="field-inline voice-pick-inline" data-tier="3"><span>Голосовой помощник</span><select data-voice-select onchange="onVoiceSelectChange(this)" aria-label="Голосовой помощник"></select></label>
+                            <!-- Голосовой помощник (js/voiceengines.js) выбирается в Настройках → «Голосовой ввод»; здесь — только подсказка со ссылкой -->
+                            <p class="hint ai-pick-hint" data-tier="3">Голосовой помощник выбирается в <a href="#" class="ai-pick-link" onclick="openSettingsCard('voice-card'); return false;">Настройках → «Голосовой ввод»</a>.</p>
                             <p class="voice-live" id="voice-live" data-tier="2" hidden></p>
                             <p class="voice-result" id="voice-result" data-tier="2" hidden></p>
                             <input type="hidden" id="tx-comment">
@@ -261,7 +258,7 @@
                             <input type="text" id="obc-text" placeholder="Или название и автор" maxlength="120" autocomplete="off">
                             <button type="button" class="btn-secondary" onclick="obSearchByText(document.getElementById('obc-text').value)"><span class="material-icons">manage_search</span> По названию</button>
                         </div>
-                        <label class="field-inline ocr-pick-inline"><span>Распознавание обложки</span><select id="obc-engine" data-ocr-kind="cover" onchange="onOcrSelectChange(this)" aria-label="Способ распознавания обложки"></select></label>
+                        <p class="hint ai-pick-hint">Способ распознавания обложки выбирается в <a href="#" class="ai-pick-link" onclick="openSettingsCard('ocr-card'); return false;">Настройках → «Распознавание фото»</a>.</p>
                         <p class="hint obc-status" id="obc-status" aria-live="polite"></p>
                         <div id="obc-result"></div>
                     </div>
@@ -734,6 +731,12 @@
                             <h4 class="menu-editor-subtitle">Убранные пункты</h4>
                             <ul class="menu-editor" id="menu-hidden"></ul>
                         </div>
+                        <div class="menu-pages-box" id="menu-pages-box">
+                            <h4 class="menu-editor-subtitle">Блоки как страницы меню</h4>
+                            <p class="hint">Работает в режиме «Страницы вместо блоков» (Разметка и меню): в меню остаются «Записи», «Стена», «Настройки», а любой блок можно добавить отдельным пунктом. Выберите блок из списка — он появится в меню перед «Настройками».</p>
+                            <ul class="menu-editor" id="menu-pages-list"></ul>
+                            <label class="field-inline menu-page-pick"><span>Добавить блок</span><select id="menu-page-select" onchange="addMenuPage(this.value)" aria-label="Добавить блок в меню страницей"></select></label>
+                        </div>
                         <button type="button" class="btn-secondary btn-block" onclick="resetMenu()"><span class="material-icons">restart_alt</span> Вернуть стандартное меню</button>
                     </div>
 
@@ -745,7 +748,17 @@
                         </div>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>4.9.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <h4>4.10.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Исправлено: страницы пунктов Настроек («Дневной лимит», «Иконка приложения», «Распознавание фото», «Голосовой ввод», «Картинки категорий» и др.) открывались пустыми, если блок был свёрнут или имел маленький размер. Теперь в меню Настроек свёрнутость и размеры блоков не действуют.</li>
+                                    <li>«Страницы вместо блоков»: в главном меню остаются «Записи», «Стена» и «Настройки». Любой блок можно добавить в меню отдельной страницей: Настройки → «Пункты меню» → «Блоки как страницы меню» (выбор из списка). На ПК страница-блок не растягивается на весь экран.</li>
+                                    <li>На странице-блоке появилась кнопка «На стену»: блок можно положить на стену компактным (узким, не шире ~340 px на ПК) или оригинальным.</li>
+                                    <li>Настройки → «Разметка и меню» → «Меню на телефоне» → «Сверху»: нижнее меню можно перенести наверх во всех темах, кроме «Windows 95_Пуск» и «Windows 95_Экстра» (у них своё меню).</li>
+                                    <li>«Чек по фото»: вместо двух кнопок (камера и галерея) одна — система сама предложит снять фото или выбрать из галереи. Выбор способа распознавания и голосового помощника убран из блоков («Чек по фото», «Новая запись», каталог OldBook.kz): он остался в Настройках, в блоках — подсказка со ссылкой на нужную страницу настроек.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.9.0 «Экстра»</h4>
                                 <ul>
                                     <li>«Настройки» теперь — обычное меню: список пунктов (значок, название, текущее значение, стрелка), сгруппированный по смыслу. Нажатие открывает страницу одной настройки с кнопкой «Назад» (на телефоне работает и системная кнопка «Назад»). Вид у каждой темы свой: Windows 95, Android, Метро, Аква, 1-бит, Аэро. В «Windows 95_Пуск» и «Windows 95_Экстра» всё как было.</li>
                                     <li>Настройки → «Разметка и меню» → «Страницы вместо блоков»: каждый блок раздела — отдельная страница на всю ширину, по одному на экране, без кнопок размера, «На стену», «свернуть» и «развернуть». До 5 блоков переключаются вкладками сверху, больше (например, «Статистика») — списком. «Стена» остаётся как была.</li>
@@ -1042,7 +1055,7 @@
                     </div>
 
                     <!-- 4.6.0: название версии и год обновления — самое последнее в Настройках (js/script.js подставляет значения из js/admin.js) -->
-                    <p class="app-footer" id="app-footer">My Money · версия <b id="app-footer-ver">4.9.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
+                    <p class="app-footer" id="app-footer">My Money · версия <b id="app-footer-ver">4.10.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
                 </div>
             </main>
         </div>

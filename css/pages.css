@@ -40,7 +40,7 @@ html[data-pages="on"] body main > .tab:not(#wall):not([data-pg]) .tx-container {
 html[data-sm="on"] body main > #settings { grid-template-columns: minmax(0, 1fr) !important; }
 
 /* ---------- 3. Списки (меню Настроек и разделы со многими блоками) — основа: Windows 95 ---------- */
-html body :is(#settings, .tab) .pg-root .pg-list { max-width: 860px; margin: 0 auto; padding: 2px 0 12px; box-sizing: border-box; }
+html body :is(#settings, .tab) .pg-root .pg-list { max-width: var(--pg-w, 600px); margin: 0 auto; padding: 2px 0 12px; box-sizing: border-box; }
 html body :is(#settings, .tab) .pg-root .pg-group { margin: 0 0 14px; }
 html body :is(#settings, .tab) .pg-root .pg-group-title {
     display: inline-block; margin: 0 0 6px; padding: 2px 10px; font-family: var(--w95-font-ui); font-size: 14px; font-weight: 700;
@@ -290,3 +290,62 @@ html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-chip[aria-selected=
     html body :is(#settings, .tab) .pg-root .pg-list { max-width: none; }
     html body :is(#settings, .tab) .pg-root .pg-row { min-height: 52px; }
 }
+
+/* ---------- 11. 4.10.0: компактные страницы на ПК, кнопка «На стену», один блок из меню, компактный блок на стене ---------- */
+html { --pg-w: 600px; }
+
+/* на ПК страница-блок не растягивается на весь экран: узкая колонка по центру (на телефоне — на всю ширину, как было) */
+@media (min-width: 769px) {
+    html body main > .tab[data-pg] > .pg-root { max-width: var(--pg-w); margin-left: auto; margin-right: auto; }
+    html body main > .tab[data-pg] > .card.pg-active, html body main > .tab[data-pg] .tx-container > .card.pg-active {
+        max-width: var(--pg-w) !important; margin-left: auto !important; margin-right: auto !important;
+    }
+    html body main > .tab[data-pg] > .app-footer { max-width: var(--pg-w); margin-left: auto; margin-right: auto; }
+}
+
+/* кнопка «На стену»: в панели страницы — справа; под вкладками — отдельной строкой */
+html body :is(#settings, .tab) .pg-root .pg-bar > .pg-pin { margin-left: auto; }
+html body :is(#settings, .tab) .pg-root .pg-tools { display: flex; justify-content: flex-end; margin: -2px 0 8px; }
+html body .tab[data-pg-view="list"] > .pg-root > .pg-tools { display: none !important; }
+html body :is(#settings, .tab) .pg-root .pg-pin .material-icons { font-size: 19px; }
+html body :is(#settings, .tab) .pg-root .pg-solobar { padding-left: 10px; }
+/* меню выбора «Компактный / Оригинальный» (то же оформление, что у меню размера блока) */
+html body .pg-pin-menu .pg-pin-opt { display: flex; align-items: center; gap: 8px; }
+html body .pg-pin-menu .pg-pin-ico { font-size: 20px; flex: none; color: inherit !important; }
+
+/* компактный блок на стене: на ПК не шире ~340 px; на телефоне — на всю ширину */
+html body main > .wall-tab > .card.on-wall.wall-compact { max-width: 340px !important; }
+@media (max-width: 768px) {
+    html body main > .wall-tab > .card.on-wall.wall-compact { grid-column: 1 / -1 !important; max-width: none !important; }
+}
+
+/* подсказка со ссылкой на настройку ИИ (вместо выбора способа прямо в блоке) */
+html body .ai-pick-hint { margin: 8px 0 0; font-size: 12.5px; line-height: 1.35; }
+/* цвет — как у самой подсказки (читается в любой теме), ссылку выдают подчёркивание и жирность */
+html body .ai-pick-hint a.ai-pick-link { color: inherit !important; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; font-weight: 700; }
+
+/* «Пункты меню»: блоки как страницы */
+html body .menu-pages-box { margin: 10px 0 12px; }
+html body .menu-pages-box .menu-page-pick { margin-top: 6px; }
+html body .menu-pages-box .menu-page-pick select { min-width: 0; flex: 1 1 180px; }
+html body .menu-pages-box .menu-editor:empty { display: none; }
+
+/* меню сверху на телефоне (Настройки → «Разметка и меню» → «Меню на телефоне» → «Сверху»); «Windows 95_Пуск» и «Windows 95_Экстра» не затрагиваются */
+@media (max-width: 768px) {
+    html[data-menu="top"]:not([data-w95="desk95"]) { --mobile-nav-h: 0px !important; }
+    html[data-menu="top"]:not([data-w95="desk95"]) body .app-wrapper { top: var(--top-nav-h, 0px) !important; }
+    html[data-menu="top"]:not([data-w95="desk95"]) body .mobile-nav {
+        top: 0 !important; bottom: auto !important; padding-top: calc(6px + env(safe-area-inset-top)) !important; padding-bottom: 6px !important;
+    }
+    html[data-menu="top"]:not([data-w95="desk95"]) body main { padding-bottom: 24px !important; }
+    html[data-menu="top"]:not([data-w95="desk95"]) body .fab-sync { bottom: 18px !important; }
+    html[data-menu="top"][data-w95="android"] body .mobile-nav { top: calc(8px + env(safe-area-inset-top)) !important; padding-top: 8px !important; }
+    html[data-menu="top"][data-w95="android"] body .app-wrapper { top: calc(var(--top-nav-h, 0px) + 6px) !important; }
+    html[data-menu="top"]:is([data-w95="aqua"], [data-w95="aero"]) body .mobile-nav { border-top: 0 !important; border-bottom: 1px solid rgba(255, 255, 255, .55) !important; box-shadow: 0 2px 12px rgba(0, 0, 0, .25) !important; }
+    html[data-menu="top"][data-w95="mono"] body .mobile-nav { border-top: 0 !important; border-bottom: 1px solid #000 !important; }
+    html[data-menu="top"]:not([data-w95="desk95"]):not([data-w95="android"]):not([data-w95="aqua"]):not([data-w95="aero"]):not([data-w95="mono"]):not([data-w95="metro"]) body .mobile-nav {
+        box-shadow: inset 0 -1px var(--w95-shadow), inset 0 -2px var(--w95-light), 0 1px var(--w95-face) !important;
+    }
+}
+/* «Windows 95_Пуск» и «Windows 95_Экстра» режима страниц не знают — выбор блоков для меню там не нужен */
+html[data-w95="desk95"] body .menu-pages-box { display: none !important; }

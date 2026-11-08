@@ -12,6 +12,11 @@
 //    «Стена» остаётся стеной: на ней блоки и должны лежать вместе.
 // 3) Блок «Текущий баланс» с датой, временем, погодой и курсами показывается только на «Стене» (data-tab="wall" на <html>).
 //
+// 4) 4.10.0: в режиме «страницы» в меню остаются «Записи», «Стена», «Настройки» и блоки, которые человек сам добавил
+//    (Настройки → «Пункты меню» → «Блоки как страницы»): такой блок открывается один, без вкладок (вид solo).
+//    У каждой страницы — кнопка «На стену»: блок уходит на стену компактным (узким) или оригинальным. На ПК страница-блок
+//    не растягивается на весь экран (--pg-w, css/pages.css). Свёрнутость и размеры блоков в меню Настроек тоже не действуют.
+//
 // Как это устроено: страницы и карточки — те же самые элементы с теми же id и обработчиками, ничего не переносится:
 // на <div class="tab"> ставится data-pg (вид: list — список, page — страница), у показанной карточки — класс pg-active,
 // остальные скрывает css/pages.css. Выключили режим — атрибуты и вставленные панели убираются, раздел как прежде.
@@ -29,6 +34,11 @@
     const prefNoBlocks = () => { try { return !!(typeof uiPrefs !== 'undefined' && uiPrefs.layout && uiPrefs.layout.noBlocks); } catch (e) { return false; } };
     const smActive = () => !isDesk();
     window.pagesActive = () => prefNoBlocks() && !isDesk();
+    // Свёрнутость и размеры блока (сохранённые значения не стираются) не действуют на страницах: в режиме «страницы» и в меню Настроек
+    window.pagesIgnoreLayout = (card) => {
+        if (isDesk() || !card || card.classList.contains('on-wall')) return false;
+        return prefNoBlocks() || !!(card.closest && card.closest('#settings'));
+    };
     const MAX_CHIPS = 5; // до этого числа блоков — вкладки, больше — список-меню
 
     // Группы пунктов меню Настроек. Карточка попадает в группу по своему id или по названию значка в заголовке (он не переводится)
@@ -125,7 +135,19 @@
         const label = (typeof MENU_ITEMS !== 'undefined' && (MENU_ITEMS.find(i => i.id === tab.id) || {}).label) || '';
         return `<div class="pg-list">${rows}</div>` +
             `<div class="pg-bar"><div role="button" tabindex="0" class="pg-back" aria-label="${esc(tt('Назад'))}"><span class="material-icons" aria-hidden="true">arrow_back</span><span class="pg-back-text">${esc(label)}</span></div>` +
-            `<span class="pg-bar-title"><span class="pg-bar-ico material-icons" aria-hidden="true"></span><b></b></span></div>`;
+            `<span class="pg-bar-title"><span class="pg-bar-ico material-icons" aria-hidden="true"></span><b></b></span>${pinHtml()}</div>`;
+    }
+
+    // Кнопка «На стену»: блок страницы становится блоком на стене (компактным или оригинальным — спрашиваем в меню)
+    function pinHtml() {
+        const t = esc(tt('На стену'));
+        return `<div role="button" tabindex="0" class="pg-back pg-pin" aria-haspopup="menu" aria-label="${t}" title="${t}">` +
+            `<span class="material-icons" aria-hidden="true">push_pin</span><span class="pg-back-text">${t}</span></div>`;
+    }
+
+    // Один блок из меню («Блоки как страницы»): только название и кнопка «На стену»
+    function buildSolo() {
+        return `<div class="pg-bar pg-solobar"><span class="pg-bar-title"><span class="pg-bar-ico material-icons" aria-hidden="true"></span><b></b></span>${pinHtml()}</div>`;
     }
 
     function buildChips(cards, current) {
@@ -133,7 +155,7 @@
             const i = cardInfo(c);
             return `<div role="tab" tabindex="0" class="pg-chip" data-card="${esc(c.id)}" aria-selected="${c.id === current}">` +
                 `<span class="material-icons" aria-hidden="true">${esc(i.icon)}</span><span class="pg-chip-text">${esc(i.title)}</span></div>`;
-        }).join('') + '</div>';
+        }).join('') + '</div><div class="pg-tools">' + pinHtml() + '</div>';
     }
 
     function teardown(tab) {
@@ -151,14 +173,14 @@
         const kind = tab.getAttribute('data-pg');
         if (!kind) return;
         const open = tab._pgOpen && tabById(tab._pgOpen) ? tab._pgOpen : null;
-        const showId = kind === 'chips' ? (sel[tab.id] || null) : open;
+        const showId = kind === 'chips' ? (sel[tab.id] || null) : kind === 'solo' ? (tab._pgSolo || null) : open;
         tab.querySelectorAll('.card').forEach(c => c.classList.toggle('pg-active', !!showId && c.id === showId));
         tab.setAttribute('data-pg-view', kind === 'menu' && !showId ? 'list' : 'page');
         const r = tab.querySelector(':scope > .pg-root');
         if (!r) return;
         if (kind === 'chips') {
             r.querySelectorAll('.pg-chip').forEach(b => b.setAttribute('aria-selected', String(b.dataset.card === showId)));
-        } else if (showId) {
+        } else if (showId && tabById(showId)) {
             const i = cardInfo(tabById(showId));
             const t = r.querySelector('.pg-bar-title');
             if (t) { t.querySelector('b').textContent = i.title; t.querySelector('.pg-bar-ico').textContent = i.icon; }
@@ -168,9 +190,10 @@
     function render(tab, { resetView = false } = {}) {
         if (!tab) return;
         const cards = (smActive() || window.pagesActive()) ? availableCards(tab) : [];
-        const kind = kindOf(tab, cards.length);
+        const soloId = window.pagesActive() && tab._pgSolo && cards.some(c => c.id === tab._pgSolo) ? tab._pgSolo : null;
+        const kind = soloId ? 'solo' : kindOf(tab, cards.length);
         if (!kind) { if (tab.hasAttribute('data-pg') || tab.querySelector(':scope > .pg-root')) teardown(tab); return; }
-        const sig = kind + '|' + cards.map(c => { const i = cardInfo(c); return c.id + ':' + i.title + ':' + (kind === 'menu' ? subtitleFor(tab, c, i) : ''); }).join(',');
+        const sig = kind + '|' + (soloId || '') + '|' + cards.map(c => { const i = cardInfo(c); return c.id + ':' + i.title + ':' + (kind === 'menu' ? subtitleFor(tab, c, i) : ''); }).join(',');
         if (tab._pgSig !== sig || !tab.querySelector(':scope > .pg-root')) {
             const old = tab.querySelector(':scope > .pg-root');
             if (old) old.remove();
@@ -181,7 +204,7 @@
             const box = document.createElement('div');
             box.className = 'pg-root';
             box.dataset.kind = kind;
-            box.innerHTML = kind === 'menu' ? buildMenu(tab, cards) : buildChips(cards, sel[tab.id]);
+            box.innerHTML = kind === 'menu' ? buildMenu(tab, cards) : kind === 'solo' ? buildSolo() : buildChips(cards, sel[tab.id]);
             tab.insertBefore(box, tab.firstChild);
             tab._pgSig = sig;
         }
@@ -237,12 +260,102 @@
         if (mw) mw.scrollTop = 0;
     }
 
+    // ---------- «На стену»: компактный или оригинальный блок ----------
+    function closePinMenu() {
+        const m = document.getElementById('pg-pin-menu');
+        if (m) m.remove();
+        document.removeEventListener('pointerdown', pinMenuOutside, true);
+        document.removeEventListener('keydown', pinMenuEsc, true);
+    }
+    function pinMenuOutside(e) { if (!e.target.closest('#pg-pin-menu') && !e.target.closest('.pg-pin')) closePinMenu(); }
+    function pinMenuEsc(e) { if (e.key === 'Escape') closePinMenu(); }
+
+    function openPinMenu(tab, btn) {
+        const card = tab.querySelector('.card.pg-active');
+        if (!card || !card.id) return;
+        const was = document.getElementById('pg-pin-menu');
+        closePinMenu();
+        if (was) return;
+        const item = (v, ico, name, dim) => `<button type="button" class="size-opt pg-pin-opt" role="menuitem" data-v="${v}"><span class="material-icons pg-pin-ico" aria-hidden="true">${ico}</span>` +
+            `<span class="size-opt-name">${esc(tt(name))}</span><span class="size-opt-dim">${esc(tt(dim))}</span></button>`;
+        const m = document.createElement('div');
+        m.id = 'pg-pin-menu';
+        m.className = 'card-size-menu pg-pin-menu';
+        m.setAttribute('role', 'menu');
+        m.dataset.for = card.id;
+        m.innerHTML = item('c', 'crop_portrait', 'Компактный блок', 'узкий') + item('o', 'view_agenda', 'Оригинальный блок', 'как раньше');
+        document.body.appendChild(m);
+        const r = btn.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+        m.style.left = Math.max(6, Math.min(window.innerWidth - mw - 6, r.right - mw)) + 'px';
+        m.style.top = (r.bottom + mh + 8 > window.innerHeight ? Math.max(6, r.top - mh - 4) : r.bottom + 4) + 'px';
+        m.addEventListener('click', (ev) => {
+            const o = ev.target.closest('.pg-pin-opt');
+            if (!o) return;
+            const id = m.dataset.for;
+            closePinMenu();
+            const c = document.getElementById(id);
+            if (c && typeof pinCardToWall === 'function') pinCardToWall(c, o.dataset.v === 'c');
+            setTimeout(() => renderAll(), 30);
+        });
+        document.addEventListener('pointerdown', pinMenuOutside, true);
+        document.addEventListener('keydown', pinMenuEsc, true);
+        sound('open');
+    }
+
+    // ---------- блоки как страницы главного меню ----------
+    let pendingSolo = null; // { tab, card } — блок, который сейчас открывают из меню
+
+    // Все блоки, которые можно сделать страницей меню (для списка в Настройках → «Пункты меню»)
+    window.pagesAllBlocks = function () {
+        const out = [];
+        document.querySelectorAll('main > .tab').forEach(tab => {
+            if (tab.id === 'wall') return;
+            const label = (typeof MENU_ITEMS !== 'undefined' && (MENU_ITEMS.find(i => i.id === tab.id) || {}).label) || tab.id;
+            availableCards(tab).forEach(c => {
+                if (!c.id) return;
+                const i = cardInfo(c);
+                out.push({ tab: tab.id, tabLabel: label, id: c.id, icon: i.icon, title: i.title });
+            });
+        });
+        return out;
+    };
+
+    // Название и значок блока (для пункта меню); null, если блока нет (например, скрыт у администратора)
+    window.pagesCardInfo = function (id) {
+        const c = document.getElementById(id);
+        return c ? cardInfo(c) : null;
+    };
+
+    window.openBlockPage = function (cardId) {
+        const card = document.getElementById(cardId);
+        const tab = card && card.closest('main > .tab');
+        if (!tab) return;
+        if (tab.id === 'wall') { showTab('wall'); return; } // блок уже на стене
+        pendingSolo = { tab: tab.id, card: cardId };
+        showTab(tab.id, null, 'pg:' + cardId);
+        pendingSolo = null;
+    };
+
+    // Ссылка из подсказки блока на страницу настройки («Настройки → Распознавание фото»)
+    window.openSettingsCard = function (cardId) {
+        showTab('settings');
+        const tab = tabById('settings');
+        const card = document.getElementById(cardId);
+        if (tab && card && tab.getAttribute('data-pg') === 'menu') { openPage(tab, cardId); return; }
+        if (card) {
+            card.classList.remove('is-collapsed');
+            setTimeout(() => { try { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }, 60);
+        }
+    };
+
     // нажатия в списке, на вкладках и «Назад»
     document.addEventListener('click', (e) => {
         const root0 = e.target.closest && e.target.closest('.pg-root');
         if (!root0) return;
         const tab = root0.closest('.tab');
         if (!tab) return;
+        const pin = e.target.closest('.pg-pin');
+        if (pin) { openPinMenu(tab, pin); return; }
         const back = e.target.closest('.pg-back');
         if (back) { closePage(tab); return; }
         const b = e.target.closest('.pg-row, .pg-chip');
@@ -274,15 +387,17 @@
     }
 
     // Режим «страницы» включили или выключили: возвращаем размеры и свёрнутость блоков и перерисовываем страницы
-    let lastPages = null;
+    let lastPages = null, lastSm = null;
     function onModesChanged() {
         syncModes();
-        const now = window.pagesActive();
-        if (lastPages !== null && lastPages !== now) {
+        const now = window.pagesActive(), sm = smActive();
+        if ((lastPages !== null && lastPages !== now) || (lastSm !== null && lastSm !== sm)) {
             try { if (typeof enhanceCards === 'function') enhanceCards(); } catch (e) {}
             try { if (typeof applyCardSizes === 'function') applyCardSizes(); } catch (e) {}
         }
-        lastPages = now;
+        // главное меню зависит от режима: «Записи, Стена, Настройки» и блоки-страницы или все разделы
+        if ((lastPages !== null && lastPages !== now) || lastPages === null) { try { if (typeof renderMenus === 'function') renderMenus(); } catch (e) {} }
+        lastPages = now; lastSm = sm;
         renderAll();
     }
 
@@ -292,6 +407,7 @@
         // из раздела ушли, не закрыв страницу: закрываем сразу (и убираем лишнюю запись истории для кнопки «Назад»)
         document.querySelectorAll('main > .tab[data-pg="menu"]').forEach(t => { if (t.id !== tabId && t._pgOpen) closePage(t, { silent: true }); });
         const tab = tabById(tabId);
+        if (tab) tab._pgSolo = (pendingSolo && pendingSolo.tab === tabId) ? pendingSolo.card : null;
         if (tab && tabId !== 'wall') render(tab, { resetView: true });
     };
 
@@ -311,7 +427,7 @@
 
     window.addEventListener('w95-theme', () => setTimeout(onModesChanged, 0));
     window.addEventListener('app-layout', () => setTimeout(onModesChanged, 0));
-    window.addEventListener('app-lang', () => setTimeout(() => renderAll(), 60));
+    window.addEventListener('app-lang', () => setTimeout(() => { try { if (typeof renderMenus === 'function') renderMenus(); } catch (e) {} renderAll(); }, 60));
     window.addEventListener('DOMContentLoaded', () => {
         root.setAttribute('data-tab', (typeof currentTabId !== 'undefined' && currentTabId) || 'transactions');
         watch();

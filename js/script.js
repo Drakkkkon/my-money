@@ -1348,7 +1348,7 @@ function clearAllData() {
     }
 }
 
-function showTab(tabId, btn) {
+function showTab(tabId, btn, navId) {
     if (typeof adminLog === 'function' && tabId !== currentTabId) adminLog('tab', { id: tabId });
     document.querySelectorAll('.tab').forEach(t => {
         t.style.display = 'none';
@@ -1376,10 +1376,11 @@ function showTab(tabId, btn) {
     if (tabId === 'quotes') onQuotesTabShown();
     if (tabId === 'prices') renderPrices(); // диаграмме нужен видимый холст
 
-    // Подсвечиваем пункт в обоих меню (боковом и нижнем)
+    // Подсвечиваем пункт в обоих меню (боковом и нижнем). navId — пункт «блок как страница» (pg:<id блока>), он живёт в том же разделе
     currentTabId = tabId;
+    currentNavId = navId || tabId;
     document.querySelectorAll('.sidebar-nav button, .mobile-nav button').forEach(b => {
-        if (b.dataset.tab === tabId) b.classList.add('active');
+        if (b.dataset.tab === currentNavId) b.classList.add('active');
     });
 }
 
@@ -1400,6 +1401,11 @@ const MENU_ITEMS = [
 ];
 const MENU_KEY = 'finance_menu';
 let currentTabId = 'transactions';
+let currentNavId = 'transactions'; // выбранный пункт меню: id раздела или pg:<id блока>
+
+// 4.10.0: в режиме «страницы вместо блоков» (js/pages.js) в меню остаются эти три раздела и блоки-страницы, выбранные в Настройках
+const PAGES_MENU_BASE = ['transactions', 'wall', 'settings'];
+function menuPagesMode() { return typeof pagesActive === 'function' && pagesActive(); }
 
 function getMenuState() {
     let state = null;
@@ -1408,7 +1414,9 @@ function getMenuState() {
     let order = Array.isArray(state && state.order) ? state.order.filter(id => known.includes(id)) : [];
     known.forEach(id => { if (!order.includes(id)) order.push(id); }); // новые пункты из будущих версий
     let hidden = Array.isArray(state && state.hidden) ? state.hidden.filter(id => known.includes(id) && id !== 'settings') : [];
-    return { order: [...new Set(order)], hidden: [...new Set(hidden)] };
+    // блоки-страницы меню: id карточек, порядок — как добавлены
+    const pages = Array.isArray(state && state.pages) ? state.pages.filter(id => typeof id === 'string' && id && id.length < 80) : [];
+    return { order: [...new Set(order)], hidden: [...new Set(hidden)], pages: [...new Set(pages)] };
 }
 
 function saveMenuState(state) {
@@ -1420,13 +1428,40 @@ function menuItem(id) {
     return MENU_ITEMS.find(i => i.id === id);
 }
 
+// Пункты, которые сейчас видны в меню: в обычном режиме — разделы как раньше; в режиме страниц — «Записи, Стена, Настройки»
+// и блоки-страницы (перед «Настройками»). Блок, которого сейчас нет (скрыт у администратора, убран со стены), пропускается.
+function menuNavItems(state = getMenuState()) {
+    let ids = state.order.filter(id => !state.hidden.includes(id));
+    const items = [];
+    if (menuPagesMode()) {
+        ids = ids.filter(id => PAGES_MENU_BASE.includes(id));
+        const pageItems = state.pages.map(cid => {
+            const info = typeof pagesCardInfo === 'function' ? pagesCardInfo(cid) : null;
+            return info ? { id: 'pg:' + cid, icon: info.icon, label: info.title, page: true, cardId: cid } : null;
+        }).filter(Boolean);
+        ids.forEach(id => {
+            if (id === 'settings') items.push(...pageItems);
+            items.push(menuItem(id));
+        });
+        if (!ids.includes('settings')) items.push(...pageItems);
+        return items.filter(Boolean);
+    }
+    return ids.map(menuItem).filter(Boolean);
+}
+
+function openMenuItem(id, btn) {
+    if (String(id).indexOf('pg:') === 0 && typeof openBlockPage === 'function') return openBlockPage(String(id).slice(3));
+    return showTab(id, btn);
+}
+
 function renderMenus() {
     const state = getMenuState();
-    const visible = state.order.filter(id => !state.hidden.includes(id));
-    const navHtml = visible.map(id => {
-        const it = menuItem(id);
-        return `<button type="button" data-tab="${id}" class="${id === currentTabId ? 'active' : ''}" onclick="showTab('${id}', this)">` +
-            `<span class="material-icons">${it.icon}</span><span class="nav-label">${it.label}</span></button>`;
+    const visible = menuNavItems(state);
+    const navHtml = visible.map(it => {
+        const id = it.id;
+        const label = it.page ? escapeHtml(it.label) : it.label;
+        return `<button type="button" data-tab="${id}" class="${id === currentNavId ? 'active' : ''}" onclick="openMenuItem('${String(id).replace(/'/g, '')}', this)">` +
+            `<span class="material-icons">${it.icon}</span><span class="nav-label">${label}</span></button>`;
     }).join('');
     // Название раздела для огромного заголовка в теме «Метро» (css/metro.css, attr(data-title))
     MENU_ITEMS.forEach(it => { const tab = document.getElementById(it.id); if (tab) tab.dataset.title = it.label.toLowerCase(); });
@@ -1448,7 +1483,10 @@ function renderMenuEditor(state = getMenuState()) {
     const hiddenList = document.getElementById('menu-hidden');
     const hiddenWrap = document.getElementById('menu-hidden-wrap');
     if (!list) return;
-    list.innerHTML = state.order.filter(id => !state.hidden.includes(id)).map(id => {
+    // в режиме «страницы вместо блоков» редактируем те пункты, что есть в меню: «Записи», «Стена», «Настройки»
+    const pagesMode = menuPagesMode();
+    const inMode = id => !pagesMode || PAGES_MENU_BASE.includes(id);
+    list.innerHTML = state.order.filter(id => !state.hidden.includes(id) && inMode(id)).map(id => {
         const it = menuItem(id);
         return `<li class="menu-row" data-id="${id}">
             <span class="material-icons drag-handle" title="Перетащить" aria-label="Перетащить">drag_indicator</span>
@@ -1459,9 +1497,10 @@ function renderMenuEditor(state = getMenuState()) {
                 : `<button type="button" class="menu-row-btn is-remove" onclick="hideMenuItem('${id}')" aria-label="Убрать из меню"><span class="material-icons">remove_circle_outline</span></button>`}
         </li>`;
     }).join('');
+    const hiddenIds = state.hidden.filter(inMode);
     if (hiddenList && hiddenWrap) {
-        hiddenWrap.style.display = state.hidden.length ? '' : 'none';
-        hiddenList.innerHTML = state.hidden.map(id => {
+        hiddenWrap.style.display = hiddenIds.length ? '' : 'none';
+        hiddenList.innerHTML = hiddenIds.map(id => {
             const it = menuItem(id);
             return `<li class="menu-row is-hidden" data-id="${id}">
                 <span class="material-icons menu-row-icon">${it.icon}</span>
@@ -1470,6 +1509,52 @@ function renderMenuEditor(state = getMenuState()) {
             </li>`;
         }).join('');
     }
+    renderMenuPagesEditor(state);
+}
+
+// «Блоки как страницы»: выбор блока из списка (по разделам) и добавленные блоки
+function renderMenuPagesEditor(state = getMenuState()) {
+    const box = document.getElementById('menu-pages-list');
+    const sel = document.getElementById('menu-page-select');
+    if (!box || !sel) return;
+    const blocks = typeof pagesAllBlocks === 'function' ? pagesAllBlocks() : [];
+    const byId = Object.fromEntries(blocks.map(b => [b.id, b]));
+    box.innerHTML = state.pages.map(cid => {
+        const b = byId[cid];
+        const info = b || (typeof pagesCardInfo === 'function' ? pagesCardInfo(cid) : null);
+        const icon = info ? info.icon : 'help_outline';
+        const title = info ? info.title : 'Блок недоступен';
+        return `<li class="menu-row" data-id="${escapeHtml(cid)}">
+            <span class="material-icons menu-row-icon">${escapeHtml(icon)}</span>
+            <span class="menu-row-label">${escapeHtml(title)}</span>
+            <button type="button" class="menu-row-btn is-remove" onclick="removeMenuPage('${String(cid).replace(/'/g, '')}')" aria-label="Убрать из меню"><span class="material-icons">remove_circle_outline</span></button>
+        </li>`;
+    }).join('');
+    const groups = [];
+    blocks.filter(b => !state.pages.includes(b.id)).forEach(b => {
+        let g = groups.find(x => x.tab === b.tab);
+        if (!g) { g = { tab: b.tab, label: b.tabLabel, items: [] }; groups.push(g); }
+        g.items.push(b);
+    });
+    sel.innerHTML = '<option value="">Выбрать блок…</option>' + groups.map(g =>
+        `<optgroup label="${escapeHtml(typeof tr === 'function' ? tr(g.label) : g.label)}">${g.items.map(b => `<option value="${escapeHtml(b.id)}">${escapeHtml(b.title)}</option>`).join('')}</optgroup>`).join('');
+    sel.value = '';
+}
+
+function addMenuPage(cardId) {
+    if (!cardId) return;
+    const state = getMenuState();
+    if (!state.pages.includes(cardId)) state.pages.push(cardId);
+    saveMenuState(state);
+    if (typeof playSound === 'function') playSound('click');
+}
+
+function removeMenuPage(cardId) {
+    const state = getMenuState();
+    state.pages = state.pages.filter(id => id !== cardId);
+    saveMenuState(state);
+    // страница, которую убрали из меню, закрывается: открываем «Записи»
+    if (currentNavId === 'pg:' + cardId) showTab('transactions');
 }
 
 function hideMenuItem(id) {
@@ -1499,6 +1584,10 @@ function updateMobileNavHeight() {
     requestAnimationFrame(() => {
         const h = nav.offsetHeight;
         if (h > 0) document.documentElement.style.setProperty('--mobile-nav-h', h + 'px');
+        // 4.10.0: меню сверху (Настройки → «Разметка и меню»): приложение опускается под меню на его высоту (css/pages.css, раздел 11)
+        const root = document.documentElement;
+        const top = root.getAttribute('data-menu') === 'top' && root.getAttribute('data-w95') !== 'desk95' && h > 0 && window.innerWidth < 769;
+        root.style.setProperty('--top-nav-h', top ? Math.ceil(nav.getBoundingClientRect().bottom) + 'px' : '0px');
     });
 }
 window.addEventListener('resize', updateMobileNavHeight);

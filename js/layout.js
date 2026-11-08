@@ -39,9 +39,9 @@ function normalizeUiPrefs(p) {
         notify: normalizeNotifyPrefs(obj(src.notify, {})),
         bank: normalizeBankPrefs(obj(src.bank, {})),
         fonts: obj(src.fonts, {}),
-        // «Стена» (js/wall.js): [{ id блока, w — ширина в колонках 1–4, h — высота в px или 0 (по содержимому) }]
+        // «Стена» (js/wall.js): [{ id блока, w — ширина в колонках 1–4, h — высота в px или 0 (по содержимому), c — компактный (узкий) блок }]
         wall: Array.isArray(src.wall) ? src.wall.filter(x => x && typeof x.id === 'string')
-            .map(x => ({ id: x.id.slice(0, 80), w: Math.min(4, Math.max(1, Number(x.w) || 2)), h: Math.min(1600, Math.max(0, Number(x.h) || 0)) })) : [],
+            .map(x => ({ id: x.id.slice(0, 80), w: Math.min(4, Math.max(1, Number(x.w) || 2)), h: Math.min(1600, Math.max(0, Number(x.h) || 0)), ...(x.c === true ? { c: true } : {}) })) : [],
         // Размеры блоков (js/sizes.js): { id блока: 's' | 'm' | 'l' }
         sizes: Object.fromEntries(Object.entries(obj(src.sizes, {})).filter(([k, v]) => typeof k === 'string' && k.length < 80 && ['s', 'm', 'l'].includes(v)).slice(0, 200)),
         layout: normalizeLayoutPrefs(obj(src.layout, {}))
@@ -58,7 +58,7 @@ function normalizeLayoutPrefs(l) {
         pcCols: pick(String(l.pcCols || 'auto'), ['auto', '1', '2', '3'], 'auto'),
         density: pick(l.density, ['compact', 'normal', 'roomy'], 'normal'),
         pcMenu: pick(l.pcMenu, ['left', 'burger'], 'left'),
-        mobileMenu: pick(l.mobileMenu, ['bottom', 'left', 'burger'], 'bottom'),
+        mobileMenu: pick(l.mobileMenu, ['bottom', 'top', 'left', 'burger'], 'bottom'),
         pcSplash: l.pcSplash !== false,
         // 4.9.0: «страницы вместо блоков» — каждый блок раздела отдельной страницей на весь экран (js/pages.js)
         noBlocks: l.noBlocks === true
@@ -190,8 +190,8 @@ function enhanceCards(root = document) {
                 if (min) toggleCardCollapse(min);
             });
         }
-        // 4.9.0: в режиме «страницы вместо блоков» свёрнутость игнорируется (js/pages.js), сохранённое значение остаётся
-        const pagesOn = typeof pagesActive === 'function' && pagesActive() && !card.classList.contains('on-wall');
+        // 4.9.0: в режиме «страницы вместо блоков» и в меню Настроек свёрнутость игнорируется (js/pages.js), сохранённое значение остаётся
+        const pagesOn = typeof pagesIgnoreLayout === 'function' && pagesIgnoreLayout(card);
         card.classList.toggle('is-collapsed', !pagesOn && !!collapsed[cardKey(card)] && !card.classList.contains('is-maximized'));
         syncCollapseButton(card);
     });
@@ -366,8 +366,9 @@ function renderLayoutSettings() {
         <h4 class="font-sub">Страницы вместо блоков</h4>
         <label class="hdr-part"><input type="checkbox" ${l.noBlocks ? 'checked' : ''} onchange="setLayoutPref('noBlocks', this.checked)"> Каждый блок — отдельная страница</label>
         <p class="hint">Вместо сетки блоков в каждом разделе — один блок на весь экран. Если блоков немного, они переключаются вкладками сверху, если много — списком. Кнопки размера, «На стену», «свернуть» и «развернуть» убираются. «Стена» остаётся как есть. Не действует в темах «Windows 95_Пуск» и «Windows 95_Экстра» (у них свои окна).</p>
+        <p class="hint">В меню остаются «Записи», «Стена» и «Настройки». Нужный блок можно добавить в меню отдельной страницей: Настройки → «Пункты меню» → «Блоки как страницы меню». Кнопка «На стену» на странице спрашивает, каким сделать блок на стене: компактным или оригинальным.</p>
         <h4 class="font-sub">Меню на телефоне</h4>
-        ${seg('mobileMenu', [['bottom', 'Внизу'], ['left', 'Слева'], ['burger', 'Гамбургер ☰']])}
+        ${seg('mobileMenu', [['bottom', 'Внизу'], ['top', 'Сверху'], ['left', 'Слева'], ['burger', 'Гамбургер ☰']])}
         <div class="layout-pc-only">
             <h4 class="font-sub">Меню на ПК</h4>
             ${seg('pcMenu', [['left', 'Слева'], ['burger', 'Гамбургер ☰']])}
