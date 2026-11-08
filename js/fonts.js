@@ -33,7 +33,10 @@ const FONT_LIB = [
     // Doom 1993 (4.12.0): пиксельные шрифты с кириллицей. «Press Start 2P» — крупный «аркадный» (как цифры на панели игры),
     // «Pixelify Sans» — мельче и разборчивее для длинных надписей (у темы он по умолчанию)
     { id: 'press-start', name: 'Press Start 2P', family: "'Press Start 2P'", group: 'doom', css: 'Press+Start+2P' },
-    { id: 'pixelify-doom', name: 'Pixelify Sans', family: "'Pixelify Sans'", group: 'doom', css: 'Pixelify+Sans:wght@400;600' }
+    { id: 'pixelify-doom', name: 'Pixelify Sans', family: "'Pixelify Sans'", group: 'doom', css: 'Pixelify+Sans:wght@400;600' },
+    // 4.12.1: «AmazDooM» — свой файл сайта (fonts/AmazDooMLeft.ttf, @font-face в css/doom.css), не Google: в списке загрузки он отмечен как уже подключённый.
+    // Только заглавные буквы; есть все русские (с Ё), нет ₸ % « » — их подставляет запасной шрифт
+    { id: 'amazdoom', name: 'AmazDooM', family: "'AmazDooM'", group: 'doom', local: true }
 ];
 const FONT_FALLBACK = "'Segoe UI', Tahoma, Roboto, Arial, sans-serif";
 const CUSTOM_FONTS_KEY = 'finance_custom_fonts';
@@ -54,7 +57,7 @@ let customFonts = [];
 try { customFonts = JSON.parse(localStorage.getItem(CUSTOM_FONTS_KEY) || '[]') || []; } catch (e) { customFonts = []; }
 
 // ---------- Загрузка шрифтов ----------
-const loadedFontCss = new Set(['pixelify', 'pixelify-doom', 'open-sans', 'google-sans-flex']); // уже подключены в index.html
+const loadedFontCss = new Set(['pixelify', 'pixelify-doom', 'amazdoom', 'open-sans', 'google-sans-flex']); // уже подключены в index.html и css/doom.css
 function loadFontCss(ids) {
     const need = FONT_LIB.filter(f => ids.includes(f.id) && !loadedFontCss.has(f.id));
     if (!need.length) return;

@@ -34,7 +34,7 @@
     <link rel="stylesheet" href="css/android.css">
     <!-- 4.9.0: меню Настроек, «страницы вместо блоков», блок баланса только на Стене (подключается последним; «Windows 95_Пуск» не затрагивает) -->
     <link rel="stylesheet" href="css/pages.css">
-    <!-- 4.12.0: тема «Doom 1993» (только для русского языка): действует только при html[data-w95="doom"] -->
+    <!-- 4.12.0–4.12.1: тема «Doom 1993» (только для русского языка): действует только при html[data-w95="doom"] -->
     <link rel="stylesheet" href="css/doom.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -750,7 +750,14 @@
                         </div>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>4.12.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <h4>4.12.1 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>К теме «Doom 1993» добавлен шрифт «AmazDooM» (автор Amazingmax) — в нём есть все русские буквы, включая «Ё». Им набраны заголовки окон, пункты главного меню и крупные надписи темы; цифры суммы и часов остались пиксельными («Press Start 2P»), чтобы их нельзя было спутать. Выбрать его для других мест можно в Настройках → «Шрифты» → группа «Doom 1993».</li>
+                                    <li>Второй присланный шрифт, «DooM», не добавлен: в нём нет русских букв.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.12.0 «Экстра»</h4>
                                 <ul>
                                     <li>Новая тема «Doom 1993» (Настройки → «Темы оформления» → папка «Doom 1993»): кирпичная стена вместо рабочего стола, окна из тёмного металла с заклёпками, красные заголовки, красные «цифры на панели» для суммы и часов, главное меню в стиле игры, нижнее меню на телефоне — как панель состояния. Тема не заменяет остальные и показывается только при русском языке (при других языках её нет в списке, а выбор сохраняется и вернётся вместе с русским).</li>
                                     <li>Звуки темы — «предсмертные крики монстров»: нажатие, открытие и закрытие окон, меню, запуск и выход из приложения звучат хриплым вскриком, визгом, рыком или булькающим стоном, при запуске — ещё и выстрел. Все звуки синтезируются в приложении (файлов игры нет); любой из них можно заменить своим: Настройки → «Звуки» → «Выбрать звуки».</li>
@@ -1075,7 +1082,7 @@
                     </div>
 
                     <!-- 4.6.0: название версии и год обновления — самое последнее в Настройках (js/script.js подставляет значения из js/admin.js) -->
-                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.12.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
+                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.12.1</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
                 </div>
             </main>
         </div>
