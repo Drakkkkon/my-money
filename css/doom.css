@@ -19,7 +19,7 @@
 }
 
 html[data-w95="doom"] body {
-    --doom-title-font: 'AmazDooM', 'Press Start 2P', 'Pixelify Sans', 'Courier New', monospace;
+    --doom-title-font: 'AmazDooM', 'Pixelify Sans', 'Trebuchet MS', 'Segoe UI', sans-serif;
     /* цифры суммы, часов и статистики — пиксельные: в AmazDooM цифры 5 и 9 похожи */
     --doom-hud-font: 'Press Start 2P', 'Pixelify Sans', 'Courier New', monospace;
     --doom-red: #e0452b;          /* красный текст на тёмном (контраст ≈ 4,6 : 1 на панели) */
@@ -296,3 +296,9 @@ html[data-w95="doom"] body .w95-sb-track { background-color: #14110e; background
     html[data-w95="doom"] body .mobile-nav button { font-size: 10.5px !important; }
     html[data-w95="doom"] body .tx-amount { font-size: 11px !important; }
 }
+
+/* 4.12.2: шрифт AmazDooM выше строки — верх букв и значок над «Й» обрезались. Даём подписи запас сверху/снизу, а раскладку не меняем (отрицательные поля) */
+html[data-w95="doom"] body .sidebar-nav .nav-label { padding: 8px 2px 3px; margin: -8px -2px -3px; }
+html[data-w95="doom"] body :is(#settings, .tab) .pg-root .pg-bar-title b { padding: 8px 0 3px; margin: -8px 0 -3px; }
+/* образец «AmazDooM» в галерее шрифтов: сам шрифт крупный (size-adjust), поэтому образец делаем мельче, чтобы не обрезался */
+html[data-w95="doom"] body .font-card-sample[style*="AmazDooM"] { font-size: 14px !important; line-height: 2 !important; }

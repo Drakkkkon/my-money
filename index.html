@@ -34,7 +34,7 @@
     <link rel="stylesheet" href="css/android.css">
     <!-- 4.9.0: меню Настроек, «страницы вместо блоков», блок баланса только на Стене (подключается последним; «Windows 95_Пуск» не затрагивает) -->
     <link rel="stylesheet" href="css/pages.css">
-    <!-- 4.12.0–4.12.1: тема «Doom 1993» (только для русского языка): действует только при html[data-w95="doom"] -->
+    <!-- 4.12.0–4.12.2: тема «Doom 1993» (только для русского языка): действует только при html[data-w95="doom"] -->
     <link rel="stylesheet" href="css/doom.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -750,7 +750,14 @@
                         </div>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>4.12.1 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <h4>4.12.2 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Тема «Doom 1993»: исправлена буква «О» (и «П») в названиях вкладок и на кнопках — раньше она подставлялась из другого шрифта и выглядела крупнее остальных, теперь все буквы одной высоты.</li>
+                                    <li>Тема «Doom 1993»: надписи шрифтом «AmazDooM» больше не обрезаются сверху (левое меню, заголовок страницы) — теперь видны целиком, в том числе значок над «Й». Образец «AmazDooM» в Настройках → «Шрифты» тоже уменьшен, чтобы помещаться.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.12.1 «Экстра»</h4>
                                 <ul>
                                     <li>К теме «Doom 1993» добавлен шрифт «AmazDooM» (автор Amazingmax) — в нём есть все русские буквы, включая «Ё». Им набраны заголовки окон, пункты главного меню и крупные надписи темы; цифры суммы и часов остались пиксельными («Press Start 2P»), чтобы их нельзя было спутать. Выбрать его для других мест можно в Настройках → «Шрифты» → группа «Doom 1993».</li>
                                     <li>Второй присланный шрифт, «DooM», не добавлен: в нём нет русских букв.</li>
@@ -1082,7 +1089,7 @@
                     </div>
 
                     <!-- 4.6.0: название версии и год обновления — самое последнее в Настройках (js/script.js подставляет значения из js/admin.js) -->
-                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.12.1</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
+                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.12.2</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
                 </div>
             </main>
         </div>
