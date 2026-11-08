@@ -303,11 +303,6 @@ html { --pg-w: 600px; }
     html body main > .tab[data-pg] > .app-footer { max-width: var(--pg-w); margin-left: auto; margin-right: auto; }
 }
 
-/* кнопка «На стену»: в панели страницы — справа; под вкладками — отдельной строкой */
-html body :is(#settings, .tab) .pg-root .pg-bar > .pg-pin { margin-left: auto; }
-html body :is(#settings, .tab) .pg-root .pg-tools { display: flex; justify-content: flex-end; margin: -2px 0 8px; }
-html body .tab[data-pg-view="list"] > .pg-root > .pg-tools { display: none !important; }
-html body :is(#settings, .tab) .pg-root .pg-pin .material-icons { font-size: 19px; }
 html body :is(#settings, .tab) .pg-root .pg-solobar { padding-left: 10px; }
 /* меню выбора «Компактный / Оригинальный» (то же оформление, что у меню размера блока) */
 html body .pg-pin-menu .pg-pin-opt { display: flex; align-items: center; gap: 8px; }
@@ -349,3 +344,70 @@ html body .menu-pages-box .menu-editor:empty { display: none; }
 }
 /* «Windows 95_Пуск» и «Windows 95_Экстра» режима страниц не знают — выбор блоков для меню там не нужен */
 html[data-w95="desk95"] body .menu-pages-box { display: none !important; }
+
+
+/* ---------- 12. Цвет картинок категорий (4.11.0) ----------
+   Эмодзи остаются прежними, цвет — фильтр поверх: серый → сепия → поворот оттенка. Без выбора цвета (нет data-ec) картинка как была. */
+[data-ec="red"]    { filter: grayscale(1) sepia(1) hue-rotate(-44deg) saturate(9) brightness(.92); }
+[data-ec="orange"] { filter: grayscale(1) sepia(1) hue-rotate(-18deg) saturate(8) brightness(1); }
+[data-ec="yellow"] { filter: grayscale(1) sepia(1) hue-rotate(8deg) saturate(8) brightness(1.1); }
+[data-ec="green"]  { filter: grayscale(1) sepia(1) hue-rotate(78deg) saturate(6) brightness(.95); }
+[data-ec="cyan"]   { filter: grayscale(1) sepia(1) hue-rotate(140deg) saturate(6) brightness(1); }
+[data-ec="blue"]   { filter: grayscale(1) sepia(1) hue-rotate(206deg) saturate(9) brightness(.95); }
+[data-ec="purple"] { filter: grayscale(1) sepia(1) hue-rotate(250deg) saturate(7) brightness(.92); }
+[data-ec="pink"]   { filter: grayscale(1) sepia(1) hue-rotate(300deg) saturate(7) brightness(1.02); }
+/* в окне выбора все картинки сразу показываются выбранным цветом */
+.emoji-picker[data-ec-pick="red"] .emoji-cell .ec { filter: grayscale(1) sepia(1) hue-rotate(-44deg) saturate(9) brightness(.92); }
+.emoji-picker[data-ec-pick="orange"] .emoji-cell .ec { filter: grayscale(1) sepia(1) hue-rotate(-18deg) saturate(8) brightness(1); }
+.emoji-picker[data-ec-pick="yellow"] .emoji-cell .ec { filter: grayscale(1) sepia(1) hue-rotate(8deg) saturate(8) brightness(1.1); }
+.emoji-picker[data-ec-pick="green"] .emoji-cell .ec { filter: grayscale(1) sepia(1) hue-rotate(78deg) saturate(6) brightness(.95); }
+.emoji-picker[data-ec-pick="cyan"] .emoji-cell .ec { filter: grayscale(1) sepia(1) hue-rotate(140deg) saturate(6) brightness(1); }
+.emoji-picker[data-ec-pick="blue"] .emoji-cell .ec { filter: grayscale(1) sepia(1) hue-rotate(206deg) saturate(9) brightness(.95); }
+.emoji-picker[data-ec-pick="purple"] .emoji-cell .ec { filter: grayscale(1) sepia(1) hue-rotate(250deg) saturate(7) brightness(.92); }
+.emoji-picker[data-ec-pick="pink"] .emoji-cell .ec { filter: grayscale(1) sepia(1) hue-rotate(300deg) saturate(7) brightness(1.02); }
+.emoji-colors { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 6px; }
+.emoji-color {
+    width: 40px; height: 40px; min-height: 0 !important; padding: 0 !important; display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; flex: 0 0 auto;
+}
+.emoji-color .ec-swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .85); box-shadow: 0 0 0 1px rgba(0, 0, 0, .45); display: block; }
+.emoji-color .ec-preview { font-size: 20px; line-height: 1; font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif; }
+.emoji-color.is-on { outline: 2px solid var(--w95-select, #1a73e8); outline-offset: 1px; }
+
+
+/* ---------- 13. 4.11.0: «Масштаб» и «На стену» — отдельные кнопки внизу блока и страницы ----------
+   Кнопки создаёт js/layout.js (ensureCardFoot), внешний вид задают сами темы через .btn-secondary. */
+html body .card > .card-foot {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 0; padding: 10px 0 0;
+    border-top: 1px solid rgba(128, 128, 128, .32); clear: both;
+}
+html body .card > .card-foot .foot-btn {
+    width: auto !important; flex: 0 1 auto; min-width: 0; min-height: 36px; margin: 0 !important; padding: 4px 14px !important;
+    display: inline-flex !important; align-items: center; justify-content: center; gap: 6px; font-size: 13px !important; line-height: 1.2; cursor: pointer;
+}
+html body .card > .card-foot .foot-btn .material-icons { font-size: 18px !important; margin: 0 !important; }
+html body .card > .card-foot .foot-pin .material-icons { transform: rotate(35deg); }
+/* на стене у блоков свои кнопки (ширина, высота, булавка в шапке); у «Windows 95_Пуск» и «Экстра» кнопки остаются в шапке окна */
+html body .card.on-wall > .card-foot, html[data-w95="desk95"] body .card > .card-foot { display: none !important; }
+/* из шапки кнопки «На стену» и размера убраны (на стене булавка «Убрать со стены» остаётся) */
+html:not([data-w95="desk95"]):not(#_) body .card:not(.on-wall) > h3 .w95-ctl-pin,
+html:not([data-w95="desk95"]):not(#_) body .card:not(.on-wall) > h3 .w95-ctl-size { display: none !important; }
+/* на телефоне страница и так на всю ширину — менять масштаб нечего; блок не на странице при включённом режиме «страницы» — тоже */
+@media (max-width: 768px) {
+    html body .card.pg-active > .card-foot .foot-size { display: none !important; }
+}
+html[data-pages="on"] body .card:not(.pg-active) > .card-foot .foot-size { display: none !important; }
+
+
+/* ---------- 14. 4.11.0: без названия «Money Pro» и значка на страницах ----------
+   Название и значок остались только внизу «Настроек» над номером версии (.app-brand). «Windows 95_Пуск» и «Экстра» не затрагиваются. */
+html:not([data-w95="desk95"]):not([data-nobrand]) body .app-wrapper > aside.sidebar > .sidebar-header,
+html:not([data-w95="desk95"]):not([data-nobrand]) body #main-header > .header-top { display: none !important; }
+/* без блока баланса (всё, кроме «Стены») шапка пуста — убираем целиком */
+html:not([data-tab="wall"]):not([data-w95="desk95"]):not([data-nobrand]) body #main-header { display: none !important; }
+/* меню-гамбургер: кнопка ☰ лежит в левом верхнем углу — оставляем ей место над страницей */
+html[data-menu="burger"]:not([data-w95="desk95"]):not([data-tab="wall"]) body main { padding-top: 64px !important; }
+html[data-menu="burger"]:not([data-w95="desk95"]) body .app-wrapper > aside.sidebar > .sidebar-nav { margin-top: 58px; }
+html body .app-footer .app-brand { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 2px 0 6px; font-size: 15px; }
+html body .app-footer .app-brand .app-logo { width: 22px; height: 22px; border-radius: 6px; box-shadow: none; }
+html[data-w95="desk95"] body .app-footer .app-brand { display: none; }

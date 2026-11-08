@@ -2,7 +2,7 @@
 // uiPrefs синхронизируется через Google Диск (cloud.js, вместе с копилкой, лимитом и т. п.):
 //   header  — что показывать в блоке баланса и размеры цифр и текста;
 //   quotes  — котировка в шапке и на заставке, скрытые стандартные котировки (js/quotes.js);
-//   catIcons / iconMode — картинки категорий в «Новой записи» и в истории (js/emoji.js).
+//   catIcons / catColors / iconMode — картинки категорий, их цвета и вид в «Новой записи» и в истории (js/emoji.js).
 // Свёрнутые блоки запоминаются только на этом устройстве (finance_collapsed).
 
 const UI_PREFS_KEY = 'finance_ui';
@@ -12,6 +12,7 @@ const UI_DEFAULTS = {
     header: { hide: [], balance: 1, time: 1, text: 1 },
     quotes: { header: 'AAPL', splash: ['AAPL', 'KSPI'], hidden: [] },
     catIcons: { form: {}, history: {} },
+    catColors: { form: {}, history: {} },
     iconMode: { form: 'both', history: 'both' }
 };
 
@@ -22,6 +23,8 @@ function normalizeUiPrefs(p) {
     const q = obj(src.quotes, {});
     const ci = obj(src.catIcons, {});
     const im = obj(src.iconMode, {});
+    const cc = obj(src.catColors, {});
+    const colorMap = m => Object.fromEntries(Object.entries(obj(m, {})).filter(([k, v]) => k.length < 80 && typeof v === 'string' && /^[a-z]{3,8}$/.test(v)).slice(0, 400));
     const scale = (v, d) => { const n = Number(v); return Number.isFinite(n) && n >= 0.5 && n <= 2.5 ? n : d; };
     const mode = v => ['icon', 'text', 'both'].includes(v) ? v : 'both';
     return {
@@ -35,6 +38,7 @@ function normalizeUiPrefs(p) {
             hidden: Array.isArray(q.hidden) ? q.hidden.filter(x => typeof x === 'string') : []
         },
         catIcons: { form: obj(ci.form, {}), history: obj(ci.history, {}) },
+        catColors: { form: colorMap(cc.form), history: colorMap(cc.history) },
         iconMode: { form: mode(im.form), history: mode(im.history) },
         notify: normalizeNotifyPrefs(obj(src.notify, {})),
         bank: normalizeBankPrefs(obj(src.bank, {})),
@@ -44,6 +48,8 @@ function normalizeUiPrefs(p) {
             .map(x => ({ id: x.id.slice(0, 80), w: Math.min(4, Math.max(1, Number(x.w) || 2)), h: Math.min(1600, Math.max(0, Number(x.h) || 0)), ...(x.c === true ? { c: true } : {}) })) : [],
         // Размеры блоков (js/sizes.js): { id блока: 's' | 'm' | 'l' }
         sizes: Object.fromEntries(Object.entries(obj(src.sizes, {})).filter(([k, v]) => typeof k === 'string' && k.length < 80 && ['s', 'm', 'l'].includes(v)).slice(0, 200)),
+        // Ширина страниц на ПК (js/sizes.js → «Масштаб» страницы): { id блока: 'm' | 'l' }, компактная ('s') — по умолчанию
+        pageSizes: Object.fromEntries(Object.entries(obj(src.pageSizes, {})).filter(([k, v]) => typeof k === 'string' && k.length < 80 && ['m', 'l'].includes(v)).slice(0, 200)),
         layout: normalizeLayoutPrefs(obj(src.layout, {}))
     };
 }
@@ -181,6 +187,8 @@ function enhanceCards(root = document) {
                 min.replaceWith(b);
             }
         }
+        // 4.11.0: «Масштаб» и «На стену» — отдельные кнопки внизу блока (а не в шапке). У «Windows 95_Пуск» и «Экстра» они остаются в шапке окна, внизу блока их скрывает css/pages.css
+        ensureCardFoot(card);
         // двойное нажатие по заголовку тоже сворачивает (как в Windows)
         if (!h._dbl) {
             h._dbl = true;
@@ -195,6 +203,23 @@ function enhanceCards(root = document) {
         card.classList.toggle('is-collapsed', !pagesOn && !!collapsed[cardKey(card)] && !card.classList.contains('is-maximized'));
         syncCollapseButton(card);
     });
+}
+
+function ensureCardFoot(card) {
+    if (card.parentElement && card.parentElement.closest('.card')) return; // вложенный блок — без своих кнопок
+    const canSize = !!card.id && !card.classList.contains('wall-info');
+    const canPin = canSize && !card.hasAttribute('data-wall-fixed');
+    let foot = card.querySelector(':scope > .card-foot');
+    if (!canSize) { if (foot) foot.remove(); return; }
+    if (!foot) {
+        foot = document.createElement('div');
+        foot.className = 'card-foot';
+        foot.innerHTML =
+            '<button type="button" class="btn-secondary foot-btn foot-size" onclick="openCardSizeMenu(this)" aria-haspopup="menu"><span class="material-icons" aria-hidden="true">aspect_ratio</span><span>Масштаб</span></button>' +
+            (canPin ? '<button type="button" class="btn-secondary foot-btn foot-pin" onclick="openFootPin(this)" aria-haspopup="menu"><span class="material-icons" aria-hidden="true">push_pin</span><span>На стену</span></button>' : '');
+    }
+    if (foot !== card.lastElementChild) card.appendChild(foot); // всегда самый нижний
+    if (typeof syncFootSize === 'function') syncFootSize(card);
 }
 
 function syncCollapseButton(card) {
@@ -234,8 +259,7 @@ const HEADER_PARTS = [
     { id: 'time', name: 'Время', sel: '#hdr-time' },
     { id: 'weather', name: 'Погода', sel: '#hdr-weather' },
     { id: 'rates', name: 'Курсы валют', sel: '#hdr-rates' },
-    { id: 'quote', name: 'Котировка акции', sel: '#hdr-quote' },
-    { id: 'title', name: 'Название приложения (на телефоне)', sel: '.header-top' }
+    { id: 'quote', name: 'Котировка акции', sel: '#hdr-quote' }
 ];
 
 function applyHeaderPrefs() {

@@ -16,11 +16,22 @@ const CARD_SIZES = {
     l: { cols: 2, rows: 4, name: 'Большой', dim: '2 × 4' }
 };
 
+// 4.11.0: «Масштаб» страницы (режим «страницы» и меню Настроек, js/pages.js) — её ширина на ПК. Компактная — как была; на телефоне страница и так на всю ширину
+const PAGE_SIZES = {
+    s: { name: 'Компактная', dim: '600 px', w: '600px' },
+    m: { name: 'Средняя', dim: '860 px', w: '860px' },
+    l: { name: 'Широкая', dim: 'вся ширина', w: '100%' }
+};
+function pageSizeOf(id) {
+    const v = (uiPrefs.pageSizes || {})[id];
+    return PAGE_SIZES[v] ? v : 's';
+}
+
 // Высота в клетках: на одной колонке «маленький» — одна клетка (иначе он не отличался бы от среднего)
 const CARD_ROWS_1COL = { s: 1, m: 2, l: 4 };
 
 // ---------- Уровни содержимого ----------
-const TIER_SKIP = 'h3, script, style, datalist, template, input[type="hidden"], .w95-sb';
+const TIER_SKIP = 'h3, script, style, datalist, template, input[type="hidden"], .w95-sb, .card-foot';
 const TIER_ACTION = 'button, .btn-group, .btn-stack, .ob-keypad, .calc-tape-tools, [class*="-btns"], .tx-actions';
 function tierHasField(k) { return k.matches('input:not([type="hidden"]), select, textarea') || !!k.querySelector('input:not([type="hidden"]):not([type="file"]), select, textarea'); }
 function tierIsAction(k) { return k.matches(TIER_ACTION); }
@@ -66,6 +77,7 @@ function applyCardSize(card) {
         card.removeAttribute('data-size');
         card.style.removeProperty('--card-rows');
         card.style.removeProperty('--card-cols');
+        syncFootSize(card);
         return;
     }
     const size = cardSizeOf(card.id), def = CARD_SIZES[size];
@@ -80,6 +92,19 @@ function applyCardSize(card) {
     }
     if (def) card.style.setProperty('--card-rows', def.rows);
     else { card.style.removeProperty('--card-rows'); card.style.removeProperty('--card-cols'); }
+    syncFootSize(card);
+}
+
+// Кнопка «Масштаб» внизу блока: подсказка и значок показывают текущий размер блока (или ширину страницы)
+function syncFootSize(card) {
+    const b = card && card.querySelector(':scope > .card-foot .foot-size');
+    if (!b) return;
+    const page = typeof pagesIgnoreLayout === 'function' && pagesIgnoreLayout(card);
+    const k = page ? pageSizeOf(card.id) : cardSizeOf(card.id);
+    const def = (page ? PAGE_SIZES : CARD_SIZES)[k];
+    b.dataset.size = k;
+    b.title = def ? `Масштаб: ${def.name.toLowerCase()} (${def.dim})` : 'Масштаб';
+    b.setAttribute('aria-label', b.title);
 }
 
 // Ширина в клетках: не больше числа колонок раздела. Колонки считаем, пока у всех блоков раздела ширина 1,
@@ -104,6 +129,7 @@ function applyCardSizes() {
     const parents = new Set();
     document.querySelectorAll('main .card').forEach(card => { applyCardSize(card); if (card.parentElement) parents.add(card.parentElement); });
     parents.forEach(applyCardCols);
+    if (typeof pagesRefreshWidth === 'function') pagesRefreshWidth();
     window.dispatchEvent(new Event('resize')); // диаграммы подстраиваются
 }
 
@@ -120,6 +146,17 @@ function setCardSize(id, size) {
     setTimeout(() => window.dispatchEvent(new Event('resize')), 30);
 }
 
+function setPageSize(id, size) {
+    const sizes = { ...(uiPrefs.pageSizes || {}) };
+    if (PAGE_SIZES[size] && size !== 's') sizes[id] = size; else delete sizes[id]; // «компактная» — по умолчанию
+    uiPrefs.pageSizes = sizes;
+    closeCardSizeMenu();
+    if (typeof pagesRefreshWidth === 'function') pagesRefreshWidth();
+    commitUiPrefs();
+    if (typeof playSound === 'function') playSound('click');
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 30);
+}
+
 // ---------- Меню выбора размера ----------
 function closeCardSizeMenu() {
     const m = document.getElementById('card-size-menu');
@@ -127,7 +164,7 @@ function closeCardSizeMenu() {
     document.removeEventListener('pointerdown', cardSizeOutside, true);
     document.removeEventListener('keydown', cardSizeEsc, true);
 }
-function cardSizeOutside(e) { if (!e.target.closest('#card-size-menu') && !e.target.closest('.w95-ctl-size')) closeCardSizeMenu(); }
+function cardSizeOutside(e) { if (!e.target.closest('#card-size-menu') && !e.target.closest('.w95-ctl-size, .foot-size')) closeCardSizeMenu(); }
 function cardSizeEsc(e) { if (e.key === 'Escape') closeCardSizeMenu(); }
 
 function openCardSizeMenu(btn) {
@@ -136,15 +173,21 @@ function openCardSizeMenu(btn) {
     const wasOpen = document.getElementById('card-size-menu') && document.getElementById('card-size-menu').dataset.for === card.id;
     closeCardSizeMenu();
     if (wasOpen) return;
-    const cur = cardSizeOf(card.id);
-    const item = (key, label, dim) => `<button type="button" class="size-opt${cur === key ? ' is-on' : ''}" data-size="${key}" onclick="setCardSize('${card.id}', '${key}')">
-        <span class="size-glyph" data-size="${key}"></span><span class="size-opt-name">${label}</span><span class="size-opt-dim">${dim}</span></button>`;
+    // на странице (режим «страницы», меню Настроек) масштаб — ширина страницы, в блоке — его размер
+    const page = typeof pagesIgnoreLayout === 'function' && pagesIgnoreLayout(card);
+    const cur = page ? pageSizeOf(card.id) : cardSizeOf(card.id);
+    const fn = page ? 'setPageSize' : 'setCardSize';
+    const tt = (v) => (typeof tr === 'function' ? tr(v) : v);
+    const item = (key, label, dim) => `<button type="button" class="size-opt${cur === key ? ' is-on' : ''}" data-size="${key}" onclick="${fn}('${card.id}', '${key}')">
+        <span class="size-glyph" data-size="${key}"></span><span class="size-opt-name">${tt(label)}</span><span class="size-opt-dim">${tt(dim)}</span></button>`;
     const menu = document.createElement('div');
     menu.id = 'card-size-menu';
     menu.className = 'card-size-menu';
     menu.dataset.for = card.id;
     menu.setAttribute('role', 'menu');
-    menu.innerHTML = Object.keys(CARD_SIZES).map(k => item(k, CARD_SIZES[k].name, CARD_SIZES[k].dim)).join('') + item('', 'Как было', 'авто');
+    menu.innerHTML = page
+        ? Object.keys(PAGE_SIZES).map(k => item(k, PAGE_SIZES[k].name, PAGE_SIZES[k].dim)).join('')
+        : Object.keys(CARD_SIZES).map(k => item(k, CARD_SIZES[k].name, CARD_SIZES[k].dim)).join('') + item('', 'Как было', 'авто');
     document.body.appendChild(menu);
     // под кнопкой; если не помещается справа или снизу — сдвигаем внутрь экрана
     const r = btn.getBoundingClientRect(), mw = menu.offsetWidth, mh = menu.offsetHeight;

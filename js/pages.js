@@ -135,19 +135,12 @@
         const label = (typeof MENU_ITEMS !== 'undefined' && (MENU_ITEMS.find(i => i.id === tab.id) || {}).label) || '';
         return `<div class="pg-list">${rows}</div>` +
             `<div class="pg-bar"><div role="button" tabindex="0" class="pg-back" aria-label="${esc(tt('Назад'))}"><span class="material-icons" aria-hidden="true">arrow_back</span><span class="pg-back-text">${esc(label)}</span></div>` +
-            `<span class="pg-bar-title"><span class="pg-bar-ico material-icons" aria-hidden="true"></span><b></b></span>${pinHtml()}</div>`;
+            `<span class="pg-bar-title"><span class="pg-bar-ico material-icons" aria-hidden="true"></span><b></b></span></div>`;
     }
 
-    // Кнопка «На стену»: блок страницы становится блоком на стене (компактным или оригинальным — спрашиваем в меню)
-    function pinHtml() {
-        const t = esc(tt('На стену'));
-        return `<div role="button" tabindex="0" class="pg-back pg-pin" aria-haspopup="menu" aria-label="${t}" title="${t}">` +
-            `<span class="material-icons" aria-hidden="true">push_pin</span><span class="pg-back-text">${t}</span></div>`;
-    }
-
-    // Один блок из меню («Блоки как страницы»): только название и кнопка «На стену»
+    // Один блок из меню («Блоки как страницы»): только название. Кнопки «Масштаб» и «На стену» — внизу самого блока (4.11.0, js/layout.js → enhanceCards)
     function buildSolo() {
-        return `<div class="pg-bar pg-solobar"><span class="pg-bar-title"><span class="pg-bar-ico material-icons" aria-hidden="true"></span><b></b></span>${pinHtml()}</div>`;
+        return `<div class="pg-bar pg-solobar"><span class="pg-bar-title"><span class="pg-bar-ico material-icons" aria-hidden="true"></span><b></b></span></div>`;
     }
 
     function buildChips(cards, current) {
@@ -155,7 +148,7 @@
             const i = cardInfo(c);
             return `<div role="tab" tabindex="0" class="pg-chip" data-card="${esc(c.id)}" aria-selected="${c.id === current}">` +
                 `<span class="material-icons" aria-hidden="true">${esc(i.icon)}</span><span class="pg-chip-text">${esc(i.title)}</span></div>`;
-        }).join('') + '</div><div class="pg-tools">' + pinHtml() + '</div>';
+        }).join('') + '</div>';
     }
 
     function teardown(tab) {
@@ -163,6 +156,7 @@
         tab.removeAttribute('data-pg-view');
         tab.classList.remove('pg-on');
         tab._pgSig = null;
+        tab.style.removeProperty('--pg-w');
         const r = tab.querySelector(':scope > .pg-root');
         if (r) r.remove();
         tab.querySelectorAll('.card.pg-active').forEach(c => c.classList.remove('pg-active'));
@@ -176,6 +170,7 @@
         const showId = kind === 'chips' ? (sel[tab.id] || null) : kind === 'solo' ? (tab._pgSolo || null) : open;
         tab.querySelectorAll('.card').forEach(c => c.classList.toggle('pg-active', !!showId && c.id === showId));
         tab.setAttribute('data-pg-view', kind === 'menu' && !showId ? 'list' : 'page');
+        applyPageWidth(tab, showId);
         const r = tab.querySelector(':scope > .pg-root');
         if (!r) return;
         if (kind === 'chips') {
@@ -186,6 +181,17 @@
             if (t) { t.querySelector('b').textContent = i.title; t.querySelector('.pg-bar-ico').textContent = i.icon; }
         }
     }
+
+    // 4.11.0: «Масштаб» страницы на ПК — её ширина (компактная 600 px / средняя 860 px / вся ширина). Список меню — всегда компактный.
+    function applyPageWidth(tab, showId) {
+        const k = showId && typeof pageSizeOf === 'function' ? pageSizeOf(showId) : 's';
+        const w = (typeof PAGE_SIZES !== 'undefined' && PAGE_SIZES[k]) ? PAGE_SIZES[k].w : '600px';
+        if (w === '600px') tab.style.removeProperty('--pg-w'); else tab.style.setProperty('--pg-w', w);
+    }
+    window.pagesRefreshWidth = function () {
+        document.querySelectorAll('main > .tab[data-pg]').forEach(t => syncView(t));
+        document.querySelectorAll('main .card').forEach(c => { if (typeof syncFootSize === 'function') syncFootSize(c); });
+    };
 
     function render(tab, { resetView = false } = {}) {
         if (!tab) return;
@@ -267,11 +273,10 @@
         document.removeEventListener('pointerdown', pinMenuOutside, true);
         document.removeEventListener('keydown', pinMenuEsc, true);
     }
-    function pinMenuOutside(e) { if (!e.target.closest('#pg-pin-menu') && !e.target.closest('.pg-pin')) closePinMenu(); }
+    function pinMenuOutside(e) { if (!e.target.closest('#pg-pin-menu') && !e.target.closest('.foot-pin')) closePinMenu(); }
     function pinMenuEsc(e) { if (e.key === 'Escape') closePinMenu(); }
 
-    function openPinMenu(tab, btn) {
-        const card = tab.querySelector('.card.pg-active');
+    function openPinMenu(card, btn) {
         if (!card || !card.id) return;
         const was = document.getElementById('pg-pin-menu');
         closePinMenu();
@@ -348,14 +353,18 @@
         }
     };
 
+    // Кнопка «На стену» внизу блока или страницы (js/layout.js → enhanceCards): спрашиваем, каким блоком положить на стену
+    window.openFootPin = function (btn) {
+        const card = btn && btn.closest('.card');
+        if (card) openPinMenu(card, btn);
+    };
+
     // нажатия в списке, на вкладках и «Назад»
     document.addEventListener('click', (e) => {
         const root0 = e.target.closest && e.target.closest('.pg-root');
         if (!root0) return;
         const tab = root0.closest('.tab');
         if (!tab) return;
-        const pin = e.target.closest('.pg-pin');
-        if (pin) { openPinMenu(tab, pin); return; }
         const back = e.target.closest('.pg-back');
         if (back) { closePage(tab); return; }
         const b = e.target.closest('.pg-row, .pg-chip');
