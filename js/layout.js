@@ -59,7 +59,9 @@ function normalizeLayoutPrefs(l) {
         density: pick(l.density, ['compact', 'normal', 'roomy'], 'normal'),
         pcMenu: pick(l.pcMenu, ['left', 'burger'], 'left'),
         mobileMenu: pick(l.mobileMenu, ['bottom', 'left', 'burger'], 'bottom'),
-        pcSplash: l.pcSplash !== false
+        pcSplash: l.pcSplash !== false,
+        // 4.9.0: «страницы вместо блоков» — каждый блок раздела отдельной страницей на весь экран (js/pages.js)
+        noBlocks: l.noBlocks === true
     };
 }
 
@@ -188,7 +190,9 @@ function enhanceCards(root = document) {
                 if (min) toggleCardCollapse(min);
             });
         }
-        card.classList.toggle('is-collapsed', !!collapsed[cardKey(card)] && !card.classList.contains('is-maximized'));
+        // 4.9.0: в режиме «страницы вместо блоков» свёрнутость игнорируется (js/pages.js), сохранённое значение остаётся
+        const pagesOn = typeof pagesActive === 'function' && pagesActive() && !card.classList.contains('on-wall');
+        card.classList.toggle('is-collapsed', !pagesOn && !!collapsed[cardKey(card)] && !card.classList.contains('is-maximized'));
         syncCollapseButton(card);
     });
 }
@@ -335,7 +339,7 @@ function applyLayoutPrefs() {
 
 function setLayoutPref(key, value) {
     if (key === 'widthPct') value = Math.round(Number(value));
-    if (key === 'pcSplash') value = !!value;
+    if (key === 'pcSplash' || key === 'noBlocks') value = !!value;
     uiPrefs.layout = normalizeLayoutPrefs({ ...uiPrefs.layout, [key]: value });
     applyLayoutPrefs();
     if (key !== 'widthPct') renderLayoutSettings();
@@ -359,6 +363,9 @@ function renderLayoutSettings() {
     const seg = (key, opts) => `<div class="seg-buttons" role="radiogroup">${opts.map(([v, label]) =>
         `<button type="button" role="radio" aria-checked="${String(l[key]) === v}" class="seg-btn${String(l[key]) === v ? ' is-on' : ''}" onclick="setLayoutPref('${key}', '${v}')">${label}</button>`).join('')}</div>`;
     box.innerHTML = `
+        <h4 class="font-sub">Страницы вместо блоков</h4>
+        <label class="hdr-part"><input type="checkbox" ${l.noBlocks ? 'checked' : ''} onchange="setLayoutPref('noBlocks', this.checked)"> Каждый блок — отдельная страница</label>
+        <p class="hint">Вместо сетки блоков в каждом разделе — один блок на весь экран. Если блоков немного, они переключаются вкладками сверху, если много — списком. Кнопки размера, «На стену», «свернуть» и «развернуть» убираются. «Стена» остаётся как есть. Не действует в темах «Windows 95_Пуск» и «Windows 95_Экстра» (у них свои окна).</p>
         <h4 class="font-sub">Меню на телефоне</h4>
         ${seg('mobileMenu', [['bottom', 'Внизу'], ['left', 'Слева'], ['burger', 'Гамбургер ☰']])}
         <div class="layout-pc-only">

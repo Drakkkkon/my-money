@@ -1372,6 +1372,7 @@ function showTab(tabId, btn) {
     }
     
     if (typeof applyCardSizes === 'function') setTimeout(applyCardSizes, 0); // колонки видимого раздела
+    if (typeof pagesOnTabShown === 'function') pagesOnTabShown(tabId); // 4.9.0: меню Настроек, страницы-блоки, блок баланса только на Стене (js/pages.js)
     if (tabId === 'quotes') onQuotesTabShown();
     if (tabId === 'prices') renderPrices(); // диаграмме нужен видимый холст
 

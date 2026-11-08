@@ -4,7 +4,7 @@
 // Важно: запрос самой страницы (navigate) нельзя пересоздавать с параметрами — браузер выдаёт ошибку,
 // и раньше из-за этого всегда открывалась старая копия index.html из кэша (в установленном приложении
 // старая страница + новые скрипты ломали запуск). Теперь страница запрашивается по адресу.
-const CACHE = 'my-money-v24';
+const CACHE = 'my-money-v25';
 const CORE = [
     './',
     'index.html',
@@ -20,11 +20,12 @@ const CORE = [
     'css/v4.css',
     'css/v41.css',
     'css/v43.css',
-    'css/ios6.css',
     'css/desk95.css',
     'css/v46.css',
     'css/android.css',
+    'css/pages.css',
     'js/android.js',
+    'js/pages.js',
     'js/desk95-walls.js',
     'js/desk95-icons.js',
     'js/desk95.js',

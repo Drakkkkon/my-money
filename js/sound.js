@@ -372,19 +372,6 @@ const SOUND_PACKS = {
             noise(c, { start: 0.38, dur: 0.4, type: 'bandpass', freq: 1200, endFreq: 5200, q: 0.9, gain: 0.025, attack: 0.05 });
         }
     },
-    // «iOS 6»: сухой деревянный «тык» клавиатуры, мягкие «пузырьковые» открытие и закрытие и спокойная трезвучная мелодия
-    // с колокольчиком (всё синтезируется здесь, своя мелодия, не звуки iPhone)
-    tock: {
-        click: c => { noise(c, { dur: 0.022, type: 'bandpass', freq: 1900, q: 6, gain: 0.3, attack: 0.001 }); tone(c, { freq: 760, endFreq: 520, dur: 0.03, type: 'triangle', gain: 0.07, attack: 0.001 }); },
-        open: c => { tone(c, { freq: 523.25, endFreq: 784, dur: 0.11, gain: 0.09, attack: 0.004 }); tone(c, { freq: 1046.5, start: 0.05, dur: 0.14, gain: 0.04, attack: 0.004 }); },
-        close: c => { tone(c, { freq: 784, endFreq: 523.25, dur: 0.11, gain: 0.09, attack: 0.004 }); tone(c, { freq: 392, start: 0.04, dur: 0.14, gain: 0.04, attack: 0.004 }); },
-        menu: c => { noise(c, { dur: 0.018, type: 'bandpass', freq: 2300, q: 5, gain: 0.22, attack: 0.001 }); tone(c, { freq: 988, endFreq: 700, dur: 0.035, type: 'triangle', gain: 0.06, attack: 0.001 }); },
-        scroll: c => tone(c, { freq: 2200, dur: 0.01, type: 'triangle', gain: 0.015 }),
-        startup: c => {
-            [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => { bell(c, f, i * 0.12, 1.1, 0.07); tone(c, { freq: f / 2, start: i * 0.12, dur: 0.5, gain: 0.03, attack: 0.01 }); });
-            pad(c, [261.63, 329.63, 392], { start: 0.4, dur: 1.4, gain: 0.03, type: 'sine', attack: 0.25 });
-        }
-    },
     // «Android»: мягкие «капли» касания, короткие восходящие и нисходящие нотки и светлая мелодия запуска в духе системных
     // звуков телефона на Android (всё синтезируется здесь, своя мелодия, не файлы Google)
     material: {

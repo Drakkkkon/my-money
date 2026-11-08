@@ -60,6 +60,14 @@ function cardSizeOf(id) {
 // Классы и подписи блока (без колонок)
 function applyCardSize(card) {
     if (!card || !card.id || card.classList.contains('on-wall')) return;
+    // 4.9.0: в режиме «страницы вместо блоков» (js/pages.js) размеры не действуют: блок на всю страницу (сами значения не стираются)
+    if (typeof pagesActive === 'function' && pagesActive()) {
+        card.classList.remove('card-sized');
+        card.removeAttribute('data-size');
+        card.style.removeProperty('--card-rows');
+        card.style.removeProperty('--card-cols');
+        return;
+    }
     const size = cardSizeOf(card.id), def = CARD_SIZES[size];
     card.classList.toggle('card-sized', !!def);
     if (card.dataset.size !== size) card.dataset.size = size;

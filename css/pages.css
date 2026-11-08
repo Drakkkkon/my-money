@@ -1,0 +1,292 @@
+/* =========================================================================
+   4.9.0 — МЕНЮ НАСТРОЕК, «СТРАНИЦЫ ВМЕСТО БЛОКОВ», БЛОК БАЛАНСА ТОЛЬКО НА СТЕНЕ (js/pages.js)
+   Подключается последним: правила тем (aqua, mono, vista, metro, android, win95) этот файл не ломает, а дополняет.
+   «Windows 95_Пуск» и «Windows 95_Экстра» (html[data-w95="desk95"]) не затрагиваются: у них свои окна и меню.
+   Атрибуты на <html>: data-sm="on" — меню Настроек; data-pages="on" — «страницы вместо блоков»; data-tab — текущий раздел.
+   На разделе: data-pg="menu|chips", data-pg-view="list|page"; у показанной карточки — класс pg-active.
+   ========================================================================= */
+
+/* ---------- 1. Блок «Текущий баланс» (часы, погода, курсы) — только на «Стене» ---------- */
+html:not([data-tab="wall"]):not([data-w95="desk95"]) body #main-header .balance-card { display: none !important; }
+html:not([data-tab="wall"]):not([data-w95="desk95"]) body #main-header { padding-bottom: 0 !important; }
+/* «Аэро»: без блока баланса у окна-шапки остаётся только стеклянная полоса заголовка */
+html[data-w95="aero"]:not([data-tab="wall"]) body #main-header { background: var(--aero-gloss), var(--aero-tint) !important; }
+html[data-w95="aero"]:not([data-tab="wall"]) body #main-header .header-top { margin-bottom: 0 !important; }
+
+/* ---------- 2. Общее для списка и страниц ---------- */
+html body main > .tab > .pg-root { grid-column: 1 / -1; min-width: 0; width: 100%; box-sizing: border-box; }
+html body .tab[data-pg] .card:not(.pg-active) { display: none !important; }
+html body .tab[data-pg] .wall-placeholder { display: none !important; }
+html body .tab[data-pg] > .app-footer { display: none; }
+html body .tab[data-pg][data-pg-view="list"] > .app-footer { display: block; }
+html body .tab[data-pg] .card.pg-active > h3 { display: none !important; }
+html body .tab[data-pg] .card.pg-active { margin-top: 0 !important; }
+/* страница одной карточки — на всю ширину раздела, без сетки */
+html body main > .tab[data-pg] { grid-template-columns: minmax(0, 1fr) !important; }
+html body main > .tab[data-pg] > .card, html body .tab[data-pg] .tx-container > .card { grid-column: 1 / -1 !important; width: 100% !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+html body .tab[data-pg] .tx-container { display: block !important; }
+html body .tab[data-pg] .tx-container > .card { position: static !important; height: auto !important; }
+/* список / страница: что когда видно */
+html body .tab[data-pg-view="page"] > .pg-root > .pg-list { display: none !important; }
+html body .tab[data-pg-view="list"] > .pg-root > .pg-bar:not(.pg-chips) { display: none !important; }
+html body .tab[data-pg-view="list"] > .tx-container { display: none !important; }
+
+/* «страницы вместо блоков»: без кнопок размера, булавки, свёрнутости и развёртывания (кроме «Стены») */
+html[data-pages="on"] body main > .tab:not(#wall) .w95-ctls,
+html[data-sm="on"] body main > #settings .w95-ctls { display: none !important; }
+html[data-pages="on"] body main > .tab:not(#wall) > .card, html[data-pages="on"] body main > .tab:not(#wall) .tx-container > .card { grid-column: 1 / -1 !important; }
+html[data-pages="on"] body main > .tab:not(#wall):not([data-pg]) { grid-template-columns: minmax(0, 1fr) !important; }
+html[data-pages="on"] body main > .tab:not(#wall):not([data-pg]) .tx-container { display: block !important; }
+html[data-sm="on"] body main > #settings { grid-template-columns: minmax(0, 1fr) !important; }
+
+/* ---------- 3. Списки (меню Настроек и разделы со многими блоками) — основа: Windows 95 ---------- */
+html body :is(#settings, .tab) .pg-root .pg-list { max-width: 860px; margin: 0 auto; padding: 2px 0 12px; box-sizing: border-box; }
+html body :is(#settings, .tab) .pg-root .pg-group { margin: 0 0 14px; }
+html body :is(#settings, .tab) .pg-root .pg-group-title {
+    display: inline-block; margin: 0 0 6px; padding: 2px 10px; font-family: var(--w95-font-ui); font-size: 14px; font-weight: 700;
+    background: var(--w95-face); color: var(--w95-text); box-shadow: var(--w95-raised);
+}
+html body :is(#settings, .tab) .pg-root .pg-rows {
+    list-style: none; margin: 0; padding: 2px; background: var(--w95-field); color: var(--w95-text); box-shadow: var(--w95-sunken);
+}
+html body :is(#settings, .tab) .pg-root .pg-rows > li { margin: 0; padding: 0; }
+html body :is(#settings, .tab) .pg-root .pg-row {
+    display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; margin: 0; padding: 8px 10px; box-sizing: border-box; cursor: pointer; text-align: left;
+    background: transparent !important; color: var(--w95-text) !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; text-shadow: none !important;
+    font: inherit; font-family: var(--w95-font-text); font-size: 15px; font-weight: 400; line-height: 1.25; letter-spacing: normal; text-transform: none;
+    text-align: left !important; justify-content: flex-start !important; flex-direction: row !important; float: none !important; transform: none;
+}
+html body :is(#settings, .tab) .pg-root .pg-rows > li + li > .pg-row { border-top: 1px dotted var(--w95-shadow) !important; }
+html body :is(#settings, .tab) .pg-root .pg-row:hover { background: var(--w95-hover) !important; }
+html body :is(#settings, .tab) .pg-root .pg-row:active, html body :is(#settings, .tab) .pg-root .pg-row:focus-visible {
+    background: var(--w95-select) !important; color: var(--w95-title-text) !important; outline: 1px dotted var(--w95-title-text) !important; outline-offset: -3px;
+}
+html body :is(#settings, .tab) .pg-root .pg-row:active .pg-txt small, html body :is(#settings, .tab) .pg-root .pg-row:focus-visible .pg-txt small,
+html body :is(#settings, .tab) .pg-root .pg-row:active .pg-chev, html body :is(#settings, .tab) .pg-root .pg-row:focus-visible .pg-chev,
+html body :is(#settings, .tab) .pg-root .pg-row:active .pg-ico, html body :is(#settings, .tab) .pg-root .pg-row:focus-visible .pg-ico { color: var(--w95-title-text) !important; }
+html body :is(#settings, .tab) .pg-root .pg-ico {
+    flex: none; display: grid; place-items: center; width: 34px; height: 34px; color: var(--w95-title); background: var(--w95-face); box-shadow: var(--w95-raised);
+}
+html body :is(#settings, .tab) .pg-root .pg-ico .material-icons { font-size: 22px; }
+html body :is(#settings, .tab) .pg-root .pg-txt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+html body :is(#settings, .tab) .pg-root .pg-txt b { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html body :is(#settings, .tab) .pg-root .pg-txt small { font-size: 12.5px; color: var(--w95-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
+html body :is(#settings, .tab) .pg-root .pg-chev { flex: none; font-size: 22px; color: var(--w95-muted); }
+
+/* ---------- 4. Панель страницы («Назад» и название) и вкладки — основа: Windows 95 ---------- */
+html body :is(#settings, .tab) .pg-root .pg-bar {
+    display: flex; align-items: center; gap: 10px; margin: 0 0 8px; padding: 4px 6px; box-sizing: border-box; min-height: 40px;
+    background: linear-gradient(90deg, var(--w95-title), var(--w95-title-2)); color: var(--w95-title-text);
+}
+html body :is(#settings, .tab) .pg-root .pg-back {
+    flex: none; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; margin: 0; padding: 2px 12px 2px 6px; cursor: pointer;
+    background: var(--w95-button, var(--w95-face)) !important; color: var(--w95-button-text, var(--w95-text)) !important; border: 0 !important; border-radius: 0 !important;
+    box-shadow: var(--w95-raised) !important; font: inherit; font-family: var(--w95-font-ui); font-size: 14px; font-weight: 600; text-shadow: none !important;
+}
+html body :is(#settings, .tab) .pg-root .pg-back:active { box-shadow: var(--w95-pressed) !important; }
+html body :is(#settings, .tab) .pg-root .pg-back .material-icons { font-size: 20px; }
+html body :is(#settings, .tab) .pg-root .pg-bar-title { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; font-family: var(--w95-font-ui); font-size: 16px; color: inherit; }
+html body :is(#settings, .tab) .pg-root .pg-bar-title b { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html body :is(#settings, .tab) .pg-root .pg-bar-title, html body :is(#settings, .tab) .pg-root .pg-bar-title b, html body :is(#settings, .tab) .pg-root .pg-bar-title .material-icons { color: inherit !important; }
+html body :is(#settings, .tab) .pg-root .pg-bar-ico { font-size: 22px; }
+
+/* вкладки (до 5 блоков) */
+html body :is(#settings, .tab) .pg-root .pg-bar.pg-chips {
+    display: flex; flex-wrap: nowrap; gap: 4px; padding: 4px 4px 6px; overflow-x: auto; overflow-y: hidden; background: transparent !important; color: var(--w95-text);
+    scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+}
+html body :is(#settings, .tab) .pg-root .pg-chip {
+    flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 38px; margin: 0; padding: 4px 14px; cursor: pointer; white-space: nowrap;
+    background: var(--w95-button, var(--w95-face)) !important; color: var(--w95-button-text, var(--w95-text)) !important; border: 0 !important; border-radius: 0 !important;
+    box-shadow: var(--w95-raised) !important; font: inherit; font-family: var(--w95-font-ui); font-size: 14px; font-weight: 500; text-shadow: none !important;
+}
+html body :is(#settings, .tab) .pg-root .pg-chip .material-icons { font-size: 19px; }
+html body :is(#settings, .tab) .pg-root .pg-chip[aria-selected="true"] { box-shadow: var(--w95-pressed) !important; font-weight: 700; background: var(--w95-hilite) !important; }
+
+/* ---------- 5. «Android»: Material 3 — тональные «соединённые» плитки, круглые значки, верхняя панель ---------- */
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-list { padding: 0 0 12px; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-group { margin: 0 0 18px; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-group-title {
+    display: block; margin: 0; padding: 8px 16px 8px; font-family: var(--md-font); font-size: 14px; font-weight: 600; letter-spacing: .1px; color: var(--md-primary); background: transparent; box-shadow: none;
+}
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-rows { display: flex; flex-direction: column; gap: 3px; padding: 0; background: transparent; box-shadow: none; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-rows > li + li > .pg-row { border-top: 0 !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-row {
+    position: relative; min-height: 68px; padding: 10px 16px 10px 14px; gap: 16px; font-family: var(--md-font);
+    background: var(--md-tile) !important; color: var(--md-on-surface) !important; border-radius: 8px !important; overflow: hidden;
+    transition: background-color .2s var(--md-ease), border-radius .3s var(--md-spring), box-shadow .2s var(--md-ease);
+}
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-rows > li:first-child > .pg-row { border-radius: 24px 24px 8px 8px !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-rows > li:last-child > .pg-row { border-radius: 8px 8px 24px 24px !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-rows > li:only-child > .pg-row { border-radius: 24px !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-row:hover { box-shadow: var(--md-st-hover) !important; background: var(--md-tile) !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-row:active { border-radius: 24px !important; box-shadow: var(--md-st-press) !important; background: var(--md-tile) !important; color: var(--md-on-surface) !important; outline: 0 !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible { outline: 2px solid var(--md-primary) !important; outline-offset: -2px; background: var(--md-tile) !important; color: var(--md-on-surface) !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-ico { width: 42px; height: 42px; border-radius: 50% !important; background: var(--md-primary-container); color: var(--md-on-primary-container); box-shadow: none; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-row:active .pg-ico, html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible .pg-ico { color: var(--md-on-primary-container) !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-txt b { font-size: 16px; font-weight: 500; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-txt small, html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-row:active .pg-txt small, html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible .pg-txt small { font-size: 14px; color: var(--md-on-variant) !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-chev, html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-row:active .pg-chev { color: var(--md-on-variant) !important; }
+/* верхняя панель страницы: круглая стрелка «назад» и крупное название */
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-bar:not(.pg-chips) { background: transparent !important; color: var(--md-on-surface); padding: 2px 2px 4px; min-height: 56px; margin: 0 0 6px; gap: 6px; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-back {
+    width: 48px; min-width: 48px; height: 48px; padding: 0; justify-content: center; border-radius: 50% !important; box-shadow: none !important;
+    background: transparent !important; color: var(--md-on-surface) !important; position: relative; overflow: hidden;
+}
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-back:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-back:active { box-shadow: var(--md-st-press) !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-back .pg-back-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-back .material-icons { font-size: 24px; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-bar-title { font-family: var(--md-font); font-size: 22px; font-weight: 500; color: var(--md-on-surface); letter-spacing: 0; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-bar-title b { font-weight: 500; white-space: normal; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-bar-ico { display: none; }
+/* вкладки — тональные «пилюли» */
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-bar.pg-chips { gap: 8px; padding: 2px 2px 10px; margin: 0; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-chip {
+    min-height: 40px; padding: 0 16px 0 12px; gap: 8px; border-radius: 12px !important; box-shadow: none !important; font-family: var(--md-font); font-size: 14px; font-weight: 500;
+    background: var(--md-container-high) !important; color: var(--md-on-variant) !important; transition: background-color .2s var(--md-ease), border-radius .3s var(--md-spring), color .2s var(--md-ease);
+}
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-chip:hover { box-shadow: var(--md-st-hover) !important; }
+html[data-w95="android"] body :is(#settings, .tab) .pg-root .pg-chip[aria-selected="true"] { background: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important; border-radius: 20px !important; font-weight: 600; }
+
+/* ---------- 6. «Метро» (Windows Phone): крупный тонкий строчный текст, без значков и рамок ---------- */
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-list { padding: 4px 12px 24px; max-width: 760px; margin: 0; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-group { margin: 0 0 18px; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-group-title {
+    display: block; margin: 0 0 6px; padding: 0; font-family: var(--w95-font-text); font-size: 15px; font-weight: 600; text-transform: lowercase; color: var(--m-accent, var(--w95-title)); background: transparent; box-shadow: none;
+}
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-rows { padding: 0; background: transparent; box-shadow: none; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-rows > li + li > .pg-row { border-top: 0 !important; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-row { min-height: 0; padding: 9px 8px; gap: 0; font-family: var(--w95-font-text); color: var(--w95-text) !important; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-row:hover { background: transparent !important; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-row:active, html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible {
+    background: var(--m-accent, var(--w95-select)) !important; color: var(--m-on-accent, #fff) !important; outline: 0 !important; transform: scale(.985);
+}
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-ico, html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-chev { display: none; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-txt b { font-size: 26px; font-weight: 300; text-transform: lowercase; line-height: 1.15; letter-spacing: -.2px; white-space: normal; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-txt small { font-size: 14px; color: var(--w95-muted); margin-top: 1px; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-row:active .pg-txt small, html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible .pg-txt small { color: var(--m-on-accent, #fff) !important; opacity: .85; }
+/* панель страницы: круглая стрелка и огромное название */
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-bar:not(.pg-chips) {
+    flex-direction: column; align-items: flex-start; gap: 6px; background: transparent !important; color: var(--w95-text); padding: 4px 12px 8px; margin: 0;
+}
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-back {
+    width: 38px; min-width: 38px; height: 38px; padding: 0; justify-content: center; border-radius: 50% !important; box-shadow: none !important; background: transparent !important;
+    border: 2px solid var(--w95-text) !important; color: var(--w95-text) !important; position: relative; overflow: hidden;
+}
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-back:active { background: var(--m-accent, var(--w95-select)) !important; border-color: var(--m-accent, var(--w95-select)) !important; color: var(--m-on-accent, #fff) !important; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-back .pg-back-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-bar-title { font-family: var(--w95-font-text); color: var(--w95-text); }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-bar-title b { font-size: 34px; font-weight: 300; text-transform: lowercase; letter-spacing: -.5px; white-space: normal; line-height: 1.1; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-bar-ico { display: none; }
+/* вкладки — «панорама»: тонкие строчные заголовки, активный — белый */
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-bar.pg-chips { gap: 22px; padding: 2px 12px 10px; margin: 0; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-chip {
+    min-height: 0; padding: 0; gap: 0; background: transparent !important; box-shadow: none !important; border-radius: 0 !important;
+    font-family: var(--w95-font-text); font-size: 26px; font-weight: 300; text-transform: lowercase; color: var(--w95-muted) !important; letter-spacing: -.3px;
+}
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-chip .material-icons { display: none; }
+html[data-w95="metro"] body :is(#settings, .tab) .pg-root .pg-chip[aria-selected="true"] { background: transparent !important; color: var(--w95-text) !important; font-weight: 300; }
+
+/* ---------- 7. «Аква» (Mac OS X 2000): белый список со скруглением, голубая «капля» на выбранном, пилюля «Показать все» ---------- */
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-group-title { display: block; font-family: var(--w95-font-ui); font-size: 13px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .65); padding: 0 0 0 6px; background: transparent; box-shadow: none; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-rows { padding: 0; background: #fff; border: 1px solid #a5a5a5; border-radius: 8px !important; box-shadow: 0 1px 0 #fff, inset 0 1px 2px rgba(0, 0, 0, .14); overflow: hidden; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-rows > li + li > .pg-row { border-top: 1px solid #e4e4e4 !important; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-row { font-family: var(--w95-font-text); }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-row:hover { background: #eef5ff !important; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-row:active, html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible {
+    background: linear-gradient(to bottom, #6fa8f0 0%, #3d83e0 50%, #2f6fd0 51%, #4b93ec 100%) !important; color: #fff !important; outline: 0 !important; text-shadow: 0 -1px 0 rgba(0, 0, 0, .3) !important;
+}
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-ico {
+    width: 32px; height: 32px; border-radius: 8px !important; color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 1px 2px rgba(0, 0, 0, .35);
+    background: linear-gradient(to bottom, #8fbcf5 0%, #4d90e6 48%, #2f73d4 52%, #5aa0f0 100%);
+}
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-ico .material-icons { font-size: 20px; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-bar:not(.pg-chips) {
+    background: linear-gradient(to bottom, #f4f4f4 0%, #d9d9d9 50%, #cdcdcd 51%, #dedede 100%); color: #1a1a1a; border: 1px solid #8f8f8f; border-radius: 8px !important; padding: 5px 8px; min-height: 42px;
+    box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0, 0, 0, .25);
+}
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-back, html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-chip {
+    border: 1px solid #6e6e6e !important; border-radius: 14px !important; color: #1a1a1a !important; text-shadow: 0 1px 0 rgba(255, 255, 255, .7) !important;
+    background: linear-gradient(to bottom, #fdfdfd 0%, #e9e9e9 49%, #d2d2d2 50%, #e8e8e8 100%) !important; box-shadow: inset 0 1px 0 #fff, 0 1px 1px rgba(0, 0, 0, .25) !important;
+}
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-back { min-height: 28px; padding: 1px 12px 1px 6px; font-family: var(--w95-font-ui); font-weight: 600; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-back:active { background: linear-gradient(to bottom, #c8c8c8, #dcdcdc) !important; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .35) !important; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-bar-title { color: #1a1a1a; text-shadow: 0 1px 0 #fff; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-bar.pg-chips { gap: 0; padding: 4px 2px 10px; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-chip { border-radius: 0 !important; min-height: 32px; margin-left: -1px; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-chip:first-child { border-radius: 14px 0 0 14px !important; margin-left: 0; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-chip:last-child { border-radius: 0 14px 14px 0 !important; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-chip:only-child { border-radius: 14px !important; }
+html[data-w95="aqua"] body :is(#settings, .tab) .pg-root .pg-chip[aria-selected="true"] {
+    background: linear-gradient(to bottom, #7fb2f3 0%, #4a8de4 49%, #2f73d4 50%, #55a0f0 100%) !important; color: #fff !important; text-shadow: 0 -1px 0 rgba(0, 0, 0, .35) !important; border-color: #1f4f9c !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3) !important;
+}
+
+/* ---------- 8. «Классика 1-бит» (Mac 1984): чёрные рамки, выбранное — инверсия, полосатая строка заголовка ---------- */
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-group-title { font-family: var(--w95-font-ui); font-size: 13px; font-weight: 700; color: #000; background: #fff; box-shadow: none; display: inline-block; padding: 0 6px; margin-left: 8px; position: relative; z-index: 1; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-rows { margin-top: -9px; padding: 0; background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-rows > li + li > .pg-row { border-top: 1px solid #000 !important; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-row { color: #000 !important; font-family: var(--w95-font-text); }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-row:hover { background: #fff !important; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-row:hover .pg-txt b { text-decoration: underline; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-row:active, html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible { background: #000 !important; color: #fff !important; outline: 0 !important; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-row:active .pg-ico, html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible .pg-ico { color: #fff !important; background: #000; box-shadow: none; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-ico { width: 30px; height: 30px; color: #000; background: #fff; box-shadow: none; border: 1px solid #000; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-txt small { color: #333; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-chev { color: #000; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-bar:not(.pg-chips) {
+    background: #fff repeating-linear-gradient(0deg, #000 0 1px, #fff 1px 3px) !important; color: #000; border: 2px solid #000; padding: 4px 8px; box-shadow: 3px 3px 0 #000; min-height: 36px;
+}
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-bar-title { flex: 0 1 auto; margin: 0 auto 0 0; background: #fff; padding: 0 8px; color: #000; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-back, html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-chip {
+    background: #fff !important; color: #000 !important; border: 2px solid #000 !important; border-radius: 0 !important; box-shadow: none !important;
+}
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-back:active, html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-chip:active { background: #000 !important; color: #fff !important; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-back { min-height: 28px; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-bar.pg-chips { gap: 6px; padding: 4px 4px 10px; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root .pg-chip[aria-selected="true"] { background: #000 !important; color: #fff !important; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root :is(.pg-row, .pg-chip, .pg-back):is(:active, :focus-visible, [aria-selected="true"]) * { color: #fff !important; }
+html[data-w95="mono"] body :is(#settings, .tab) .pg-root :is(.pg-chip, .pg-back):not(:active):not([aria-selected="true"]) * { color: #000 !important; }
+
+/* ---------- 9. «Аэро» (Windows Vista): светлый список, голубая подсветка, круглая стеклянная кнопка «назад» ---------- */
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-group-title { display: block; font-family: var(--w95-font-ui); font-size: 15px; font-weight: 400; color: #fff; text-shadow: 0 0 6px rgba(0, 20, 50, .9), 0 1px 2px rgba(0, 0, 0, .8); padding: 0 0 0 4px; background: transparent; box-shadow: none; }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-rows { padding: 2px; background: #fff; border: 1px solid #8ea6c7; border-radius: 4px !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .8), 0 1px 3px rgba(0, 0, 0, .15); }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-rows > li + li > .pg-row { border-top: 0 !important; }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-row { border: 1px solid transparent !important; border-radius: 3px !important; font-family: var(--w95-font-text); margin: 1px 0; }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-row:hover {
+    background: linear-gradient(to bottom, #fcfdff 0%, #e8f2fd 100%) !important; border-color: #b8d6fb !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .8) !important;
+}
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-row:active, html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible {
+    background: linear-gradient(to bottom, #e3f0fd 0%, #c7e0fa 100%) !important; border-color: #7da2ce !important; color: #1e1e1e !important; outline: 0 !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .7) !important;
+}
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-row:active .pg-txt small, html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible .pg-txt small,
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-row:active .pg-chev, html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible .pg-chev,
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-row:active .pg-ico, html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-row:focus-visible .pg-ico { color: #1e3a8a !important; }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-ico { width: 34px; height: 34px; border-radius: 5px !important; color: #1e5fa8; background: linear-gradient(to bottom, #fff, #dde9f7); box-shadow: inset 0 0 0 1px #a9c0de; }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-chev { color: #5d7ea8; }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-bar:not(.pg-chips) {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, .92), rgba(226, 236, 249, .92)); color: #1e3a8a; border: 1px solid #9db3d3; border-radius: 4px !important; padding: 5px 8px; min-height: 44px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .8), 0 1px 3px rgba(0, 0, 0, .18);
+}
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-back {
+    width: 34px; min-width: 34px; height: 34px; padding: 0; justify-content: center; border-radius: 50% !important; color: #fff !important; border: 1px solid #2d5a94 !important;
+    background: radial-gradient(ellipse at 50% 0%, #bfe0ff 0, #5f9ee6 38%, #2a64b4 60%, #3f86d8 100%) !important; box-shadow: inset 0 1px 1px rgba(255, 255, 255, .8), 0 1px 3px rgba(0, 0, 0, .35) !important;
+    position: relative; overflow: hidden;
+}
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-back:active { filter: brightness(.9); }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-back .pg-back-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-bar-title { color: #1e3a8a; font-weight: 400; }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-bar-title b { font-weight: 400; }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-bar.pg-chips { gap: 2px; padding: 4px 2px 0; border-bottom: 1px solid #8ea6c7; margin-bottom: 8px; }
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-chip {
+    border: 1px solid #8ea6c7 !important; border-bottom: 0 !important; border-radius: 4px 4px 0 0 !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9) !important; color: #1e1e1e !important;
+    background: linear-gradient(to bottom, #f6f9fd 0%, #dbe6f4 100%) !important; font-family: var(--w95-font-text); min-height: 34px;
+}
+html[data-w95="aero"] body :is(#settings, .tab) .pg-root .pg-chip[aria-selected="true"] { background: #fff !important; font-weight: 600; box-shadow: inset 0 2px 0 #4f86c2 !important; position: relative; top: 1px; }
+
+/* ---------- 10. Телефон: чуть плотнее ---------- */
+@media (max-width: 768px) {
+    html body :is(#settings, .tab) .pg-root .pg-list { max-width: none; }
+    html body :is(#settings, .tab) .pg-root .pg-row { min-height: 52px; }
+}

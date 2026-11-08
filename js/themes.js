@@ -6,6 +6,10 @@
 
 const THEME_KEY = 'finance_w95_theme';
 
+// 4.9.0: темы «iOS 6» и «iOS 6: тёмный лён» удалены. Свои темы, сделанные на их основе, не пропадают: цвета остаются,
+// основой становится стандартная тема.
+const REMOVED_THEME_IDS = ['ios6', 'ios6-linen'];
+
 // Общие значения, которые темы могут переопределить
 const THEME_DEFAULTS = {
     light: '#ffffff', hilite: '#dfdfdf', shadow: '#808080', dark: '#0a0a0a',
@@ -69,29 +73,6 @@ function metroTheme(v) {
         fontUi: METRO_FONT, fontText: METRO_FONT,
         ...rest
     };
-}
-
-// Шрифт темы «iOS 6»: Helvetica Neue есть на устройствах Apple, на остальных — похожие системные (файлов Apple в приложении нет)
-const IOS_FONT = "'Helvetica Neue', Helvetica, Arial, 'Arimo', 'Liberation Sans', 'Noto Sans', sans-serif";
-// Полосатый фон «Настроек» iOS 6 (светлая тема) и тёмный «лён» центра уведомлений (вторая тема); рисуются градиентами
-const IOS_PINSTRIPE = 'repeating-linear-gradient(90deg, #c5ccd4 0, #c5ccd4 4px, #d3d9df 4px, #d3d9df 7px)';
-const IOS_LINEN = 'repeating-linear-gradient(0deg, rgba(255,255,255,.045) 0, rgba(255,255,255,.045) 1px, rgba(0,0,0,.10) 1px, rgba(0,0,0,.10) 2px), ' +
-    'repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0, rgba(255,255,255,.04) 1px, rgba(0,0,0,.09) 1px, rgba(0,0,0,.09) 3px), ' +
-    'repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, rgba(0,0,0,.02) 2px 4px)';
-const IOS_VARIANTS = [
-    { id: 'ios6', name: 'iOS 6',
-      face: '#ffffff', light: '#ffffff', hilite: '#f2f4f7', shadow: '#a1a8b1', dark: '#6b727b',
-      field: '#ffffff', text: '#000000', muted: '#4c566c', titleText: '#ffffff', hover: '#e8edf5', grid: '#d9d9d9',
-      income: '#25802f', expense: '#c0261e', title: '#7f98b8', title2: '#6a83a5', desktop: '#c5ccd4', select: '#1b6fe0',
-      pattern: IOS_PINSTRIPE, patternSize: 'auto' },
-    { id: 'ios6-linen', name: 'iOS 6: тёмный лён', variant: 'linen', dark: true,
-      face: '#2a2b2e', light: '#4a4c51', hilite: '#35373b', shadow: '#0c0c0d', darkEdge: '#000000',
-      field: '#1d1e20', text: '#f4f5f7', muted: '#a7b0c0', titleText: '#ffffff', hover: '#34363b', grid: '#17181a',
-      income: '#6fd27a', expense: '#ff6b60', title: '#4d4f54', title2: '#1c1d20', desktop: '#2b2b2c', select: '#2f7fe8',
-      pattern: IOS_LINEN, patternSize: 'auto' }
-];
-function iosTheme(v) {
-    return { sounds: 'tock', folder: 'ios', cssId: 'ios6', fontUi: IOS_FONT, fontText: IOS_FONT, ...v };
 }
 
 // «Android» (4.8.0) — по мотивам современного Android (Material 3 Expressive, «Material You»): тональные цвета вместо рамок,
@@ -281,10 +262,6 @@ const W95_THEMES = [
     // огромные строчные заголовки разделов на полэкрана, тонкий шрифт, никаких рамок и теней.
     // Форма — в css/metro.css (только при html[data-w95="metro"]); 10 вариантов отличаются цветом акцента и фона.
     ...METRO_VARIANTS.map(v => metroTheme(v)),
-    // «iOS 6» — по мотивам iPhone и iPad 2012 года: глянцевые сине-серые панели, сгруппированные таблицы на полосатом фоне,
-    // переключатели ВКЛ/ВЫКЛ, чёрная глянцевая панель вкладок. Форма — в css/ios6.css (только при html[data-w95="ios6"]).
-    // Две темы: светлая и тёмный «лён»; остальные темы не затронуты.
-    ...IOS_VARIANTS.map(v => iosTheme(v)),
     // «Android» (4.8.0) — Material 3 Expressive: тональные карточки, пилюли в меню, переключатели-кружки, плавающая кнопка.
     // Пять вариантов (3 светлых и 2 тёмных) в одной папке; форма — css/android.css (только при html[data-w95="android"]).
     ...ANDROID_PALETTES.map(p => androidTheme(p))
@@ -299,7 +276,6 @@ const THEME_FOLDERS = [
     { id: 'vista', name: 'Windows Vista' },
     { id: 'mac', name: 'Mac OS' },
     { id: 'metro', name: 'Windows 8 Метро' },
-    { id: 'ios', name: 'iOS' },
     { id: 'android', name: 'Android' }
 ];
 const CUSTOM_FOLDER_DEFAULT = 'Мои темы';
@@ -324,6 +300,7 @@ try {
 } catch (e) {}
 
 function isValidCustomTheme(c) {
+    if (c && REMOVED_THEME_IDS.includes(c.base)) c.base = 'standard';
     return !!(c && /^ct[a-z0-9]+$/.test(String(c.id)) && W95_THEMES.some(t => t.id === c.base));
 }
 
@@ -433,6 +410,11 @@ function applyResolvedTheme(t, { save = true, preview = false, render = true } =
 function applySavedTheme() {
     let id = 'standard';
     try { id = localStorage.getItem(THEME_KEY) || 'standard'; } catch (e) {}
+    // тема удалена (iOS 6, 4.9.0) или не найдена — стандартная, и это запоминается
+    if (REMOVED_THEME_IDS.includes(id)) {
+        id = 'standard';
+        try { localStorage.setItem(THEME_KEY, id); } catch (e) {}
+    }
     applyTheme(id, { save: false });
 }
 
