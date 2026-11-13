@@ -450,6 +450,7 @@ function applySnapshot(s) {
 
 // --- Синхронизация ---
 function scheduleCloudSync(delay = 1500) {
+    if (typeof scheduleAccountSync === 'function') scheduleAccountSync(delay); // аккаунт My Money (js/account.js)
     if (!cloudUser) return;
     clearTimeout(cloudSyncTimer);
     cloudSyncTimer = setTimeout(() => runCloudSync(), delay);
@@ -520,13 +521,20 @@ async function runCloudSync({ manual = false } = {}) {
 
 // Кнопка синхронизации (круглая внизу справа и в настройках)
 async function syncNowButton() {
+    const hasAccount = typeof acctUser !== 'undefined' && !!acctUser;
     if (!cloudUser) {
+        if (hasAccount) {
+            const ok = await runAccountSync({ manual: true });
+            showToast(ok ? 'Синхронизировано с аккаунтом' : 'Синхронизация не удалась');
+            return;
+        }
         showTab('settings');
-        const card = document.getElementById('auth-section');
+        const card = document.getElementById('account-section') || document.getElementById('auth-section');
         if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        showToast('Войдите через Google, чтобы данные сохранялись на Google Диске');
+        showToast('Войдите в аккаунт или через Google, чтобы данные хранились в облаке');
         return;
     }
+    if (hasAccount) runAccountSync({ manual: true });
     if (!hasValidToken()) { reconnectGoogle(); return; }
     const ok = await runCloudSync({ manual: true });
     showToast(ok ? 'Синхронизировано с Google Диском' : (cloudStatus.state === 'offline' ? 'Нет интернета — синхронизация позже' : 'Синхронизация не удалась'));
@@ -651,7 +659,7 @@ async function migrateFromFirebase() {
     setStatus('Подключаемся к старому аккаунту…');
     try {
         for (const src of LEGACY_FIREBASE_SCRIPTS) await loadScriptOnce(src);
-        const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(LEGACY_FIREBASE_CONFIG);
+        const app = firebase.apps.find(a => a.name === '[DEFAULT]') || firebase.initializeApp(LEGACY_FIREBASE_CONFIG);
         const auth = app.auth();
         const cred = await auth.signInWithEmailAndPassword(email, pass);
         const snap = await app.database().ref('users/' + cred.user.uid).once('value');

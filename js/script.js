@@ -54,6 +54,7 @@ window.onload = function() {
     safeStep('интерфейс', () => updateUI(false));
     safeStep('полосы прокрутки', initW95Scrollbars);
     safeStep('облако', initCloud);
+    safeStep('аккаунт', initAccount);
     safeStep('офлайн-режим', registerServiceWorker);
 };
 

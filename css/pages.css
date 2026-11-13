@@ -411,3 +411,25 @@ html[data-menu="burger"]:not([data-w95="desk95"]) body .app-wrapper > aside.side
 html body .app-footer .app-brand { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 2px 0 6px; font-size: 15px; }
 html body .app-footer .app-brand .app-logo { width: 22px; height: 22px; border-radius: 6px; box-shadow: none; }
 html[data-w95="desk95"] body .app-footer .app-brand { display: none; }
+
+/* ---------- 15. Аккаунт My Money (4.13.0, js/account.js) ---------- */
+.account-card .acct-tabs { display: flex; gap: 6px; margin: 4px 0 10px; }
+.account-card .acct-tab { flex: 1; padding: 8px 10px; cursor: pointer; opacity: .65; font-weight: 600; }
+.account-card .acct-tab.is-on { opacity: 1; box-shadow: inset 0 -3px 0 var(--w95-select, #2a6fdb); }
+.account-card .acct-form { display: flex; flex-direction: column; gap: 8px; }
+.account-card .acct-row { display: flex; flex-direction: column; gap: 3px; font-size: .92em; }
+.account-card .acct-row > span:first-child { color: var(--w95-muted, inherit); }
+.account-card .acct-row input { width: 100%; box-sizing: border-box; }
+.account-card .acct-pass-wrap { position: relative; display: block; }
+html #account-section .acct-pass-wrap > input { padding-right: 40px; margin: 0 !important; }
+html #account-section .acct-pass-wrap > .acct-eye { position: absolute !important; right: 3px; top: 3px; bottom: 3px; height: auto !important; min-width: 0 !important;
+    min-height: 0 !important; margin: 0 !important; padding: 0 6px !important; display: flex; align-items: center;
+    background: transparent !important; border: 0 !important; box-shadow: none !important; cursor: pointer; color: inherit; line-height: 1; }
+html #account-section .acct-eye .material-icons { font-size: 20px; }
+.account-card .acct-msg { margin: 8px 0 0; color: #c0392b; }
+.account-card .acct-msg.is-ok { color: inherit; }
+.account-card .acct-links { display: flex; justify-content: space-between; gap: 10px; margin: 8px 0 0; }
+.account-card .acct-links a { color: var(--w95-select, inherit); }
+.account-card .acct-avatar { font-size: 40px; opacity: .8; }
+.account-card .acct-verify { margin: 6px 0; }
+.account-card .acct-danger { color: #c0392b; }

@@ -554,6 +554,60 @@
 
                 <!-- НАСТРОЙКИ -->
                 <div id="settings" class="tab" style="display:none;">
+                    <!-- 4.13.0: аккаунт My Money — регистрация по почте и паролю для любого пользователя (js/account.js) -->
+                    <div class="card sync-card account-card" id="account-section">
+                        <h3><span class="material-icons">account_circle</span> Аккаунт My Money</h3>
+
+                        <div id="acct-logged-out">
+                            <p class="hint">Аккаунт по почте и паролю — для всех, у кого нет Google или кто не хочет им пользоваться. Данные хранятся в облаке и синхронизируются между вашими устройствами. Ваши записи видны только вам.</p>
+                            <div class="acct-tabs" role="tablist">
+                                <button type="button" class="acct-tab is-on" data-mode="login" onclick="acctSwitch('login')">Вход</button>
+                                <button type="button" class="acct-tab" data-mode="register" onclick="acctSwitch('register')">Регистрация</button>
+                            </div>
+                            <form class="acct-form" onsubmit="event.preventDefault(); acctSubmit();" novalidate>
+                                <label class="acct-row" id="acct-name-row" style="display:none;"><span>Имя</span>
+                                    <input type="text" id="acct-name" maxlength="40" autocomplete="name" placeholder="Как к вам обращаться"></label>
+                                <label class="acct-row"><span>Почта</span>
+                                    <input type="email" id="acct-email" autocomplete="username" inputmode="email" placeholder="name@example.com"></label>
+                                <label class="acct-row" id="acct-pass-row"><span>Пароль</span>
+                                    <span class="acct-pass-wrap"><input type="password" id="acct-pass" autocomplete="current-password" placeholder="Не меньше 6 символов">
+                                    <button type="button" class="acct-eye" id="acct-eye" onclick="acctTogglePass()" aria-label="Показать пароль"><span class="material-icons">visibility</span></button></span></label>
+                                <label class="acct-row" id="acct-pass2-row" style="display:none;"><span>Пароль ещё раз</span>
+                                    <input type="password" id="acct-pass2" autocomplete="new-password"></label>
+                                <button type="submit" class="btn-primary btn-block" id="acct-submit"><span class="material-icons">login</span> Войти</button>
+                            </form>
+                            <p class="hint acct-msg" id="acct-msg" role="status" style="display:none;"></p>
+                            <p class="hint acct-links">
+                                <a href="#" id="acct-forgot" onclick="event.preventDefault(); acctSwitch('reset')">Забыли пароль?</a>
+                                <a href="#" id="acct-back" style="display:none;" onclick="event.preventDefault(); acctSwitch('login')">← Назад ко входу</a>
+                            </p>
+                        </div>
+
+                        <div id="acct-logged-in" style="display:none;">
+                            <div class="google-account">
+                                <span class="material-icons acct-avatar">account_circle</span>
+                                <p>Вы вошли как:<br><strong id="acct-who"></strong></p>
+                            </div>
+                            <div class="acct-verify" id="acct-verify" style="display:none;">
+                                <p class="hint">Почта не подтверждена. Откройте письмо от My Money и нажмите ссылку. Если письма нет — проверьте «Спам».</p>
+                                <div class="btn-group">
+                                    <button type="button" class="btn-secondary" onclick="acctResendVerification()"><span class="material-icons">forward_to_inbox</span> Прислать ещё раз</button>
+                                    <button type="button" class="btn-secondary" onclick="acctRefreshUser()"><span class="material-icons">task_alt</span> Я подтвердил</button>
+                                </div>
+                            </div>
+                            <p class="hint cloud-status" id="acct-status"></p>
+                            <div class="btn-group">
+                                <button type="button" class="btn-primary" onclick="runAccountSync({ manual: true })"><span class="material-icons">sync</span> Синхронизировать</button>
+                                <button type="button" class="btn-secondary" onclick="acctSignOut()"><span class="material-icons">logout</span> Выйти</button>
+                            </div>
+                            <details class="legacy-migrate">
+                                <summary>Удалить аккаунт</summary>
+                                <p class="hint">Аккаунт и все данные в облаке будут удалены. На этом устройстве данные останутся.</p>
+                                <button type="button" class="btn-secondary btn-block acct-danger" onclick="acctDelete()"><span class="material-icons">delete_forever</span> Удалить аккаунт навсегда</button>
+                            </details>
+                        </div>
+                    </div>
+
                     <div class="card sync-card" id="auth-section">
                         <h3><span class="material-icons">add_to_drive</span> Аккаунт Google (Google Диск)</h3>
 
@@ -576,14 +630,7 @@
                             </div>
                         </div>
 
-                        <details class="legacy-migrate">
-                            <summary>Перенести данные из старого аккаунта (вход по email)</summary>
-                            <p class="hint">Один раз перенесёт записи, подписки, копилку, цель и лимит из прежнего облака. Уже имеющиеся здесь данные не пропадут.</p>
-                            <input type="email" id="legacy-email" placeholder="Email старого аккаунта" autocomplete="username">
-                            <input type="password" id="legacy-password" placeholder="Пароль старого аккаунта" autocomplete="current-password">
-                            <button type="button" class="btn-secondary btn-block" onclick="migrateFromFirebase()"><span class="material-icons">move_down</span> Перенести данные</button>
-                            <p class="hint" id="legacy-status"></p>
-                        </details>
+                        <p class="hint">Был вход по email в старых версиях? Просто войдите в «Аккаунт My Money» выше с той же почтой и паролем — записи перенесутся сами.</p>
                     </div>
 
                     <div class="card" id="profile-section">
@@ -748,7 +795,16 @@
                         </div>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>4.12.3 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <h4>4.13.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Регистрация для любого пользователя: новый блок «Аккаунт My Money» в Настройках (Аккаунт и данные) — вход и регистрация по почте и паролю, без аккаунта Google. Данные хранятся в облаке и синхронизируются между устройствами; каждый видит только свои записи.</li>
+                                    <li>Подтверждение почты письмом, «Забыли пароль?» (письмо для смены пароля), выход и удаление аккаунта вместе с данными в облаке.</li>
+                                    <li>Аккаунт и Google Диск можно подключить одновременно — данные сольются в обоих местах. Фото чеков и свои звуки по-прежнему хранятся только на Google Диске.</li>
+                                    <li>Был вход по email в старых версиях — достаточно войти в «Аккаунт My Money» с той же почтой: записи перенесутся сами (отдельный блок переноса убран).</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.12.3 «Экстра»</h4>
                                 <ul>
                                     <li>Тема оформления из версий 4.12.0–4.12.2 удалена полностью: вместе с ней убраны её папка в «Темах оформления», набор звуков, группа и файлы шрифтов. Если она была выбрана, включается стандартная тема; свои темы на её основе сохраняются (основой становится стандартная).</li>
                                 </ul>
@@ -1071,7 +1127,7 @@
                     </div>
 
                     <!-- 4.6.0: название версии и год обновления — самое последнее в Настройках (js/script.js подставляет значения из js/admin.js) -->
-                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.12.3</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
+                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.13.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
                 </div>
             </main>
         </div>
@@ -1093,6 +1149,7 @@
     <script src="js/themes.js"></script>
     <script src="js/scrollbars.js"></script>
     <script src="js/cloud.js"></script>
+    <script src="js/account.js"></script>
     <script src="js/dialogs.js"></script>
     <script src="js/extras.js"></script>
     <script src="js/importer.js"></script>

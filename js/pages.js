@@ -43,7 +43,7 @@
 
     // Группы пунктов меню Настроек. Карточка попадает в группу по своему id или по названию значка в заголовке (он не переводится)
     const SM_GROUPS = [
-        { name: 'Аккаунт и данные', keys: ['auth-section', 'profile-section', 'lock', 'speed', 'save'] },
+        { name: 'Аккаунт и данные', keys: ['account-section', 'auth-section', 'profile-section', 'lock', 'speed', 'save'] },
         { name: 'Оформление и вид', keys: ['palette', 'desk-wall-card', 'font-settings-card', 'layout-settings-card', 'menu_open', 'icon-app-card',
             'header-settings-card', 'icon-settings-form-card', 'icon-settings-history-card'] },
         { name: 'Ввод, звук и уведомления', keys: ['label', 'ocr-card', 'voice-card', 'volume_up', 'notify-card'] },
@@ -99,6 +99,10 @@
         if (tab.id !== 'settings') return '';
         const val = (id) => { const el = document.getElementById(id); return el ? (el.value || el.textContent || '').trim() : ''; };
         try {
+            if (card.id === 'account-section') {
+                const inn = document.getElementById('acct-logged-in');
+                return inn && inn.style.display !== 'none' ? val('acct-who') : tt('Вход не выполнен');
+            }
             if (card.id === 'auth-section') {
                 const out = document.getElementById('auth-logged-in');
                 const logged = out && out.style.display !== 'none';
