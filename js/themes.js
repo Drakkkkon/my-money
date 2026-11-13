@@ -8,7 +8,7 @@ const THEME_KEY = 'finance_w95_theme';
 
 // 4.9.0: темы «iOS 6» и «iOS 6: тёмный лён» удалены. Свои темы, сделанные на их основе, не пропадают: цвета остаются,
 // основой становится стандартная тема.
-const REMOVED_THEME_IDS = ['ios6', 'ios6-linen'];
+const REMOVED_THEME_IDS = ['ios6', 'ios6-linen', 'doom']; // 4.12.3: «Doom 1993» удалена
 
 // Общие значения, которые темы могут переопределить
 const THEME_DEFAULTS = {
@@ -144,28 +144,6 @@ const DESK95X_THEMES = [
       title: '#56687c', title2: '#7488a0', desktop: '#8499ad', select: '#56687c', ...DESK95X_WALL('pinstripe') }
 ].map(t => ({ folder: 'desk95x', cssId: 'desk95', ...t }));
 
-// «Doom 1993» (4.12.0) — тёмная тема в духе шутеров начала 90-х: кирпичная стена вместо рабочего стола, окна из тёмного
-// металла, заголовки цвета запёкшейся крови, красные «цифры на панели», пиксельные шрифты и звуки «убитых монстров».
-// Всё нарисовано и синтезировано заново (кирпичи — плитка ниже, звуки — набор 'doom' в js/sound.js): без файлов, картинок,
-// логотипа, героев и монстров игры. Для личного, некоммерческого использования. Форма — css/doom.css (только при html[data-w95="doom"]).
-// Тема видна только при русском языке (langs): в других языках (и в дореформенном русском) её нет в списке, а если она была
-// выбрана, то на время работает стандартная — выбор не стирается и вернётся вместе с русским языком.
-// Плитка кирпичей 64×64 (SVG, нарисована скриптом один раз). Внутри только одинарные кавычки: значение попадает в style="..." значков тем
-const DOOM_BRICKS = "url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2264%22%20height=%2264%22%20viewBox=%220%200%2064%2064%22%20shape-rendering=%22crispEdges%22%3E%3Cpath%20fill=%22%23150e09%22%20d=%22M0%200h64v64h-64z%22/%3E%3Cpath%20fill=%22%235a3a25%22%20d=%22M1%201h31v15h-31zM17%2017h31v15h-31zM49%2049h15v15h-15zM0%2049h16v15h-16z%22/%3E%3Cpath%20fill=%22%238c6140%22%20d=%22M1%201h31v1h-31zM1%201h1v15h-1zM33%201h31v1h-31zM33%201h1v15h-1zM1%201h31v1h-31zM1%201h1v15h-1zM0%2017h16v1h-16zM0%2017h-14v15h--14zM17%2017h31v1h-31zM17%2017h1v15h-1zM49%2017h15v1h-15zM49%2017h1v15h-1zM0%2017h16v1h-16zM0%2017h-14v15h--14zM17%2017h31v1h-31zM17%2017h1v15h-1zM1%2033h31v1h-31zM1%2033h1v15h-1zM33%2033h31v1h-31zM33%2033h1v15h-1zM1%2033h31v1h-31zM1%2033h1v15h-1zM0%2049h16v1h-16zM0%2049h-14v15h--14zM17%2049h31v1h-31zM17%2049h1v15h-1zM49%2049h15v1h-15zM49%2049h1v15h-1zM0%2049h16v1h-16zM0%2049h-14v15h--14zM17%2049h31v1h-31zM17%2049h1v15h-1z%22/%3E%3Cpath%20fill=%22%232b1b11%22%20d=%22M1%2015h31v1h-31zM31%201h1v15h-1zM33%2015h31v1h-31zM63%201h1v15h-1zM1%2015h31v1h-31zM31%201h1v15h-1zM0%2031h16v1h-16zM15%2017h1v15h-1zM17%2031h31v1h-31zM47%2017h1v15h-1zM49%2031h15v1h-15zM79%2017h-15v15h--15zM0%2031h16v1h-16zM15%2017h1v15h-1zM17%2031h31v1h-31zM47%2017h1v15h-1zM1%2047h31v1h-31zM31%2033h1v15h-1zM33%2047h31v1h-31zM63%2033h1v15h-1zM1%2047h31v1h-31zM31%2033h1v15h-1zM0%2063h16v1h-16zM15%2049h1v15h-1zM17%2063h31v1h-31zM47%2049h1v15h-1zM49%2063h15v1h-15zM79%2049h-15v15h--15zM0%2063h16v1h-16zM15%2049h1v15h-1zM17%2063h31v1h-31zM47%2049h1v15h-1z%22/%3E%3Cpath%20fill=%22%23553624%22%20d=%22M33%201h31v15h-31zM0%2017h16v15h-16z%22/%3E%3Cpath%20fill=%22%236a4a31%22%20d=%22M1%201h31v15h-31zM17%2017h31v15h-31zM17%2049h31v15h-31z%22/%3E%3Cpath%20fill=%22%2343291b%22%20d=%22M49%2017h15v15h-15zM0%2017h16v15h-16zM1%2033h31v15h-31zM0%2049h16v15h-16z%22/%3E%3Cpath%20fill=%22%234d3220%22%20d=%22M1%2033h31v15h-31z%22/%3E%3Cpath%20fill=%22%235f3e29%22%20d=%22M33%2033h31v15h-31z%22/%3E%3Cpath%20fill=%22%23664229%22%20d=%22M17%2049h31v15h-31z%22/%3E%3Cpath%20fill=%22%233a2517%22%20d=%22M21%207h1v1h-1zM20%209h1v1h-1zM17%206h1v1h-1zM15%203h1v1h-1zM26%2012h1v1h-1zM3%208h1v1h-1zM35%2012h1v1h-1zM55%203h1v1h-1zM35%2010h1v1h-1zM40%2011h1v1h-1zM26%2012h1v1h-1zM26%207h1v1h-1zM12%205h1v1h-1zM7%208h1v1h-1zM10%208h1v1h-1zM25%2026h1v1h-1zM26%2027h1v1h-1zM12%2024h1v1h-1zM53%2022h1v1h-1zM56%2028h1v1h-1zM5%2027h1v1h-1zM26%2024h1v1h-1zM24%2028h1v1h-1zM21%2041h1v1h-1zM24%2043h1v1h-1zM17%2040h1v1h-1zM44%2035h1v1h-1zM60%2040h1v1h-1zM42%2040h1v1h-1zM44%2035h1v1h-1zM5%2036h1v1h-1zM24%2042h1v1h-1zM20%2044h1v1h-1zM16%2043h1v1h-1zM9%2061h1v1h-1zM27%2059h1v1h-1zM37%2057h1v1h-1zM36%2056h1v1h-1zM29%2055h1v1h-1zM56%2054h1v1h-1zM4%2054h1v1h-1zM52%2057h1v1h-1zM13%2058h1v1h-1zM4%2061h1v1h-1zM9%2061h1v1h-1zM40%2052h1v1h-1zM44%2053h1v1h-1zM38%2054h1v1h-1zM26%2051h1v1h-1zM39%2061h1v1h-1z%22/%3E%3Cpath%20fill=%22%238c6140%22%20d=%22M26%2012h1v1h-1zM26%2011h1v1h-1zM7%209h1v1h-1zM14%209h1v1h-1zM28%208h1v1h-1zM55%207h1v1h-1zM49%207h1v1h-1zM54%2013h1v1h-1zM61%204h1v1h-1zM36%203h1v1h-1zM20%209h1v1h-1zM19%209h1v1h-1zM18%206h1v1h-1zM26%204h1v1h-1zM3%206h1v1h-1zM6%205h1v1h-1zM2%2023h1v1h-1zM9%2023h1v1h-1zM4%2019h1v1h-1zM25%2022h1v1h-1zM21%2021h1v1h-1zM42%2020h1v1h-1zM44%2021h1v1h-1zM30%2021h1v1h-1zM44%2021h1v1h-1zM56%2024h1v1h-1zM5%2022h1v1h-1zM61%2020h1v1h-1zM10%2026h1v1h-1zM23%2024h1v1h-1zM43%2029h1v1h-1zM30%2025h1v1h-1zM41%2029h1v1h-1zM33%2022h1v1h-1zM30%2023h1v1h-1zM44%2024h1v1h-1zM31%2022h1v1h-1zM26%2043h1v1h-1zM14%2036h1v1h-1zM12%2040h1v1h-1zM16%2035h1v1h-1zM7%2044h1v1h-1zM41%2045h1v1h-1zM49%2036h1v1h-1zM49%2037h1v1h-1zM38%2038h1v1h-1zM40%2044h1v1h-1zM24%2038h1v1h-1zM8%2043h1v1h-1zM3%2035h1v1h-1zM24%2035h1v1h-1zM20%2042h1v1h-1zM21%2041h1v1h-1zM12%2061h1v1h-1zM6%2051h1v1h-1zM4%2054h1v1h-1zM35%2057h1v1h-1zM21%2054h1v1h-1zM31%2052h1v1h-1zM41%2060h1v1h-1zM22%2055h1v1h-1zM44%2052h1v1h-1zM40%2052h1v1h-1zM9%2055h1v1h-1zM5%2055h1v1h-1zM55%2052h1v1h-1zM62%2058h1v1h-1zM30%2058h1v1h-1zM32%2052h1v1h-1zM45%2056h1v1h-1zM20%2060h1v1h-1zM29%2060h1v1h-1z%22/%3E%3Cpath%20fill=%22%232b1b11%22%20d=%22M6%203h1v1h-1zM25%2012h1v1h-1zM39%207h1v1h-1zM15%206h1v1h-1zM9%2011h1v1h-1zM6%2028h1v1h-1zM1%2029h1v1h-1zM29%2023h1v1h-1zM20%2020h1v1h-1zM23%2026h1v1h-1zM45%2023h1v1h-1zM56%2029h1v1h-1zM53%2027h1v1h-1zM13%2020h1v1h-1zM45%2020h1v1h-1zM44%2023h1v1h-1zM20%2040h1v1h-1zM13%2039h1v1h-1zM3%2041h1v1h-1zM6%2042h1v1h-1zM23%2040h1v1h-1zM0%2060h1v1h-1zM43%2052h1v1h-1zM32%2052h1v1h-1zM60%2061h1v1h-1zM53%2058h1v1h-1zM41%2053h1v1h-1zM25%2052h1v1h-1zM23%2056h1v1h-1z%22/%3E%3Cpath%20fill=%22%237a5233%22%20d=%22M20%206h1v1h-1zM53%206h1v1h-1zM43%204h1v1h-1zM61%2012h1v1h-1zM56%205h1v1h-1zM8%209h1v1h-1zM9%2021h1v1h-1zM30%2028h1v1h-1zM30%2028h1v1h-1zM54%2025h1v1h-1zM57%2019h1v1h-1zM13%2020h1v1h-1zM35%2022h1v1h-1zM28%2022h1v1h-1zM14%2038h1v1h-1zM17%2043h1v1h-1zM20%2040h1v1h-1zM61%2038h1v1h-1zM55%2044h1v1h-1zM52%2037h1v1h-1zM38%2041h1v1h-1zM46%2037h1v1h-1zM4%2040h1v1h-1zM6%2044h1v1h-1zM2%2056h1v1h-1zM36%2061h1v1h-1zM8%2060h1v1h-1zM13%2052h1v1h-1zM26%2060h1v1h-1z%22/%3E%3C/svg%3E')";
-// 4.12.2: «Press Start 2P» убран из запасных шрифтов кнопок/вкладок — он подставлялся на отдельные буквы (о, п) и они выглядели крупнее остальных
-const DOOM_FONT_UI = "'Pixelify Sans', 'Trebuchet MS', 'Segoe UI', sans-serif";
-const DOOM_FONT_TEXT = "'Pixelify Sans', 'Trebuchet MS', 'Segoe UI', sans-serif";
-// Шрифт заголовков и «цифр на панели» подгружается только вместе с этой темой (ensureDoomFont)
-const DOOM_FONT_LINK = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
-function ensureDoomFont() {
-    if (document.getElementById('doom-font-css')) return;
-    const link = document.createElement('link');
-    link.id = 'doom-font-css';
-    link.rel = 'stylesheet';
-    link.href = DOOM_FONT_LINK;
-    document.head.appendChild(link);
-}
-
 // Темы, доступные не на всех языках (langs: ['ru'])
 function themeAvailable(t) {
     if (!t || !t.langs) return true;
@@ -293,16 +271,7 @@ const W95_THEMES = [
     ...METRO_VARIANTS.map(v => metroTheme(v)),
     // «Android» (4.8.0) — Material 3 Expressive: тональные карточки, пилюли в меню, переключатели-кружки, плавающая кнопка.
     // Пять вариантов (3 светлых и 2 тёмных) в одной папке; форма — css/android.css (только при html[data-w95="android"]).
-    ...ANDROID_PALETTES.map(p => androidTheme(p)),
-    // «Doom 1993» (4.12.0): тёмный металл, красные заголовки, кирпичная стена; звуки — набор 'doom' (js/sound.js).
-    // Только для русского языка; форма — css/doom.css.
-    { id: 'doom', name: 'Doom 1993', sounds: 'doom', folder: 'doom', langs: ['ru'], dark: true,
-        face: '#4a443d', light: '#8c8375', hilite: '#625a50', shadow: '#2b2722', darkEdge: '#050403',
-        field: '#0e0b09', text: '#e6dcc4', muted: '#ab9e83', titleText: '#ffd27a',
-        hover: '#3a2a22', grid: '#3b342d', income: '#46d246', expense: '#ff4a34',
-        title: '#4d0a05', title2: '#a8160a', desktop: '#24160d', select: '#8c0f07',
-        pattern: `linear-gradient(rgba(12, 7, 3, .5), rgba(12, 7, 3, .5)), ${DOOM_BRICKS}`, patternSize: '64px 64px',
-        fontUi: DOOM_FONT_UI, fontText: DOOM_FONT_TEXT }
+    ...ANDROID_PALETTES.map(p => androidTheme(p))
 ];
 
 let currentThemeId = 'standard';
@@ -314,8 +283,7 @@ const THEME_FOLDERS = [
     { id: 'vista', name: 'Windows Vista' },
     { id: 'mac', name: 'Mac OS' },
     { id: 'metro', name: 'Windows 8 Метро' },
-    { id: 'android', name: 'Android' },
-    { id: 'doom', name: 'Doom 1993' }
+    { id: 'android', name: 'Android' }
 ];
 const CUSTOM_FOLDER_DEFAULT = 'Мои темы';
 
@@ -362,7 +330,7 @@ function themeById(id) {
     return W95_THEMES.find(t => t.id === id) || W95_THEMES[0];
 }
 
-// Как themeById, но тема, которой нет на текущем языке (Doom 1993 не на русском), заменяется стандартной
+// Как themeById, но тема, которой нет на текущем языке (поле langs у темы), заменяется стандартной
 function availableThemeById(id) {
     const t = themeById(id);
     return themeAvailable(t) ? t : W95_THEMES[0];
@@ -437,7 +405,6 @@ function applyResolvedTheme(t, { save = true, preview = false, render = true } =
         if (flags.has(f)) root.setAttribute(f, ''); else root.removeAttribute(f);
     });
 
-    if ((t.cssId || t.id) === 'doom') ensureDoomFont(); // пиксельный шрифт заголовков — только вместе с этой темой
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', t.desktop);
 

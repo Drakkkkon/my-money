@@ -1,8 +1,7 @@
 // --- ЗВУКИ ИНТЕРФЕЙСА ---
 // Все звуки синтезируются Web Audio API прямо в браузере: без звуковых файлов и без чужой музыки.
 // У каждой темы свой набор (js/themes.js → sounds): классика, колокольчики, дерево, вода, дождь, гроза,
-// мягкий синтезатор, фанфары, леопард (рычание и лязг когтей), неон (искажённое гудение и «зипы»),
-// Doom 1993 (синтезированные «предсмертные крики монстров», выстрел и «шлёп»).
+// мягкий синтезатор, фанфары, леопард (рычание и лязг когтей), неон (искажённое гудение и «зипы»).
 // Браузеры разрешают звук только после первого касания или нажатия, поэтому мелодия звучит при разблокировке.
 
 const SOUND_KEY = 'finance_sound';
@@ -252,124 +251,6 @@ function neonHum(ctx, { start = 0, dur = 0.35, gain = 0.09 }) {
     g.connect(masterGain);
 }
 
-// ---------- «Doom 1993» (4.12.0): предсмертные крики монстров, выстрел, «шлёп» ----------
-// Всё синтезируется здесь, прямо в браузере: свои звуки в духе шутеров начала 90-х, а не записи игры (файлы игры не нужны
-// и не используются). Если нужны именно «те самые» записи — их можно назначить вручную: Настройки → «Звуки» → «Выбрать звуки»
-// (js/soundpicker.js), выбор действует отдельно для каждой темы.
-// Голос монстра: пила с падающей высотой и «дрожью» → искажение (хрип) → полосовые фильтры-форманты (как гласные «а», «о»,
-// «у»; «рот закрывается» — форманты ползут вниз) → рычащее подрагивание громкости → огибающая. Плюс шум дыхания.
-// Разные монстры отличаются высотой, формантами, хрипом, длиной и подрагиванием.
-function monsterCry(ctx, o = {}) {
-    const { start = 0, dur = 0.4, f0 = 180, f1 = 80, gain = 0.2, formants = [[700, 6], [1200, 6]], rasp = 40,
-        trem = 0, tremDepth = 0.5, breath = 0.3, wobble = 30, lp = 3200, attack = 0.012, hold = 0.35, open = 0.7, makeup = 3 } = o;
-    const t0 = ctx.currentTime + start;
-    const dist = ctx.createWaveShaper();
-    dist.curve = distortionCurve(rasp);
-    // «дрожь» голосовых связок: медленное покачивание высоты
-    const wob = ctx.createOscillator();
-    wob.frequency.value = 8 + Math.random() * 6;
-    const wobDepth = ctx.createGain();
-    wobDepth.gain.value = wobble; // в центах
-    wob.connect(wobDepth);
-    const oscs = [[f0, f1, 'sawtooth', 1], [f0 * 0.5, f1 * 0.5, 'square', 0.4]].map(([a, b, type, level]) => {
-        const osc = ctx.createOscillator();
-        osc.type = type;
-        osc.frequency.setValueAtTime(a, t0);
-        osc.frequency.exponentialRampToValueAtTime(Math.max(20, b), t0 + dur);
-        wobDepth.connect(osc.detune);
-        const lvl = ctx.createGain();
-        lvl.gain.value = level;
-        osc.connect(lvl);
-        lvl.connect(dist);
-        osc.start(t0);
-        osc.stop(t0 + dur + 0.05);
-        return osc;
-    });
-    wob.start(t0);
-    wob.stop(t0 + dur + 0.05);
-    // форманты
-    const bank = ctx.createGain();
-    bank.gain.value = makeup;
-    formants.forEach(([f, q]) => {
-        const bp = ctx.createBiquadFilter();
-        bp.type = 'bandpass';
-        bp.Q.value = q;
-        bp.frequency.setValueAtTime(f, t0);
-        bp.frequency.exponentialRampToValueAtTime(f * open, t0 + dur);
-        dist.connect(bp);
-        bp.connect(bank);
-    });
-    const lpf = ctx.createBiquadFilter();
-    lpf.type = 'lowpass';
-    lpf.frequency.value = lp;
-    // рычание: быстрое подрагивание громкости
-    const am = ctx.createGain();
-    am.gain.value = trem ? 1 - tremDepth / 2 : 1;
-    if (trem) {
-        const l2 = ctx.createOscillator();
-        l2.frequency.value = trem * (0.9 + Math.random() * 0.2);
-        const d2 = ctx.createGain();
-        d2.gain.value = tremDepth / 2;
-        l2.connect(d2);
-        d2.connect(am.gain);
-        l2.start(t0);
-        l2.stop(t0 + dur + 0.05);
-    }
-    const env = ctx.createGain();
-    env.gain.setValueAtTime(0.0001, t0);
-    env.gain.exponentialRampToValueAtTime(gain, t0 + attack);
-    env.gain.setValueAtTime(gain, t0 + Math.max(attack + 0.001, dur * hold));
-    env.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    bank.connect(lpf);
-    lpf.connect(am);
-    am.connect(env);
-    env.connect(masterGain);
-    if (breath) noise(ctx, { start, dur: Math.min(dur, 0.9), type: 'bandpass', freq: formants[0][0] * 1.5, endFreq: formants[0][0], q: 0.9, gain: gain * breath, attack });
-    return oscs;
-}
-
-// Пузырьки: короткие падающие «бульк» (какодемон, шлёп)
-function bubbles(ctx, { start = 0, dur = 0.8, count = 8, gain = 0.1, freq = 500 } = {}) {
-    for (let i = 0; i < count; i++) {
-        const s = start + Math.random() * dur;
-        const f = freq * (0.6 + Math.random() * 0.9);
-        tone(ctx, { freq: f, endFreq: f * 0.45, start: s, dur: 0.05 + Math.random() * 0.05, type: 'sine', gain: gain * (0.5 + Math.random() * 0.5), attack: 0.004 });
-        noise(ctx, { start: s, dur: 0.04, type: 'bandpass', freq: f * 2, q: 3, gain: gain * 0.5, attack: 0.002 });
-    }
-}
-
-// «Шлёп»: монстр упал (мокрый глухой удар и пара пузырьков)
-function splat(ctx, { start = 0, gain = 0.2 } = {}) {
-    noise(ctx, { start, dur: 0.22, type: 'lowpass', freq: 1800, endFreq: 160, q: 1.2, gain, attack: 0.004 });
-    tone(ctx, { freq: 150, endFreq: 38, start, dur: 0.2, type: 'sine', gain: gain * 0.9, attack: 0.004 });
-    bubbles(ctx, { start: start + 0.05, dur: 0.2, count: 3, gain: gain * 0.5, freq: 380 });
-}
-
-// Выстрел из дробовика: резкий щелчок, шум с падающим фильтром и низкий удар
-function blast(ctx, { start = 0, gain = 0.3, dur = 0.34 } = {}) {
-    noise(ctx, { start, dur, type: 'lowpass', freq: 5200, endFreq: 380, q: 0.7, gain, attack: 0.001 });
-    noise(ctx, { start, dur: dur * 0.25, type: 'highpass', freq: 2500, gain: gain * 0.7, attack: 0.001 });
-    tone(ctx, { freq: 130, endFreq: 34, start, dur: dur * 0.8, type: 'sine', gain: gain * 1.1, attack: 0.002 });
-}
-
-// Голоса: каждый раз чуть другая высота (±7%), чтобы одинаковые нажатия не звучали «магнитофонной петлёй»
-const DOOM_VOICES = {
-    // «бывший человек»: короткое хриплое «ах!»
-    trooper: (c, o = {}) => { const k = 0.93 + Math.random() * 0.14; monsterCry(c, { dur: 0.2, f0: 215 * k, f1: 125 * k, formants: [[800, 5], [1250, 6]], rasp: 30, breath: 0.55, gain: 0.12, hold: 0.3, open: 0.75, ...o }); },
-    // «сержант»: ниже и тяжелее, «ооргх»
-    sergeant: (c, o = {}) => { const k = 0.93 + Math.random() * 0.14; monsterCry(c, { dur: 0.3, f0: 150 * k, f1: 78 * k, formants: [[560, 5], [980, 6]], rasp: 45, trem: 30, tremDepth: 0.4, breath: 0.45, gain: 0.13, hold: 0.3, open: 0.7, ...o }); },
-    // «имп»: пронзительный хрипящий визг, падающий вниз
-    imp: (c, o = {}) => { const k = 0.93 + Math.random() * 0.14; monsterCry(c, { dur: 0.55, f0: 560 * k, f1: 190 * k, formants: [[1100, 8], [2500, 8]], rasp: 80, trem: 42, tremDepth: 0.55, breath: 0.4, gain: 0.17, hold: 0.25, open: 0.6, wobble: 55, lp: 4200, ...o }); },
-    // «демон»: низкий рык с дрожью, затихающий
-    demon: (c, o = {}) => { const k = 0.93 + Math.random() * 0.14; monsterCry(c, { dur: 0.7, f0: 112 * k, f1: 50 * k, formants: [[350, 5], [760, 5]], rasp: 60, trem: 26, tremDepth: 0.7, breath: 0.5, gain: 0.2, hold: 0.4, open: 0.65, wobble: 40, lp: 1500, ...o }); },
-    // «какодемон»: долгий булькающий стон с пузырями
-    cacodemon: (c, o = {}) => {
-        const k = 0.95 + Math.random() * 0.1;
-        monsterCry(c, { dur: 1.1, f0: 150 * k, f1: 42 * k, formants: [[320, 4], [650, 5]], rasp: 25, trem: 13, tremDepth: 0.85, breath: 0.5, gain: 0.26, hold: 0.45, open: 0.6, wobble: 50, lp: 950, ...o });
-        bubbles(c, { start: (o.start || 0) + 0.15, dur: 0.85, count: 9, gain: 0.07, freq: 300 });
-    }
-};
-
 // Мягкий аккорд-«подушка»
 function pad(ctx, freqs, { start = 0, dur = 0.5, gain = 0.06, type = 'triangle', attack = 0.08 } = {}) {
     freqs.forEach(f => tone(ctx, { freq: f, start, dur, type, gain, attack }));
@@ -522,23 +403,6 @@ const SOUND_PACKS = {
         open: c => { neonHum(c, { dur: 0.3 }); neonZap(c, { start: 0.05, dur: 0.14, from: 500, to: 2200, gain: 0.08 }); },
         close: c => { neonZap(c, { dur: 0.16, from: 2200, to: 300, gain: 0.08 }); neonHum(c, { dur: 0.2, gain: 0.06 }); },
         startup: c => { neonHum(c, { dur: 1.4, gain: 0.08 }); [261.63, 392, 523.25, 783.99].forEach((f, i) => neonZap(c, { start: 0.25 + i * 0.16, dur: 0.22, from: f * 2, to: f, gain: 0.07 })); }
-    },
-    // «Doom 1993» (4.12.0): на каждое действие — «предсмертный крик монстра» (свои синтезированные звуки в духе шутеров начала 90-х)
-    doom: {
-        click: c => DOOM_VOICES.trooper(c),
-        menu: c => DOOM_VOICES.sergeant(c, { dur: 0.22 }),
-        open: c => { DOOM_VOICES.imp(c); splat(c, { start: 0.45, gain: 0.1 }); },
-        close: c => { DOOM_VOICES.demon(c); splat(c, { start: 0.62, gain: 0.1 }); },
-        scroll: c => noise(c, { dur: 0.03, type: 'bandpass', freq: 520, endFreq: 220, q: 2, gain: 0.22, attack: 0.002 }),
-        success: c => { blast(c, { gain: 0.1, dur: 0.18 }); DOOM_VOICES.imp(c, { start: 0.1, dur: 0.32, gain: 0.12 }); splat(c, { start: 0.38, gain: 0.08 }); },
-        error: c => DOOM_VOICES.demon(c, { dur: 0.32, f0: 85, f1: 45, gain: 0.2 }),
-        appclose: c => { DOOM_VOICES.cacodemon(c, { dur: 0.9 }); splat(c, { start: 0.85, gain: 0.1 }); },
-        startup: c => {
-            blast(c, { gain: 0.22 });
-            DOOM_VOICES.imp(c, { start: 0.2, dur: 0.6 });
-            DOOM_VOICES.cacodemon(c, { start: 0.6, gain: 0.2 });
-            splat(c, { start: 1.62, gain: 0.16 });
-        }
     }
 };
 

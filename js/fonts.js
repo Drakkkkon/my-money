@@ -1,6 +1,6 @@
 // --- ШРИФТЫ ---
 // 10 шрифтов с Google Fonts (все с кириллицей): 3 общих для всех тем и по 1–2 своих у каждой группы тем
-// (Windows 95, Windows Vista, Mac OS, Windows 8 Метро, Android, Doom 1993). Шрифт выбирается отдельно для заголовков/кнопок
+// (Windows 95, Windows Vista, Mac OS, Windows 8 Метро, Android). Шрифт выбирается отдельно для заголовков/кнопок
 // и для текста/цифр и запоминается для группы тем: при смене темы на другую группу действует её выбор.
 // Свои шрифты (TTF, OTF, WOFF, WOFF2) хранятся на устройстве; перед установкой приложение проверяет, какие
 // буквы в шрифте есть (русские, казахские, дореформенные, латиница, цифры, ₸) и насколько он шире/выше обычного.
@@ -8,8 +8,7 @@
 
 const FONT_GROUPS = [
     { id: 'win95', name: 'Windows 95' }, { id: 'vista', name: 'Windows Vista' },
-    { id: 'mac', name: 'Mac OS' }, { id: 'metro', name: 'Windows 8 Метро' }, { id: 'android', name: 'Android' },
-    { id: 'doom', name: 'Doom 1993' }
+    { id: 'mac', name: 'Mac OS' }, { id: 'metro', name: 'Windows 8 Метро' }, { id: 'android', name: 'Android' }
 ];
 const FONT_LIB = [
     // общие — для всех тем
@@ -29,14 +28,7 @@ const FONT_LIB = [
     { id: 'montserrat', name: 'Montserrat', family: "'Montserrat'", group: 'metro', css: 'Montserrat:wght@300;400;600' },
     // Android: шрифт Pixel / Android 16 (Google Sans Flex подключён в index.html) и Roboto Flex
     { id: 'google-sans-flex', name: 'Google Sans Flex', family: "'Google Sans Flex'", group: 'android', css: 'Google+Sans+Flex:wght@400;500;700' },
-    { id: 'roboto-flex', name: 'Roboto Flex', family: "'Roboto Flex'", group: 'android', css: 'Roboto+Flex:wght@400;500;700' },
-    // Doom 1993 (4.12.0): пиксельные шрифты с кириллицей. «Press Start 2P» — крупный «аркадный» (как цифры на панели игры),
-    // «Pixelify Sans» — мельче и разборчивее для длинных надписей (у темы он по умолчанию)
-    { id: 'press-start', name: 'Press Start 2P', family: "'Press Start 2P'", group: 'doom', css: 'Press+Start+2P' },
-    { id: 'pixelify-doom', name: 'Pixelify Sans', family: "'Pixelify Sans'", group: 'doom', css: 'Pixelify+Sans:wght@400;600' },
-    // 4.12.1: «AmazDooM» — свой файл сайта (fonts/AmazDooMLeft.ttf, @font-face в css/doom.css), не Google: в списке загрузки он отмечен как уже подключённый.
-    // Только заглавные буквы; есть все русские (с Ё), нет ₸ % « » — их подставляет запасной шрифт
-    { id: 'amazdoom', name: 'AmazDooM', family: "'AmazDooM'", group: 'doom', local: true }
+    { id: 'roboto-flex', name: 'Roboto Flex', family: "'Roboto Flex'", group: 'android', css: 'Roboto+Flex:wght@400;500;700' }
 ];
 const FONT_FALLBACK = "'Segoe UI', Tahoma, Roboto, Arial, sans-serif";
 const CUSTOM_FONTS_KEY = 'finance_custom_fonts';
@@ -57,7 +49,7 @@ let customFonts = [];
 try { customFonts = JSON.parse(localStorage.getItem(CUSTOM_FONTS_KEY) || '[]') || []; } catch (e) { customFonts = []; }
 
 // ---------- Загрузка шрифтов ----------
-const loadedFontCss = new Set(['pixelify', 'pixelify-doom', 'amazdoom', 'open-sans', 'google-sans-flex']); // уже подключены в index.html и css/doom.css
+const loadedFontCss = new Set(['pixelify', 'open-sans', 'google-sans-flex']); // уже подключены в index.html
 function loadFontCss(ids) {
     const need = FONT_LIB.filter(f => ids.includes(f.id) && !loadedFontCss.has(f.id));
     if (!need.length) return;

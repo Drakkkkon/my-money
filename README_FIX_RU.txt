@@ -1,3 +1,17 @@
+My Money v4.12.3 «Экстра» — сайт
+
+Что нового в 4.12.3 (правки к 4.12.2):
+1) Тема «Doom 1993» удалена полностью:
+   - js/themes.js: тема, папка «Doom 1993», плитка кирпичей DOOM_BRICKS, шрифты DOOM_FONT_*, ensureDoomFont — убраны.
+     id 'doom' добавлен в REMOVED_THEME_IDS: если тема была сохранена, включается стандартная; свои темы на её основе остаются (основа — стандартная).
+     Общий механизм langs/themeAvailable оставлен (сейчас ни одна тема его не использует).
+   - js/sound.js: набор звуков 'doom' и функции monsterCry, bubbles, splat, blast, DOOM_VOICES — убраны.
+   - js/fonts.js: группа шрифтов «Doom 1993» и шрифты Press Start 2P, Pixelify Sans (doom), AmazDooM — убраны
+     (Pixelify Sans остаётся в группе «Windows 95»). Если такой шрифт был выбран, он просто игнорируется.
+   - Удалены файлы css/doom.css и fonts/AmazDooMLeft.ttf (папка fonts/ тоже).
+   - index.html: подключение css/doom.css убрано, история версий 4.12.0–4.12.2 заменена одной записью 4.12.3.
+2) Файлы: js/themes.js, js/sound.js, js/fonts.js, index.html, js/admin.js (APP_VERSION = 4.12.3), sw.js (my-money-v31, без doom-файлов).
+
 My Money v4.12.2 «Экстра» — сайт
 
 Что нового в 4.12.2 (правки к 4.12.1):
