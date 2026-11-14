@@ -504,6 +504,7 @@ async function runCloudSync({ manual = false } = {}) {
         }
         localStorage.setItem(CLOUD_KEYS.lastSync, String(Date.now()));
         setCloudStatus('ok');
+        if (typeof seedAdminCategories === 'function') seedAdminCategories(); // 4.14.0: рабочие категории администратора — один раз, после синхронизации
         return true;
     } catch (e) {
         console.warn('Синхронизация с Google Диском не удалась', e);

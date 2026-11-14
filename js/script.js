@@ -215,6 +215,11 @@ function updateUI(pushToCloud = false) {
     renderStatistics();
     renderCategorySettings();
     renderAllIconSettings();
+    if (typeof renderWelcomeSettings === 'function') {
+        const wb = document.getElementById('welcome-settings');
+        if (!(wb && wb.contains(document.activeElement))) renderWelcomeSettings();
+        applyWelcome();
+    }
     renderAllQuotes();
     applyHeaderPrefs();
     renderSoundLibrary();
@@ -1815,7 +1820,8 @@ function updateSplashClock() {
         else if (hour >= 12 && hour < 18) greeting = 'Добрый день!';
         else if (hour >= 18 && hour < 23) greeting = 'Добрый вечер!';
         const tr = typeof window.t === 'function' ? window.t : (s => s); // перевод (js/i18n.js)
-        greetEl.textContent = profileName ? tr(greeting).replace('!', `, ${profileName}!`) : greeting;
+        const own = (typeof uiPrefs !== 'undefined' && uiPrefs.welcome && uiPrefs.welcome.text) || ''; // 4.14.0: своё приветствие (js/welcome.js)
+        greetEl.textContent = own || (profileName ? tr(greeting).replace('!', `, ${profileName}!`) : greeting);
     }
 
     // Правая колонка в блоке «Текущий баланс»
@@ -2360,7 +2366,11 @@ function initSlider() {
     requestAnimationFrame(measure);
 }
 
-// --- СИСТЕМА АВТОЗАПОЛНЕНИЯ КАТЕГОРИЙ ---
+// --- КАТЕГОРИИ (4.14.0) ---
+// Все категории — свои: customCategories = [{ id, name, parent? }]. parent — id раздела: так делаются подкатегории
+// («Семья» → «Отец», «Мать», «Коты»). В записи подкатегория хранится как «Семья: Отец» — статистика складывает её в «Семья»,
+// картинка без своей берётся у раздела. У нового пользователя категорий нет совсем. Администратору один раз (после первой
+// синхронизации) добавляются его прежние рабочие категории (ниже), дальше их можно менять и удалять как любые другие.
 const categoryOptions = [
     "Паковка Вб",
     "Паковка Озон",
@@ -2376,70 +2386,227 @@ const categoryOptions = [
 ];
 
 function showCategories() {
-    filterCategories(); 
+    filterCategories();
     let drop = document.getElementById('category-dropdown');
-    if(drop) drop.style.display = 'block';
+    if (drop && drop.children.length) drop.style.display = 'block';
 }
 
 function hideCategories() {
     setTimeout(() => {
         let drop = document.getElementById('category-dropdown');
         if (drop) drop.style.display = 'none';
-    }, 200); 
+    }, 200);
 }
 
+const CAT_SEP = ': ';
+function catClean(raw) { return String(raw || '').replace(/[:]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40); }
+function catById(id) { return customCategories.find(c => c && c.id === id) || null; }
+// Раздел — категория без родителя (или с потерянным родителем)
+function catIsTop(c) { return !c.parent || !catById(c.parent); }
+function catTops() { return customCategories.filter(c => c && c.name && catIsTop(c)); }
+function catChildren(id) { return customCategories.filter(c => c && c.name && c.parent === id && catById(id)); }
+function catFullName(c) { return catIsTop(c) ? c.name : catById(c.parent).name + CAT_SEP + c.name; }
+
+// Названия в порядке «раздел, его подкатегории, следующий раздел…»
 function customCategoryNames() {
-    return customCategories.map(c => c && c.name).filter(Boolean);
+    const out = [];
+    catTops().forEach(p => { out.push(p.name); catChildren(p.id).forEach(ch => out.push(p.name + CAT_SEP + ch.name)); });
+    return out;
 }
 
-// Все категории: свои — первыми, затем стандартные; без повторов (без учёта регистра)
-function allCategories(defaults = categoryOptions) {
+function allCategories(defaults = []) {
     const seen = new Set();
-    return customCategoryNames().concat(defaults).filter(name => {
-        const key = name.toLowerCase();
+    return customCategoryNames().concat(defaults || []).filter(name => {
+        const key = String(name).toLowerCase();
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
     });
 }
 
-function addCustomCategory(rawName, { silent = false } = {}) {
-    const name = String(rawName || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+function catNewId() { return 'cat' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+
+// parentId — id раздела ('' — новый раздел). «Семья: Отец», набранное в поле записи, тоже создаёт подкатегорию.
+function addCustomCategory(rawName, { silent = false, parent = '' } = {}) {
+    let raw = String(rawName || '');
+    if (!parent && raw.includes(':')) {
+        const [pName, ...rest] = raw.split(':');
+        const pn = catClean(pName), cn = catClean(rest.join(' '));
+        if (pn && cn) {
+            let p = catTops().find(c => c.name.toLowerCase() === pn.toLowerCase());
+            if (!p) { p = { id: catNewId(), name: pn }; customCategories.push(p); }
+            parent = p.id; raw = cn;
+        }
+    }
+    const name = catClean(raw);
     if (!name) {
         if (!silent) alert('Введите название категории.');
         return false;
     }
-    const exists = allCategories(categoryOptions).some(c => c.toLowerCase() === name.toLowerCase());
-    if (exists) {
+    const siblings = parent ? catChildren(parent) : catTops();
+    if (siblings.some(c => c.name.toLowerCase() === name.toLowerCase())) {
         if (!silent) showToast(`Категория «${name}» уже есть`);
         return false;
     }
-    customCategories.push({ id: 'cat' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name });
+    customCategories.push(parent ? { id: catNewId(), name, parent } : { id: catNewId(), name });
     updateUI(true);
-    if (!silent) showToast(`Категория «${name}» добавлена`);
+    if (!silent) showToast(parent ? `Подкатегория «${name}» добавлена в «${catById(parent).name}»` : `Категория «${name}» добавлена`);
     return true;
 }
 
 function addCategoryFromSettings() {
     const input = document.getElementById('new-category');
-    if (addCustomCategory(input ? input.value : '') && input) input.value = '';
+    const sel = document.getElementById('new-category-parent');
+    if (addCustomCategory(input ? input.value : '', { parent: sel ? sel.value : '' }) && input) input.value = '';
+}
+
+// Переименование: меняется и в уже сделанных записях, картинка переезжает вместе с названием
+function catRenameEverywhere(oldFull, newFull) {
+    if (oldFull === newFull) return;
+    const ok = String(oldFull).toLowerCase();
+    transactions.forEach(t => {
+        const c = String(t.category || '');
+        if (c.toLowerCase() === ok) t.category = newFull;
+        else if (c.toLowerCase().startsWith(ok + ':')) t.category = newFull + c.slice(oldFull.length);
+    });
+    if (typeof catKey === 'function' && typeof uiPrefs !== 'undefined') {
+        ['form', 'history'].forEach(set => {
+            const m = uiPrefs.catIcons[set] || {};
+            const ko = catKey(oldFull), kn = catKey(newFull);
+            if (typeof m[ko] === 'string') { m[kn] = m[ko]; delete m[ko]; }
+        });
+    }
+}
+
+function editCustomCategory(id) {
+    const cat = catById(id);
+    if (!cat) return;
+    closeCatEditor();
+    const kids = catChildren(cat.id);
+    const parents = catTops().filter(p => p.id !== cat.id);
+    const full = catFullName(cat);
+    const em = typeof categoryEmoji === 'function' ? categoryEmoji(full, 'form') : '';
+    const overlay = document.createElement('div');
+    overlay.id = 'cat-editor';
+    overlay.className = 'export-sheet-overlay';
+    overlay.innerHTML = `
+        <div class="export-sheet cat-editor" role="dialog" aria-modal="true" aria-label="Изменить категорию">
+            <div class="export-sheet-head">
+                <h3>Изменить категорию</h3>
+                <button type="button" class="export-sheet-close" data-act="close" aria-label="Закрыть"><span class="material-icons">close</span></button>
+            </div>
+            <div class="ce-row">
+                <button type="button" class="ce-emoji" data-act="emoji" aria-label="Картинка категории" title="Картинка категории">${em ? `<span class="sys-emoji">${em}</span>` : '<span class="material-icons">block</span>'}</button>
+                <input type="text" id="ce-name" maxlength="40" value="${escapeHtml(cat.name)}" aria-label="Название">
+            </div>
+            <label class="field-inline ce-parent"><span>Раздел</span>
+                <select id="ce-parent" ${kids.length ? 'disabled title="У категории есть подкатегории — она сама остаётся разделом"' : ''}>
+                    <option value="">— нет (это раздел) —</option>
+                    ${parents.map(p => `<option value="${escapeHtml(p.id)}"${p.id === cat.parent ? ' selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+                </select>
+            </label>
+            <p class="hint">Новое название появится и в уже сделанных записях.${kids.length ? ` Подкатегорий: ${kids.length}.` : ''}</p>
+            <div class="export-sheet-actions">
+                <button type="button" class="btn-secondary" data-act="delete"><span class="material-icons">delete</span> Удалить</button>
+                <button type="button" class="btn-primary" data-act="save"><span class="material-icons">save</span> Сохранить</button>
+            </div>
+        </div>`;
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay || e.target.closest('[data-act="close"]')) { closeCatEditor(true); return; }
+        const act = e.target.closest('[data-act]');
+        if (!act) return;
+        if (act.dataset.act === 'emoji') { closeCatEditor(); openEmojiPicker('both', full); return; }
+        if (act.dataset.act === 'delete') { closeCatEditor(); deleteCustomCategory(cat.id); return; }
+        if (act.dataset.act === 'save') {
+            const name = catClean(document.getElementById('ce-name').value);
+            const parent = kids.length ? '' : (document.getElementById('ce-parent').value || '');
+            if (!name) { alert('Введите название категории.'); return; }
+            const siblings = (parent ? catChildren(parent) : catTops()).filter(c => c.id !== cat.id);
+            if (siblings.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert(`Категория «${name}» там уже есть.`); return; }
+            const oldFull = catFullName(cat);
+            const oldKids = kids.map(k => [k, catFullName(k)]);
+            cat.name = name;
+            if (parent) cat.parent = parent; else delete cat.parent;
+            catRenameEverywhere(oldFull, catFullName(cat));
+            oldKids.forEach(([k, old]) => catRenameEverywhere(old, catFullName(k)));
+            closeCatEditor(true);
+            updateUI(true);
+            if (typeof commitUiPrefs === 'function') commitUiPrefs();
+            showToast('Категория сохранена');
+        }
+    });
+    document.body.appendChild(overlay);
+    const inp = document.getElementById('ce-name');
+    if (inp) { inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') overlay.querySelector('[data-act="save"]').click(); }); setTimeout(() => inp.focus(), 50); }
+    if (typeof playSound === 'function') playSound('open');
+}
+
+function closeCatEditor(withSound) {
+    const el = document.getElementById('cat-editor');
+    if (!el) return;
+    el.remove();
+    if (withSound && typeof playSound === 'function') playSound('close');
 }
 
 function deleteCustomCategory(id) {
-    const cat = customCategories.find(c => c.id === id);
-    if (!cat || !confirm(`Удалить категорию «${cat.name}» из списка? Уже сделанные записи с ней не изменятся.`)) return;
-    customCategories = customCategories.filter(c => c.id !== id);
+    const cat = catById(id);
+    if (!cat) return;
+    const kids = catChildren(cat.id);
+    const msg = kids.length
+        ? `Удалить раздел «${cat.name}» и его подкатегории (${kids.map(k => k.name).join(', ')})? Уже сделанные записи с ними не изменятся.`
+        : `Удалить категорию «${catFullName(cat)}»? Уже сделанные записи с ней не изменятся.`;
+    if (!confirm(msg)) return;
+    const gone = new Set([cat.id, ...kids.map(k => k.id)]);
+    customCategories = customCategories.filter(c => !gone.has(c.id));
     updateUI(true);
+}
+
+function addSubcategoryPrompt(parentId) {
+    const p = catById(parentId);
+    if (!p) return;
+    const name = prompt(`Новая подкатегория в «${p.name}»:`, '');
+    if (name !== null) addCustomCategory(name, { parent: p.id });
+}
+
+// Администратору — его прежние рабочие категории, один раз и только после синхронизации (чтобы не вернуть удалённые на другом устройстве)
+function seedAdminCategories() {
+    try {
+        if (typeof isAdminUser !== 'function' || !isAdminUser() || typeof uiPrefs === 'undefined' || uiPrefs.catsSeeded) return;
+        const deleted = (typeof getSyncMeta === 'function' && (getSyncMeta().deleted || {}).cats) || {};
+        let added = 0;
+        categoryOptions.forEach((name, i) => {
+            const id = 'catdef' + i;
+            if (deleted[id] || catById(id) || catTops().some(c => c.name.toLowerCase() === name.toLowerCase())) return;
+            customCategories.push({ id, name });
+            added++;
+        });
+        uiPrefs.catsSeeded = true;
+        if (typeof commitUiPrefs === 'function') commitUiPrefs();
+        if (added) updateUI(true);
+    } catch (e) { console.warn('seedAdminCategories', e); }
 }
 
 function renderCategorySettings() {
     const list = document.getElementById('custom-categories');
-    if (list) {
-        list.innerHTML = customCategories.length
-            ? customCategories.map(c => `<div class="cat-chip"><span class="cat-chip-name">${escapeHtml(c.name)}</span>` +
-                `<button type="button" class="cat-chip-del" onclick="deleteCustomCategory('${escapeHtml(c.id)}')" aria-label="Удалить категорию ${escapeHtml(c.name)}"><span class="material-icons">close</span></button></div>`).join('')
-            : '<p class="hint">Своих категорий пока нет.</p>';
+    const sel = document.getElementById('new-category-parent');
+    const tops = catTops();
+    if (sel) {
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">Новый раздел</option>' + tops.map(p => `<option value="${escapeHtml(p.id)}">В раздел «${escapeHtml(p.name)}»</option>`).join('');
+        if (tops.some(p => p.id === cur)) sel.value = cur;
     }
+    if (!list) return;
+    const emo = full => {
+        const e = typeof categoryEmoji === 'function' ? categoryEmoji(full, 'form') : '';
+        return `<button type="button" class="cm-emoji" data-cat="${escapeHtml(full)}" onclick="openEmojiPicker('both', this.dataset.cat)" title="Картинка" aria-label="Картинка для «${escapeHtml(full)}»">${e ? `<span class="sys-emoji">${e}</span>` : '<span class="material-icons">block</span>'}</button>`;
+    };
+    const row = (c, full, isSub) => `<div class="cm-row${isSub ? ' is-sub' : ''}">${emo(full)}<span class="cm-name">${escapeHtml(c.name)}</span>` +
+        (isSub ? '' : `<button type="button" class="cm-btn" onclick="addSubcategoryPrompt('${escapeHtml(c.id)}')" title="Добавить подкатегорию" aria-label="Добавить подкатегорию в «${escapeHtml(c.name)}»"><span class="material-icons">add</span></button>`) +
+        `<button type="button" class="cm-btn" onclick="editCustomCategory('${escapeHtml(c.id)}')" title="Изменить" aria-label="Изменить «${escapeHtml(full)}»"><span class="material-icons">edit</span></button>` +
+        `<button type="button" class="cm-btn cm-del" onclick="deleteCustomCategory('${escapeHtml(c.id)}')" title="Удалить" aria-label="Удалить «${escapeHtml(full)}»"><span class="material-icons">delete</span></button></div>`;
+    list.innerHTML = tops.length
+        ? tops.map(p => `<div class="cm-group">${row(p, p.name, false)}${catChildren(p.id).map(ch => row(ch, p.name + CAT_SEP + ch.name, true)).join('')}</div>`).join('')
+        : '<p class="hint cm-empty">Категорий пока нет. Добавьте первую: например раздел «Семья», а в нём подкатегории «Отец», «Мать», «Коты».</p>';
 }
 
 function filterCategories() {
@@ -2470,12 +2637,12 @@ function filterCategories() {
     if (typed && !all.some(c => c.toLowerCase() === input)) {
         let add = document.createElement('div');
         add.className = 'dropdown-item dropdown-add';
-        add.innerHTML = `<span class="material-icons">add</span> Добавить «${escapeHtml(typed.slice(0, 40))}» в мои категории`;
+        add.innerHTML = `<span class="material-icons">add</span> Добавить «${escapeHtml(typed.slice(0, 60))}» в категории`;
         // mousedown срабатывает раньше, чем поле теряет фокус и список скрывается
         add.onmousedown = function(e) { e.preventDefault(); };
         add.onclick = function() {
             addCustomCategory(typed);
-            catInput.value = typed.slice(0, 40);
+            catInput.value = typed.includes(':') ? typed.split(':').map(catClean).filter(Boolean).slice(0, 2).join(CAT_SEP) : catClean(typed);
             drop.style.display = 'none';
         };
         drop.appendChild(add);

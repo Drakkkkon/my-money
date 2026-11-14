@@ -81,9 +81,9 @@ function categoryColor(name, set = 'history') {
 }
 
 // Атрибут data-ec для картинки категории ('' если цвет не выбран)
+// 4.14.0: эмодзи показываются как в системе (без окраски фильтром) — цвет больше не применяется, сохранённые значения не стираются
 function ecAttr(name, set) {
-    const c = categoryColor(name, set);
-    return c ? ` data-ec="${c}"` : '';
+    return '';
 }
 
 // HTML названия категории в истории операций с картинкой слева
@@ -93,32 +93,66 @@ function historyCategoryHtml(name) {
     const em = categoryEmoji(name || '', 'history');
     if (mode === 'text' || !em) return `<strong>${label}</strong>`;
     const ec = ecAttr(name || '', 'history');
-    if (mode === 'icon') return `<span class="cat-emoji"${ec} title="${label}" aria-label="${label}">${em}</span>`;
-    return `<span class="cat-emoji"${ec} aria-hidden="true">${em}</span><strong>${label}</strong>`;
+    if (mode === 'icon') return `<span class="cat-emoji sys-emoji"${ec} title="${label}" aria-label="${label}">${em}</span>`;
+    return `<span class="cat-emoji sys-emoji"${ec} aria-hidden="true">${em}</span><strong>${label}</strong>`;
 }
 
 // ---------- Плитки категорий в «Новой записи» ----------
+// 4.14.0: плитки — разделы; у раздела с подкатегориями значок ▾, нажатие открывает ряд его подкатегорий.
+// Категорий нет — вместо плиток подсказка со ссылкой на Настройки → «Категории».
+let catTileOpen = ''; // раздел, чьи подкатегории сейчас раскрыты
+
+function catTileHtml(full, label, mode, selected, extra = '') {
+    const em = categoryEmoji(full, 'form') || '🏷️';
+    const name = escapeHtml(label);
+    return `<button type="button" class="cat-tile${selected ? ' is-selected' : ''}${extra}" data-cat="${escapeHtml(full)}" title="${escapeHtml(full)}" onclick="pickCategoryTile(this.dataset.cat)">` +
+        `<span class="cat-tile-emoji sys-emoji" aria-hidden="true">${em}</span>${mode === 'both' ? `<span class="cat-tile-name">${name}</span>` : `<span class="sr-only">${name}</span>`}</button>`;
+}
+
 function renderCategoryTiles() {
     const box = document.getElementById('cat-tiles');
     if (!box) return;
     const mode = iconMode('form');
+    const owner = box.closest('.card');
+    const tops = typeof catTops === 'function' ? catTops() : [];
+    if (!tops.length) {
+        box.classList.remove('is-icons');
+        if (owner) owner.classList.remove('tiles-off');
+        box.style.display = '';
+        box.innerHTML = `<p class="hint cat-tiles-empty">Категорий пока нет — запись можно сохранить и без неё. Добавить: <a href="#" onclick="openSettingsCard('categories-card'); return false;">Настройки → «Категории»</a>.</p>`;
+        return;
+    }
     box.classList.toggle('is-icons', mode === 'icon');
-    const owner = box.closest('.card'); if (owner) owner.classList.toggle('tiles-off', mode === 'text'); // в «Среднем» размере без плиток показываем поле категории
+    if (owner) owner.classList.toggle('tiles-off', mode === 'text'); // в «Среднем» размере без плиток показываем поле категории
     box.style.display = mode === 'text' ? 'none' : '';
     if (mode === 'text') return;
     const input = document.getElementById('category');
     const current = input ? catKey(input.value) : '';
-    box.innerHTML = allCategories().map(c => {
-        const em = categoryEmoji(c, 'form') || '🏷️';
-        const sel = catKey(c) === current ? ' is-selected' : '';
-        const label = escapeHtml(c);
-        return `<button type="button" class="cat-tile${sel}" data-cat="${label}" title="${label}" onclick="pickCategoryTile(this.dataset.cat)">` +
-            `<span class="cat-tile-emoji"${ecAttr(c, 'form')} aria-hidden="true">${em}</span>${mode === 'both' ? `<span class="cat-tile-name">${label}</span>` : `<span class="sr-only">${label}</span>`}</button>`;
+    const curTop = current.split(':')[0].trim();
+    if (catTileOpen && !tops.some(p => p.id === catTileOpen)) catTileOpen = '';
+    let html = tops.map(p => {
+        const kids = catChildren(p.id);
+        const sel = catKey(p.name) === curTop;
+        return catTileHtml(p.name, p.name, mode, sel, (kids.length ? ' has-sub' : '') + (p.id === catTileOpen ? ' is-open' : ''));
     }).join('');
+    const open = tops.find(p => p.id === catTileOpen);
+    if (open) {
+        const kids = catChildren(open.id);
+        html += `<div class="cat-subtiles" role="group" aria-label="Подкатегории «${escapeHtml(open.name)}»">` +
+            kids.map(k => { const full = open.name + CAT_SEP + k.name; return catTileHtml(full, k.name, mode, catKey(full) === current); }).join('') + '</div>';
+    }
+    box.innerHTML = html;
 }
 
 function pickCategoryTile(name) {
     const input = document.getElementById('category');
+    const top = (typeof catTops === 'function' ? catTops() : []).find(p => catKey(p.name) === catKey(name));
+    if (top) {
+        const hasKids = catChildren(top.id).length > 0;
+        // повторное нажатие на раскрытый раздел — свернуть
+        if (hasKids && catTileOpen === top.id && input && catKey(input.value) === catKey(name)) catTileOpen = '';
+        else catTileOpen = hasKids ? top.id : '';
+    }
     if (input) input.value = name;
     const drop = document.getElementById('category-dropdown');
     if (drop) drop.style.display = 'none';
@@ -129,7 +163,7 @@ function pickCategoryTile(name) {
 const ICON_MODES = [['icon', 'Картинки'], ['text', 'Текст'], ['both', 'Картинки и текст']];
 
 function categoriesForIconSet(set) {
-    const names = allCategories(categoryOptions.concat(typeof OB_DEFAULT_CATEGORIES !== 'undefined' ? OB_DEFAULT_CATEGORIES : []));
+    const names = allCategories();
     if (set === 'history') {
         // и категории из уже сделанных записей (без «Подписка: …», у них картинка общей категории)
         const seen = new Set(names.map(catKey));
@@ -170,7 +204,23 @@ function renderCategoryIconSettings(set) {
 function renderAllIconSettings() {
     renderCategoryIconSettings('form');
     renderCategoryIconSettings('history');
+    renderCategoryViewSettings();
     renderCategoryTiles();
+}
+
+// 4.14.0: Настройки → «Категории»: как показывать категории в «Новой записи» и в истории операций
+function renderCategoryViewSettings() {
+    const box = document.getElementById('cat-view-settings');
+    if (!box) return;
+    const seg = set => {
+        const mode = iconMode(set);
+        return `<div class="seg-buttons" role="radiogroup" aria-label="Как показывать категории">` +
+            ICON_MODES.map(([v, l]) => `<button type="button" role="radio" aria-checked="${mode === v}" class="seg-btn${mode === v ? ' is-on' : ''}" onclick="setIconMode('${set}', '${v}')">${l}</button>`).join('') + '</div>';
+    };
+    box.innerHTML = `
+        <h4 class="font-sub">В «Новой записи»</h4>${seg('form')}
+        <h4 class="font-sub">В «Истории операций»</h4>${seg('history')}
+        <button type="button" class="btn-secondary btn-block" onclick="resetIconSet('both')"><span class="material-icons">restart_alt</span> Картинки по умолчанию</button>`;
 }
 
 function setIconMode(set, mode) {
@@ -179,9 +229,11 @@ function setIconMode(set, mode) {
 }
 
 function setCategoryEmoji(set, name, emoji) {
-    const map = uiPrefs.catIcons[set] || (uiPrefs.catIcons[set] = {});
-    if (emoji === null) delete map[catKey(name)];
-    else map[catKey(name)] = emoji;
+    (set === 'both' ? ['form', 'history'] : [set]).forEach(s => {
+        const map = uiPrefs.catIcons[s] || (uiPrefs.catIcons[s] = {});
+        if (emoji === null) delete map[catKey(name)];
+        else map[catKey(name)] = emoji;
+    });
     closeEmojiPicker(true);
     commitUiPrefs();
 }
@@ -203,38 +255,42 @@ function copyFormIconsToHistory() {
 }
 
 function resetIconSet(set) {
-    if (!confirm('Вернуть картинки по умолчанию? Выбранные вами картинки и цвета в этом наборе сбросятся.')) return;
-    uiPrefs.catIcons[set] = {};
-    uiPrefs.catColors[set] = {};
+    if (!confirm('Вернуть картинки по умолчанию? Выбранные вами картинки категорий сбросятся.')) return;
+    (set === 'both' ? ['form', 'history'] : [set]).forEach(s => { uiPrefs.catIcons[s] = {}; uiPrefs.catColors[s] = {}; });
     commitUiPrefs();
 }
 
 // ---------- Окно выбора картинки ----------
+// 4.14.0: картинки — системные эмодзи того устройства, на котором открыт сайт (шрифт эмодзи системы, без окраски).
+// Любое эмодзи можно поставить с системной клавиатуры эмодзи. set: 'form' | 'history' | 'both' (Настройки → «Категории»).
+function emojiKeyboardHint() {
+    const ua = navigator.userAgent || '';
+    if (/Android|iPhone|iPad|iPod/i.test(ua)) return 'кнопка 😊 на клавиатуре телефона';
+    if (/Mac/i.test(ua)) return 'Control + Command + Пробел';
+    if (/Windows/i.test(ua)) return 'Win + . (точка)';
+    return 'клавиатура эмодзи вашей системы';
+}
+
 function openEmojiPicker(set, name) {
     closeEmojiPicker(false);
     const overlay = document.createElement('div');
     overlay.id = 'emoji-picker';
     overlay.className = 'export-sheet-overlay';
-    const cur = categoryEmoji(name, set);
-    const col = categoryColor(name, set);
-    const cell = e => `<button type="button" class="emoji-cell${e === cur ? ' is-on' : ''}" data-e="${e}"><span class="ec">${e}</span></button>`;
+    const cur = categoryEmoji(name, set === 'both' ? 'form' : set);
+    const cell = e => `<button type="button" class="emoji-cell${e === cur ? ' is-on' : ''}" data-e="${e}"><span class="ec sys-emoji">${e}</span></button>`;
     overlay.innerHTML = `
-        <div class="export-sheet emoji-picker" role="dialog" aria-modal="true" aria-label="Картинка категории"${col ? ` data-ec-pick="${col}"` : ''}>
+        <div class="export-sheet emoji-picker" role="dialog" aria-modal="true" aria-label="Картинка категории">
             <div class="export-sheet-head">
                 <h3>Картинка: ${escapeHtml(name)}</h3>
                 <button type="button" class="export-sheet-close" data-act="close" aria-label="Закрыть"><span class="material-icons">close</span></button>
             </div>
-            <h4 class="emoji-group-title">Цвет картинки</h4>
-            <div class="emoji-colors" role="radiogroup" aria-label="Цвет картинки">
-                <button type="button" role="radio" class="emoji-color emoji-color-none${col ? '' : ' is-on'}" data-color="" aria-checked="${!col}" title="Как было" aria-label="Как было"><span class="ec-preview">${cur || '🏷️'}</span></button>
-                ${EMOJI_COLORS.map(([id, label, hex]) => `<button type="button" role="radio" class="emoji-color${col === id ? ' is-on' : ''}" data-color="${id}" aria-checked="${col === id}" title="${label}" aria-label="${label}"><span class="ec-swatch" style="background:${hex}"></span></button>`).join('')}
-            </div>
-            ${EMOJI_GROUPS.map(g => `<h4 class="emoji-group-title">${g.name}</h4>
-                <div class="emoji-grid">${g.list.map(cell).join('')}</div>`).join('')}
             <div class="emoji-own">
-                <input type="text" id="emoji-own-input" maxlength="8" placeholder="Своё эмодзи с клавиатуры" aria-label="Своё эмодзи">
+                <input type="text" id="emoji-own-input" maxlength="8" placeholder="Любое эмодзи с клавиатуры" aria-label="Своё эмодзи" class="sys-emoji-input">
                 <button type="button" class="btn-secondary" data-act="own">Поставить</button>
             </div>
+            <p class="hint">Эмодзи такие же, как в вашей системе. Любое другое: ${escapeHtml(emojiKeyboardHint())}.</p>
+            ${EMOJI_GROUPS.map(g => `<h4 class="emoji-group-title">${g.name}</h4>
+                <div class="emoji-grid">${g.list.map(cell).join('')}</div>`).join('')}
             <div class="export-sheet-actions">
                 <button type="button" class="btn-secondary" data-act="none"><span class="material-icons">block</span> Без картинки</button>
                 <button type="button" class="btn-secondary" data-act="default"><span class="material-icons">restart_alt</span> По умолчанию</button>
@@ -242,21 +298,12 @@ function openEmojiPicker(set, name) {
         </div>`;
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay || e.target.closest('[data-act="close"]')) { closeEmojiPicker(true); return; }
-        // Цвет выбирается сразу, окно остаётся открытым: можно подобрать цвет и потом нажать на картинку
-        const colorBtn = e.target.closest('.emoji-color');
-        if (colorBtn) {
-            setCategoryColor(set, name, colorBtn.dataset.color);
-            const sheet = overlay.querySelector('.emoji-picker');
-            if (colorBtn.dataset.color) sheet.dataset.ecPick = colorBtn.dataset.color; else delete sheet.dataset.ecPick;
-            overlay.querySelectorAll('.emoji-color').forEach(b => { const on = b === colorBtn; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', String(on)); });
-            return;
-        }
         const cellEl = e.target.closest('.emoji-cell');
         if (cellEl) { setCategoryEmoji(set, name, cellEl.dataset.e); return; }
         const act = e.target.closest('[data-act]');
         if (!act) return;
         if (act.dataset.act === 'none') setCategoryEmoji(set, name, '');
-        else if (act.dataset.act === 'default') { if (uiPrefs.catColors && uiPrefs.catColors[set]) delete uiPrefs.catColors[set][catKey(name)]; setCategoryEmoji(set, name, null); }
+        else if (act.dataset.act === 'default') setCategoryEmoji(set, name, null);
         else if (act.dataset.act === 'own') {
             const v = (document.getElementById('emoji-own-input').value || '').trim();
             if (!v || /[a-zа-яё0-9]/i.test(v)) { alert('Введите одно эмодзи (картинку) с клавиатуры телефона или ПК.'); return; }

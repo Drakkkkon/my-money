@@ -433,3 +433,83 @@ html #account-section .acct-eye .material-icons { font-size: 20px; }
 .account-card .acct-avatar { font-size: 40px; opacity: .8; }
 .account-card .acct-verify { margin: 6px 0; }
 .account-card .acct-danger { color: #c0392b; }
+
+/* ===== 16. 4.14.0: «Категории», системные эмодзи, «Темы» со шрифтами и иконкой, экран приветствия ===== */
+/* Эмодзи — шрифтом эмодзи той системы, где открыт сайт (Windows — Segoe UI Emoji, Apple — Apple Color Emoji, Android — Noto),
+   без окраски и серого фильтра тем: как на клавиатуре этого устройства */
+html body .sys-emoji, html body .cat-tile-emoji, html body .cat-emoji, html body .emoji-cell, html body .emoji-cell .ec,
+html body .goal-emoji, html body .sys-emoji-input {
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Twemoji Mozilla', 'Android Emoji', 'EmojiOne Color', emoji, sans-serif !important;
+    font-variant-emoji: emoji;
+    filter: none !important;
+    font-style: normal; font-weight: 400; text-shadow: none !important;
+}
+html body [data-ec] { filter: none !important; }
+
+/* Список категорий: раздел и его подкатегории */
+.cat-manager { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 6px; }
+.cat-manager .cm-group { border: 1px solid var(--border, rgba(127,127,127,.35)); border-radius: 10px; padding: 4px 6px; }
+.cat-manager .cm-row { display: flex; align-items: center; gap: 6px; min-height: 40px; }
+.cat-manager .cm-row.is-sub { padding-left: 26px; position: relative; }
+.cat-manager .cm-row.is-sub::before { content: ''; position: absolute; left: 12px; top: 0; bottom: 50%; width: 10px; border-left: 1px solid currentColor; border-bottom: 1px solid currentColor; opacity: .35; }
+.cat-manager .cm-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat-manager .cm-row:not(.is-sub) .cm-name { font-weight: 600; }
+.cat-manager .cm-emoji { flex: 0 0 auto; width: 38px; height: 38px; font-size: 22px; line-height: 1; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: transparent; border: 1px dashed rgba(127,127,127,.5); cursor: pointer; }
+.cat-manager .cm-btn { flex: 0 0 auto; width: 34px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 50%; cursor: pointer; box-shadow: none; }
+.cat-manager .cm-btn .material-icons { font-size: 20px; }
+.cat-manager .cm-btn:hover { background: rgba(127,127,127,.15); }
+.cat-manager .cm-del .material-icons { color: #c0392b; }
+.cat-parent-pick { margin: 6px 0 0; }
+.cat-parent-pick select { flex: 1 1 auto; }
+.cat-editor .ce-row { display: flex; gap: 8px; align-items: center; margin: 6px 0 10px; }
+.cat-editor .ce-row input { flex: 1 1 auto; margin: 0 !important; min-width: 0; }
+.cat-editor .ce-emoji { width: 46px; height: 46px; flex: 0 0 auto; font-size: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; }
+.cat-editor .ce-parent { display: flex; gap: 8px; align-items: center; }
+.cat-editor .ce-parent select { flex: 1 1 auto; }
+
+/* Плитки «Новой записи»: раздел с подкатегориями и ряд подкатегорий */
+.cat-tile.has-sub { position: relative; }
+.cat-tile.has-sub::after { content: '▾'; position: absolute; right: 3px; bottom: 1px; font-size: 11px; opacity: .7; }
+.cat-tile.is-open { outline: 2px dashed var(--w95-select, #1a73e8); outline-offset: -2px; }
+.cat-subtiles { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; border-radius: 10px; background: rgba(127,127,127,.12); width: 100%; box-sizing: border-box; }
+.cat-subtiles .cat-tile { flex: 0 0 auto; }
+.cat-tiles-empty { margin: 4px 0; grid-column: 1 / -1; }
+
+/* «Темы оформления»: подразделы «Шрифты» и «Иконка приложения» */
+.theme-card .theme-sub { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border, rgba(127,127,127,.35)); }
+.theme-card .theme-sub-title { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font-size: 1.05em; }
+.theme-card .theme-sub-title .material-icons { font-size: 20px; }
+
+/* Экран приветствия: вид «Приветствие и картинка» */
+#splash-screen[data-wel="simple"] #splash-weather,
+#splash-screen[data-wel="simple"] #splash-time,
+#splash-screen[data-wel="simple"] #splash-date,
+#splash-screen[data-wel="simple"] #splash-quotes,
+#splash-screen[data-wel="simple"] #splash-extra { display: none !important; }
+#splash-screen[data-wel="simple"] .splash-content { margin: auto 0; position: relative; z-index: 1; }
+#splash-screen[data-wel="simple"] #splash-greeting { font-size: clamp(30px, 8vw, 54px) !important; text-shadow: 0 2px 14px rgba(0,0,0,.55) !important; }
+#splash-screen[data-wel="simple"] .slider-container { position: relative; z-index: 1; }
+#splash-screen > .wel-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; background-size: cover; background-position: center; pointer-events: none; }
+#splash-screen > .wel-bg[data-anim="aurora"] { background: linear-gradient(120deg, #0b1e3f, #134e5e, #4b1d6b, #0f6e5a, #0b1e3f); background-size: 400% 400%; animation: wel-aurora 16s ease infinite; }
+#splash-screen > .wel-bg[data-anim="waves"] { background: linear-gradient(180deg, #0b2a4a 0%, #0e4d74 60%, #1478a0 100%); }
+#splash-screen > .wel-bg[data-anim="waves"]::before, #splash-screen > .wel-bg[data-anim="waves"]::after {
+    content: ''; position: absolute; left: -50%; width: 200%; height: 60%; bottom: -30%; border-radius: 45%;
+    background: rgba(255,255,255,.08); animation: wel-wave 14s linear infinite; }
+#splash-screen > .wel-bg[data-anim="waves"]::after { bottom: -36%; background: rgba(255,255,255,.12); animation-duration: 20s; animation-direction: reverse; }
+#splash-screen > .wel-bg[data-anim="stars"] { background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%); }
+#splash-screen > .wel-bg[data-anim="stars"] i { position: absolute; border-radius: 50%; background: #fff; animation: wel-twinkle 3s ease-in-out infinite; }
+#splash-screen > .wel-bg[data-anim="bubbles"] { background: linear-gradient(160deg, #ff7e5f, #feb47b 40%, #6a82fb 100%); }
+#splash-screen > .wel-bg[data-anim="bubbles"] i { position: absolute; border-radius: 50%; background: rgba(255,255,255,.22); border: 1px solid rgba(255,255,255,.45); animation: wel-rise 12s linear infinite; }
+@keyframes wel-aurora { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes wel-wave { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes wel-twinkle { 0%, 100% { opacity: .2; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes wel-rise { from { transform: translateY(40vh); opacity: 0; } 15% { opacity: 1; } to { transform: translateY(-110vh); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #splash-screen > .wel-bg, #splash-screen > .wel-bg * , #splash-screen > .wel-bg::before, #splash-screen > .wel-bg::after { animation: none !important; } }
+/* «Посмотреть» из Настроек: без ползунка, закрывается нажатием */
+#splash-screen.wel-preview { display: flex !important; cursor: pointer; }
+#splash-screen.wel-preview .slider-container { visibility: hidden; }
+#splash-screen.wel-preview::after { content: 'Нажмите, чтобы закрыть'; position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); left: 0; right: 0; text-align: center; opacity: .8; z-index: 2; color: #fff; }
+.welcome-card .wel-thumb { height: 140px; border-radius: 10px; background: rgba(127,127,127,.15) center / cover no-repeat; display: flex; align-items: center; justify-content: center; margin: 8px 0; }
+/* список категорий — колонкой и без ограничения высоты (у старого списка «Мои категории» были строка-обёртка и 180 px) */
+html body .custom-categories.cat-manager { display: flex !important; flex-direction: column; flex-wrap: nowrap; max-height: none !important; overflow: visible !important; }
+html body .cat-manager .cm-btn, html body .cat-manager .cm-emoji { min-width: 0 !important; min-height: 0 !important; margin: 0 !important; }

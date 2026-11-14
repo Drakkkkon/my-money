@@ -142,7 +142,6 @@
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="hdr-edit-btn" onclick="openHeaderSettings()" title="Настроить этот блок" aria-label="Настроить блок баланса"><span class="material-icons">tune</span></button>
                 </div>
             </header>
 
@@ -671,10 +670,19 @@
                         <button type="button" class="export-btn" style="background:#d32f2f; margin-top: 15px;" onclick="clearAllData()"><span class="material-icons">delete_forever</span> Сбросить всё</button>
                     </div>
 
-                    <div class="card card-wide theme-card">
+                    <div class="card card-wide theme-card" id="theme-card">
                         <h3><span class="material-icons">palette</span> Темы оформления</h3>
                         <p class="hint">Темы разложены по папкам по стилю: Windows 95, Windows 95_Экстра (рабочий стол с панелью задач и «Пуском»), Windows Vista, Mac OS и ваши папки. Нажмите на папку, чтобы открыть её. У каждой темы свои звуки — при выборе вы их услышите. Свою тему можно создать на основе текущей: поменять цвета фона, окон, кнопок, текста и сохранить в нужную папку.</p>
                         <div class="theme-browser" id="theme-picker"></div>
+                        <!-- 4.14.0: шрифты и иконка приложения перенесены в «Темы оформления» -->
+                        <section class="theme-sub" id="theme-fonts">
+                            <h4 class="theme-sub-title"><span class="material-icons">text_fields</span> Шрифты</h4>
+                            <div id="font-settings"></div>
+                        </section>
+                        <section class="theme-sub" id="theme-app-icon">
+                            <h4 class="theme-sub-title"><span class="material-icons">apps</span> Иконка приложения</h4>
+                            <div id="icon-settings"></div>
+                        </section>
                     </div>
 
                     <!-- Обои рабочего стола (js/desk95.js): карточка видна только в теме «Windows 95_Пуск» и в папке «Windows 95_Экстра» -->
@@ -689,11 +697,6 @@
                             <button type="button" class="btn-primary" onclick="deskWallDialog()"><span class="material-icons">wallpaper</span> Изменить обои</button>
                             <button type="button" class="btn-secondary dwc-reset" onclick="deskWallReset()"><span class="material-icons">restart_alt</span> Обои темы</button>
                         </div>
-                    </div>
-
-                    <div class="card font-settings-card" id="font-settings-card">
-                        <h3><span class="material-icons">text_fields</span> Шрифты</h3>
-                        <div id="font-settings"></div>
                     </div>
 
                     <div class="card layout-settings-card" id="layout-settings-card">
@@ -722,11 +725,6 @@
                         <div id="voice-settings"></div>
                     </div>
 
-                    <div class="card icon-app-card" id="icon-app-card">
-                        <h3><span class="material-icons">apps</span> Иконка приложения</h3>
-                        <div id="icon-settings"></div>
-                    </div>
-
                     <div class="card sound-card">
                         <h3><span class="material-icons">volume_up</span> Звуки</h3>
                         <p class="hint">Щелчки кнопок, звуки открытия и закрытия окон и короткая мелодия при запуске. Все звуки создаются самим приложением.</p>
@@ -742,32 +740,24 @@
                         <div id="notify-settings"></div>
                     </div>
 
-                    <div class="card header-settings-card" id="header-settings-card">
-                        <h3><span class="material-icons">dashboard_customize</span> Блок «Текущий баланс»</h3>
-                        <p class="hint">Что показывать в верхнем блоке с балансом, временем, погодой и курсами, и какого размера цифры и надписи. Сохраняется в аккаунте Google.</p>
-                        <div id="header-settings"></div>
-                    </div>
-
-                    <div class="card icon-settings-card" id="icon-settings-form-card">
-                        <h3><span class="material-icons">emoji_emotions</span> Картинки категорий</h3>
-                        <p class="hint">Как выбирать категорию в «Новой записи»: картинками, текстом или картинками с подписью. Нажмите на картинку категории, чтобы выбрать другую картинку или её цвет.</p>
-                        <div id="icon-settings-form"></div>
-                    </div>
-
-                    <div class="card icon-settings-card" id="icon-settings-history-card">
-                        <h3><span class="material-icons">format_list_bulleted</span> Картинки в истории операций</h3>
-                        <p class="hint">Картинка слева от названия в «Истории операций»: только картинка, только текст или картинка и текст. Нажмите на картинку, чтобы выбрать другую картинку или её цвет.</p>
-                        <div id="icon-settings-history"></div>
-                    </div>
-
-                    <div class="card categories-card">
-                        <h3><span class="material-icons">label</span> Мои категории</h3>
-                        <p class="hint">Свои категории появляются в подсказках «Записей» и сохраняются в аккаунте Google. Добавить можно и прямо из списка категорий при вводе записи.</p>
+                    <!-- 4.14.0: всё о категориях в одном месте — список с подкатегориями, изменить/удалить, картинки (системные эмодзи) и вид (js/script.js, js/emoji.js) -->
+                    <div class="card categories-card" id="categories-card">
+                        <h3><span class="material-icons">category</span> Категории</h3>
+                        <p class="hint">Категории для доходов и расходов в «Записях». Можно делать разделы с подкатегориями: например раздел «Семья», а в нём «Отец», «Мать», «Коты». <span class="material-icons inline-icon">add</span> — подкатегория, <span class="material-icons inline-icon">edit</span> — изменить (название, раздел, картинку), <span class="material-icons inline-icon">delete</span> — удалить. Нажмите на картинку, чтобы выбрать другую. Сохраняется в облаке вместе с остальными данными.</p>
                         <div class="cat-add-form">
-                            <input type="text" id="new-category" placeholder="Название, например «Бензин»" maxlength="40" onkeydown="if(event.key==='Enter'){addCategoryFromSettings();}">
+                            <input type="text" id="new-category" placeholder="Название, например «Семья»" maxlength="40" onkeydown="if(event.key==='Enter'){addCategoryFromSettings();}">
                             <button type="button" class="btn-primary" onclick="addCategoryFromSettings()"><span class="material-icons">add</span> Добавить</button>
                         </div>
-                        <div class="custom-categories" id="custom-categories"></div>
+                        <label class="field-inline cat-parent-pick"><span>Куда</span><select id="new-category-parent" aria-label="Раздел для новой категории"><option value="">Новый раздел</option></select></label>
+                        <div class="custom-categories cat-manager" id="custom-categories"></div>
+                        <h4 class="menu-editor-subtitle">Как показывать категории</h4>
+                        <div id="cat-view-settings"></div>
+                    </div>
+
+                    <!-- 4.14.0: экран приветствия — как было / приветствие с картинкой или анимацией / без экрана (js/welcome.js) -->
+                    <div class="card welcome-card" id="welcome-card">
+                        <h3><span class="material-icons">waving_hand</span> Экран приветствия</h3>
+                        <div id="welcome-settings"></div>
                     </div>
 
                     <div class="card menu-editor-card">
@@ -795,7 +785,18 @@
                         </div>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>4.13.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <h4>4.14.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Настройки переделаны. Всё о категориях — в одном пункте «Категории» (вместо «Картинки категорий», «Картинки в истории операций» и «Мои категории»): список, добавление, кнопки «Изменить» и «Удалить», картинки и вид в «Новой записи» и в истории.</li>
+                                    <li>Подкатегории: раздел, а в нём свои категории — например «Семья» → «Отец», «Мать», «Коты». В «Новой записи» нажмите на раздел — откроется ряд его подкатегорий. В записи сохраняется «Семья: Отец», статистика складывает подкатегории в раздел. Переименование меняет название и в уже сделанных записях.</li>
+                                    <li>У новых пользователей категорий нет совсем — человек заводит свои. Администратору прежние рабочие категории добавляются один раз, их можно менять и удалять.</li>
+                                    <li>Картинки категорий — системные эмодзи того устройства, где открыт сайт (Windows, Apple, Android), без окраски. Любое эмодзи можно поставить с клавиатуры эмодзи системы.</li>
+                                    <li>«Шрифты» и «Иконка приложения» перенесены в «Темы оформления». Пункт «Блок „Текущий баланс“» и кнопка его настройки убраны.</li>
+                                    <li>Новый пункт «Экран приветствия»: как было, только приветствие (своё или по времени суток) на своей картинке или анимации (сияние, звёзды, пузыри, волны), или без экрана вовсе. Там же — показывать ли его на ПК.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.13.0 «Экстра»</h4>
                                 <ul>
                                     <li>Регистрация для любого пользователя: новый блок «Аккаунт My Money» в Настройках (Аккаунт и данные) — вход и регистрация по почте и паролю, без аккаунта Google. Данные хранятся в облаке и синхронизируются между устройствами; каждый видит только свои записи.</li>
                                     <li>Подтверждение почты письмом, «Забыли пароль?» (письмо для смены пароля), выход и удаление аккаунта вместе с данными в облаке.</li>
@@ -1127,7 +1128,7 @@
                     </div>
 
                     <!-- 4.6.0: название версии и год обновления — самое последнее в Настройках (js/script.js подставляет значения из js/admin.js) -->
-                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.13.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
+                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.14.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
                 </div>
             </main>
         </div>
@@ -1174,6 +1175,7 @@
     <script src="js/pages.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/script.js"></script>
+    <script src="js/welcome.js"></script>
     <!-- 4.5: тема «Windows 95_Пуск» — значки и рабочий стол; идёт после script.js, подменяет showTab только пока тема выбрана -->
     <script src="js/desk95-icons.js"></script>
     <script src="js/desk95.js"></script>

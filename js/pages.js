@@ -44,9 +44,11 @@
     // Группы пунктов меню Настроек. Карточка попадает в группу по своему id или по названию значка в заголовке (он не переводится)
     const SM_GROUPS = [
         { name: 'Аккаунт и данные', keys: ['account-section', 'auth-section', 'profile-section', 'lock', 'speed', 'save'] },
-        { name: 'Оформление и вид', keys: ['palette', 'desk-wall-card', 'font-settings-card', 'layout-settings-card', 'menu_open', 'icon-app-card',
-            'header-settings-card', 'icon-settings-form-card', 'icon-settings-history-card'] },
-        { name: 'Ввод, звук и уведомления', keys: ['label', 'ocr-card', 'voice-card', 'volume_up', 'notify-card'] },
+        // 4.14.0: «Категории» — одно меню вместо «Картинки категорий», «Картинки в истории операций» и «Мои категории»;
+        // «Шрифты» и «Иконка приложения» — внутри «Тем оформления»; «Блок „Текущий баланс“» убран; новый «Экран приветствия»
+        { name: 'Записи', keys: ['categories-card'] },
+        { name: 'Оформление и вид', keys: ['palette', 'theme-card', 'desk-wall-card', 'welcome-card', 'layout-settings-card', 'menu_open'] },
+        { name: 'Ввод, звук и уведомления', keys: ['ocr-card', 'voice-card', 'volume_up', 'notify-card'] },
         { name: 'Приложение', keys: ['lang-card', 'history'] },
         { name: 'Администратор', keys: ['admin-card', 'activity-card'] }
     ];
@@ -110,6 +112,14 @@
             }
             if (card.id === 'profile-section') return val('profile-name');
             if (info.icon === 'palette' && typeof resolveTheme === 'function') return resolveTheme(currentThemeId).name || '';
+            if (card.id === 'categories-card' && typeof customCategories !== 'undefined') {
+                const tops = typeof catTops === 'function' ? catTops().length : 0;
+                const subs = customCategories.length - tops;
+                return tops ? `${tops} ${tt('разд.')}${subs > 0 ? ` · ${subs} ${tt('подкат.')}` : ''}` : tt('Пока нет');
+            }
+            if (card.id === 'welcome-card' && typeof uiPrefs !== 'undefined' && uiPrefs.welcome) {
+                return tt({ standard: 'Как было', simple: 'Приветствие и картинка', off: 'Без экрана' }[uiPrefs.welcome.mode] || '');
+            }
             if (info.icon === 'speed') { const v = Number(val('manual-limit')); return v > 0 ? Math.round(v).toLocaleString('ru-RU') + ' ₸' : tt('Не установлен'); }
             if (card.id === 'lang-card') { const on = card.querySelector('.lang-opt.is-on'); return on ? on.textContent.replace(/\s+/g, ' ').trim() : ''; }
         } catch (e) {}

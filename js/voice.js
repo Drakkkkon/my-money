@@ -192,7 +192,7 @@ function voiceFields(result, ctx) {
 function voiceContext() {
     const lang = voiceLang();
     let categories = [];
-    try { categories = allCategories(categoryOptions.concat(typeof OB_DEFAULT_CATEGORIES !== 'undefined' ? OB_DEFAULT_CATEGORIES : [])); } catch (e) {}
+    try { categories = allCategories(); } catch (e) {}
     const now = typeof almatyIsoNow === 'function' ? almatyIsoNow() : new Date().toISOString();
     return { lang, categories, today: now.slice(0, 10) };
 }

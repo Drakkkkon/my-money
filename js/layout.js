@@ -50,7 +50,11 @@ function normalizeUiPrefs(p) {
         sizes: Object.fromEntries(Object.entries(obj(src.sizes, {})).filter(([k, v]) => typeof k === 'string' && k.length < 80 && ['s', 'm', 'l'].includes(v)).slice(0, 200)),
         // Ширина страниц на ПК (js/sizes.js → «Масштаб» страницы): { id блока: 'm' | 'l' }, компактная ('s') — по умолчанию
         pageSizes: Object.fromEntries(Object.entries(obj(src.pageSizes, {})).filter(([k, v]) => typeof k === 'string' && k.length < 80 && ['m', 'l'].includes(v)).slice(0, 200)),
-        layout: normalizeLayoutPrefs(obj(src.layout, {}))
+        layout: normalizeLayoutPrefs(obj(src.layout, {})),
+        // 4.14.0: прежние рабочие категории администратора уже добавлены (js/script.js → seedAdminCategories)
+        catsSeeded: src.catsSeeded === true,
+        // 4.14.0: экран приветствия (js/welcome.js)
+        welcome: normalizeWelcomePrefs(obj(src.welcome, {}))
     };
 }
 
@@ -68,6 +72,18 @@ function normalizeLayoutPrefs(l) {
         pcSplash: l.pcSplash !== false,
         // 4.9.0: «страницы вместо блоков» — каждый блок раздела отдельной страницей на весь экран (js/pages.js)
         noBlocks: l.noBlocks === true
+    };
+}
+
+// Экран приветствия (js/welcome.js): mode — standard (как было: погода, часы, котировки), simple (только приветствие на своей
+// картинке или анимации), off (без экрана). bg — anim | image; anim — вид анимации; text — своё приветствие ('' — по времени суток)
+function normalizeWelcomePrefs(w) {
+    const pick = (v, list, d) => list.includes(v) ? v : d;
+    return {
+        mode: pick(w.mode, ['standard', 'simple', 'off'], 'standard'),
+        bg: pick(w.bg, ['anim', 'image'], 'anim'),
+        anim: pick(w.anim, ['aurora', 'stars', 'bubbles', 'waves'], 'aurora'),
+        text: typeof w.text === 'string' ? w.text.slice(0, 60) : ''
     };
 }
 
@@ -405,7 +421,6 @@ function renderLayoutSettings() {
             ${seg('pcCols', [['auto', 'Авто'], ['1', '1'], ['2', '2'], ['3', '3']])}
             <h4 class="font-sub">Плотность</h4>
             ${seg('density', [['compact', 'Компактно'], ['normal', 'Обычно'], ['roomy', 'Просторно']])}
-            <label class="hdr-part"><input type="checkbox" ${l.pcSplash ? 'checked' : ''} onchange="setLayoutPref('pcSplash', this.checked)"> Экран приветствия с ползунком при запуске на ПК</label>
         </div>`;
 }
 
