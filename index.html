@@ -553,6 +553,18 @@
 
                 <!-- НАСТРОЙКИ -->
                 <div id="settings" class="tab" style="display:none;">
+                    <!-- 4.15.0: «Помощь» — самый верхний пункт Настроек: инструкции с картинками, подсказки, «Что нового» (js/help.js) -->
+                    <div class="card help-card" id="help-card">
+                        <h3><span class="material-icons">help</span> Помощь</h3>
+                        <p class="hint">Пошаговые инструкции: куда нажать и что произойдёт. Цифры на картинках — это номера шагов. Нажмите на картинку, чтобы увеличить.</p>
+                        <div class="btn-group help-actions">
+                            <button type="button" class="btn-secondary" onclick="showWhatsNew('all')"><span class="material-icons">new_releases</span> Что нового</button>
+                            <button type="button" class="btn-secondary" onclick="helpResetTips()"><span class="material-icons">lightbulb</span> Показать подсказки заново</button>
+                        </div>
+                        <label class="help-tips-toggle"><input type="checkbox" id="help-tips-on" checked onchange="helpSetTips(this.checked)"> Подсказки при первом нажатии на кнопки</label>
+                        <div class="help-topics" id="help-topics"></div>
+                    </div>
+
                     <!-- 4.13.0: аккаунт My Money — регистрация по почте и паролю для любого пользователя (js/account.js) -->
                     <div class="card sync-card account-card" id="account-section">
                         <h3><span class="material-icons">account_circle</span> Аккаунт My Money</h3>
@@ -658,7 +670,7 @@
                         <button type="button" class="btn-primary" onclick="saveSettings()">Сохранить лимит</button>
                     </div>
                     
-                    <div class="card">
+                    <div class="card" id="local-data-card">
                         <h3><span class="material-icons">save</span> Локальные данные</h3>
                         <button type="button" class="export-btn" style="background:#546e7a;" onclick="exportBackup()"><span class="material-icons">save</span> Локальная копия (JSON)</button>
                         <div style="margin-top: 15px;">
@@ -785,7 +797,15 @@
                         </div>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>4.14.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <h4>4.15.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Новый пункт «Помощь» в самом верху Настроек: пошаговые инструкции с картинками из программы — как сделать запись, изменить её, записать чек и голосом, добавить категории, скачать Excel и PDF и где искать файл, загрузить свою таблицу, резервная копия, аккаунт и синхронизация, Стена, подписки, статистика, цели, темы, установка на телефон.</li>
+                                    <li>Подсказки при первом нажатии на главные кнопки и пункты меню (каждая — один раз). Выключаются и показываются заново в «Помощи».</li>
+                                    <li>После обновления при первой загрузке — окошко «Что нового» с коротким списком изменений; новому пользователю — приветствие со ссылкой на «Помощь».</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.14.0 «Экстра»</h4>
                                 <ul>
                                     <li>Настройки переделаны. Всё о категориях — в одном пункте «Категории» (вместо «Картинки категорий», «Картинки в истории операций» и «Мои категории»): список, добавление, кнопки «Изменить» и «Удалить», картинки и вид в «Новой записи» и в истории.</li>
                                     <li>Подкатегории: раздел, а в нём свои категории — например «Семья» → «Отец», «Мать», «Коты». В «Новой записи» нажмите на раздел — откроется ряд его подкатегорий. В записи сохраняется «Семья: Отец», статистика складывает подкатегории в раздел. Переименование меняет название и в уже сделанных записях.</li>
@@ -1128,7 +1148,7 @@
                     </div>
 
                     <!-- 4.6.0: название версии и год обновления — самое последнее в Настройках (js/script.js подставляет значения из js/admin.js) -->
-                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.14.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
+                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.15.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
                 </div>
             </main>
         </div>
@@ -1173,6 +1193,7 @@
     <script src="js/sizes.js"></script>
     <!-- 4.9.0: меню Настроек (список → страница одной настройки), «страницы вместо блоков», data-tab на <html> -->
     <script src="js/pages.js"></script>
+    <script src="js/help.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/script.js"></script>
     <script src="js/welcome.js"></script>

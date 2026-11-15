@@ -55,6 +55,7 @@ window.onload = function() {
     safeStep('полосы прокрутки', initW95Scrollbars);
     safeStep('облако', initCloud);
     safeStep('аккаунт', initAccount);
+    safeStep('помощь', initHelp); // 4.15.0: «Помощь», подсказки при первом нажатии, окно «Что нового»
     safeStep('офлайн-режим', registerServiceWorker);
 };
 

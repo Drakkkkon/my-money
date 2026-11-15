@@ -513,3 +513,42 @@ html body [data-ec] { filter: none !important; }
 /* список категорий — колонкой и без ограничения высоты (у старого списка «Мои категории» были строка-обёртка и 180 px) */
 html body .custom-categories.cat-manager { display: flex !important; flex-direction: column; flex-wrap: nowrap; max-height: none !important; overflow: visible !important; }
 html body .cat-manager .cm-btn, html body .cat-manager .cm-emoji { min-width: 0 !important; min-height: 0 !important; margin: 0 !important; }
+
+/* ---------- 17. 4.15.0: «Помощь», подсказки при первом нажатии, окно «Что нового» (js/help.js) ---------- */
+.help-card .help-actions { margin: 6px 0 8px; flex-wrap: wrap; }
+.help-card .help-tips-toggle { display: flex; align-items: center; gap: 8px; margin: 4px 0 12px; cursor: pointer; }
+.help-card .help-topics { display: flex; flex-direction: column; gap: 6px; }
+.help-card .help-topic { border: 1px solid var(--w95-grid, rgba(0, 0, 0, .15)); border-radius: 6px; background: var(--w95-field, transparent); color: var(--w95-text, inherit); }
+.help-card .help-topic > summary { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; font-weight: 600; list-style: none; }
+.help-card .help-topic > summary::-webkit-details-marker { display: none; }
+.help-card .help-topic > summary::after { content: '›'; margin-left: auto; font-size: 1.4em; line-height: 1; transition: transform .2s; opacity: .6; }
+.help-card .help-topic[open] > summary::after { transform: rotate(90deg); }
+.help-card .help-topic > summary .material-icons { color: var(--w95-select, #2a6fdb); }
+.help-card .help-topic-body { padding: 0 12px 12px; }
+.help-card .help-topic-body ol { margin: 8px 0; padding-left: 22px; line-height: 1.5; }
+.help-card .help-topic-body li { margin: 4px 0; }
+.help-card .help-shot { display: block; width: 100%; max-width: 380px; margin: 4px auto 6px; border-radius: 6px; border: 1px solid var(--w95-grid, rgba(0, 0, 0, .2));
+    cursor: zoom-in; background: #fff; }
+.help-card .help-shot.is-zoom { max-width: none; cursor: zoom-out; }
+.help-card .help-go { margin-top: 6px; }
+
+/* Подсказка у кнопки */
+.help-tip { position: fixed; z-index: 100000; max-width: min(320px, calc(100vw - 16px)); padding: 10px 12px 8px 40px; box-sizing: border-box;
+    background: #fffbe6; color: #2b2410; border: 1px solid #e3c766; border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+    font: 14px/1.4 var(--w95-font-text, system-ui, sans-serif); animation: helpTipIn .18s ease-out both; }
+.help-tip .help-tip-ic { position: absolute; left: 10px; top: 10px; font-size: 22px; color: #e0a800; }
+.help-tip .help-tip-btns { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px; }
+.help-tip .help-tip-btns button { all: unset; cursor: pointer; font-size: 13px; font-weight: 600; color: #8a5a00; text-decoration: underline; }
+.help-tip .help-tip-btns button[data-act="off"] { font-weight: 400; opacity: .8; }
+.help-tip .help-tip-arrow { position: absolute; width: 12px; height: 12px; background: #fffbe6; border: 1px solid #e3c766; transform: rotate(45deg); }
+.help-tip.is-below .help-tip-arrow { top: -7px; border-right: 0; border-bottom: 0; }
+.help-tip.is-above .help-tip-arrow { bottom: -7px; border-left: 0; border-top: 0; }
+@keyframes helpTipIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* Окно «Что нового» */
+.whats-new-overlay .whats-new { max-width: 440px; }
+.whats-new .wn-body { max-height: 55vh; overflow: auto; padding: 2px 2px 4px; }
+.whats-new .wn-ver h4 { margin: 8px 0 4px; }
+.whats-new .wn-ver ul { margin: 0 0 6px; padding-left: 20px; line-height: 1.45; }
+.whats-new .wn-ver li { margin: 3px 0; }
+.whats-new .export-sheet-head h3 { display: flex; align-items: center; gap: 8px; }

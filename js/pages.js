@@ -43,6 +43,8 @@
 
     // Группы пунктов меню Настроек. Карточка попадает в группу по своему id или по названию значка в заголовке (он не переводится)
     const SM_GROUPS = [
+        // 4.15.0: «Помощь» — самый верхний пункт (js/help.js)
+        { name: 'Помощь', keys: ['help-card'] },
         { name: 'Аккаунт и данные', keys: ['account-section', 'auth-section', 'profile-section', 'lock', 'speed', 'save'] },
         // 4.14.0: «Категории» — одно меню вместо «Картинки категорий», «Картинки в истории операций» и «Мои категории»;
         // «Шрифты» и «Иконка приложения» — внутри «Тем оформления»; «Блок „Текущий баланс“» убран; новый «Экран приветствия»
@@ -357,6 +359,20 @@
 
     // Ссылка из подсказки блока на страницу настройки («Настройки → Распознавание фото»)
     window.openSettingsCard = function (cardId) {
+        // 4.15.0: переход с одного пункта Настроек на другой (например, из «Помощи» в «Категории») — сразу, без «Назад»:
+        // раньше showTab закрывал открытую страницу через history.back(), и запоздавшее событие «Назад» закрывало новую
+        const cur = tabById('settings');
+        if (cur && cur._pgOpen && cur.style.display !== 'none' && cur.getAttribute('data-pg') === 'menu' && document.getElementById(cardId)) {
+            if (cur._pgOpen === cardId) return;
+            cur._pgOpen = cardId;
+            try { if (pushedKey) { history.replaceState({ pg: 'settings:' + cardId }, ''); pushedKey = 'settings:' + cardId; } } catch (e) {}
+            sound('open');
+            syncView(cur);
+            const mw = document.querySelector('.main-wrapper');
+            if (mw) mw.scrollTop = 0;
+            try { window.scrollTo(0, 0); } catch (e) {}
+            return;
+        }
         showTab('settings');
         const tab = tabById('settings');
         const card = document.getElementById(cardId);
