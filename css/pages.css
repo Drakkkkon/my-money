@@ -552,3 +552,66 @@ html body .cat-manager .cm-btn, html body .cat-manager .cm-emoji { min-width: 0 
 .whats-new .wn-ver ul { margin: 0 0 6px; padding-left: 20px; line-height: 1.45; }
 .whats-new .wn-ver li { margin: 3px 0; }
 .whats-new .export-sheet-head h3 { display: flex; align-items: center; gap: 8px; }
+
+/* ---------- 18. 4.16.0: «Новая запись» на телефоне — поле суммы выше, цифры в 2 раза крупнее, кнопки цифр больше ---------- */
+@media (max-width: 768px) {
+    html[data-w95] body .forms .amount-row { align-items: stretch; }
+    html[data-w95] body .forms .amount-row #amount {
+        font-size: 32px !important; line-height: 1.15 !important; height: 68px !important; min-height: 68px !important;
+        padding-top: 6px !important; padding-bottom: 6px !important; font-weight: 600; letter-spacing: .01em;
+    }
+    html[data-w95] body .forms .amount-row #amount::placeholder { font-size: 22px; font-weight: 400; }
+    html[data-w95] body .forms .amount-row .tx-currency { height: auto !important; min-height: 68px !important; font-size: 17px !important; width: 108px !important; flex-basis: 108px !important; }
+    html[data-w95] body .forms .tx-keypad-box .ob-keypad { gap: 8px !important; }
+    html[data-w95] body .forms .tx-keypad-box .ob-keypad button {
+        height: 60px !important; min-height: 60px !important; font-size: 28px !important; font-weight: 600;
+    }
+    html[data-w95] body .forms .tx-keypad-box .ob-keypad button .material-icons { font-size: 30px !important; }
+    /* Android: шрифт суммы там изначально 22 px — тоже вдвое */
+    html[data-w95="android"] body .forms .amount-row #amount { font-size: 44px !important; height: 80px !important; min-height: 80px !important; }
+    html[data-w95="android"] body .forms .amount-row .tx-currency { min-height: 80px !important; }
+}
+
+/* ---------- 19. 4.16.0: переключатели в стиле iOS вместо галочек «да / нет» (js/switch.js) ---------- */
+/* :not(#sw-none) поднимает вес правила выше тем (у некоторых тем в правилах для галочек есть id) */
+html[data-w95] body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none),
+body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none) {
+    -webkit-appearance: none !important; appearance: none !important; position: relative !important; display: inline-block !important;
+    flex: 0 0 auto !important; width: 51px !important; height: 31px !important; min-width: 51px !important; min-height: 31px !important;
+    max-width: none !important; max-height: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important;
+    border-radius: 999px !important; background: #e4e4e9 !important; background-image: none !important;
+    box-shadow: inset 0 0 0 1.5px rgba(0, 0, 0, .07) !important; cursor: pointer; vertical-align: middle;
+    transition: background-color .25s ease, box-shadow .25s ease !important; transform: none !important; filter: none !important;
+    opacity: 1 !important; font-size: 0 !important; color: transparent !important; order: 2; outline-offset: 3px;
+}
+html[data-w95] body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none)::before,
+body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none)::before {
+    content: '' !important; display: block !important; position: absolute !important; inset: auto !important; top: 2px !important; left: 2px !important;
+    width: 27px !important; height: 27px !important; margin: 0 !important; border: 0 !important; border-radius: 50% !important;
+    background: #fff !important; box-shadow: 0 3px 8px rgba(0, 0, 0, .15), 0 1px 1px rgba(0, 0, 0, .16) !important;
+    transform: none !important; transition: transform .25s cubic-bezier(.3, 1.3, .6, 1) !important; opacity: 1 !important;
+}
+html[data-w95] body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none)::after,
+body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none)::after { content: none !important; display: none !important; }
+html[data-w95] body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none):checked,
+body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none):checked { background: #34c759 !important; box-shadow: none !important; }
+html[data-w95] body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none):checked::before,
+body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none):checked::before { transform: translateX(20px) !important; }
+html[data-w95] body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none):disabled { opacity: .45 !important; cursor: default; }
+html[data-w95] body input.ios-switch.ios-switch[type="checkbox"]:not(#sw-none):focus-visible { outline: 2px solid #0a84ff !important; }
+/* большой тумблер */
+html[data-w95] body input.ios-switch.ios-switch.is-lg[type="checkbox"]:not(#sw-none) { width: 64px !important; min-width: 64px !important; height: 38px !important; min-height: 38px !important; }
+html[data-w95] body input.ios-switch.ios-switch.is-lg[type="checkbox"]:not(#sw-none)::before { width: 34px !important; height: 34px !important; }
+html[data-w95] body input.ios-switch.ios-switch.is-lg[type="checkbox"]:not(#sw-none):checked::before { transform: translateX(26px) !important; }
+
+/* строка «подпись слева — тумблер справа» */
+html body label.sw-row { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important;
+    padding: 7px 0 !important; cursor: pointer; text-align: left; line-height: 1.35; }
+html body label.sw-row > input.ios-switch { margin-left: auto !important; }
+html body .remind-opts:has(.ios-switch) { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important; gap: 0 18px !important; }
+/* большая карточка с тумблером (например, «Каждый блок — отдельная страница») */
+html body label.sw-row.sw-big { padding: 14px 16px !important; margin: 6px 0 10px; border-radius: 14px; background: var(--w95-field, #fff);
+    color: var(--w95-text, inherit); border: 1px solid var(--w95-grid, rgba(0, 0, 0, .12)); }
+html body label.sw-row.sw-big .sw-text { display: flex; flex-direction: column; gap: 3px; }
+html body label.sw-row.sw-big .sw-text b { font-size: 16px; }
+html body label.sw-row.sw-big .sw-text small { font-size: 13px; opacity: .75; }

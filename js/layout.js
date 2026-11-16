@@ -404,7 +404,8 @@ function renderLayoutSettings() {
         `<button type="button" role="radio" aria-checked="${String(l[key]) === v}" class="seg-btn${String(l[key]) === v ? ' is-on' : ''}" onclick="setLayoutPref('${key}', '${v}')">${label}</button>`).join('')}</div>`;
     box.innerHTML = `
         <h4 class="font-sub">Страницы вместо блоков</h4>
-        <label class="hdr-part"><input type="checkbox" ${l.noBlocks ? 'checked' : ''} onchange="setLayoutPref('noBlocks', this.checked)"> Каждый блок — отдельная страница</label>
+        <label class="sw-row sw-big"><span class="sw-text"><b>Каждый блок — отдельная страница</b><small>Включено — один блок на весь экран, без сетки блоков</small></span>
+            <input type="checkbox" class="ios-switch is-lg" ${l.noBlocks ? 'checked' : ''} onchange="setLayoutPref('noBlocks', this.checked)" aria-label="Каждый блок — отдельная страница"></label>
         <p class="hint">Вместо сетки блоков в каждом разделе — один блок на весь экран. Если блоков немного, они переключаются вкладками сверху, если много — списком. Кнопки размера, «На стену», «свернуть» и «развернуть» убираются. «Стена» остаётся как есть. Не действует в темах «Windows 95_Пуск» и «Windows 95_Экстра» (у них свои окна).</p>
         <p class="hint">В меню остаются «Записи», «Стена» и «Настройки». Нужный блок можно добавить в меню отдельной страницей: Настройки → «Пункты меню» → «Блоки как страницы меню». Кнопка «На стену» на странице спрашивает, каким сделать блок на стене: компактным или оригинальным.</p>
         <h4 class="font-sub">Меню на телефоне</h4>

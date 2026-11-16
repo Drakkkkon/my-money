@@ -509,6 +509,11 @@ function renderSoundSettings() {
     const st = document.getElementById('sound-startup-btn');
     if (ui) ui.innerHTML = `<span class="material-icons">${soundEnabled() ? 'volume_up' : 'volume_off'}</span> Звуки интерфейса: ${soundEnabled() ? 'включены' : 'выключены'}`;
     if (st) st.innerHTML = `<span class="material-icons">${startupSoundEnabled() ? 'music_note' : 'music_off'}</span> Мелодия при запуске: ${startupSoundEnabled() ? 'включена' : 'выключена'}`;
+    // 4.16.0: тумблеры вместо кнопок
+    const uiSw = document.getElementById('sound-ui-sw');
+    const stSw = document.getElementById('sound-startup-sw');
+    if (uiSw) uiSw.checked = soundEnabled();
+    if (stSw) stSw.checked = startupSoundEnabled();
 }
 
 function toggleUiSound() {

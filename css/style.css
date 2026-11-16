@@ -693,10 +693,10 @@ html body.theme-minimal { --income: #2e7d32 !important; --expense: #d32f2f !impo
 .export-sheet-table { flex: 1 1 auto; min-height: 120px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; margin: 4px 0 12px; }
 .export-sheet .export-table { margin: 0; font-size: 12px; white-space: nowrap; }
 .export-sheet .export-table th { position: sticky; top: 0; background: #424242; color: #fff; }
-.export-sheet .export-table tr.exp-income td { background: #2e7d32; color: #fff; }
-.export-sheet .export-table tr.exp-expense td { background: #d32f2f; color: #fff; }
-.export-sheet .export-table tr.exp-day td { background: #ffff00; color: #000; font-weight: 700; }
-.export-sheet .export-table tr.exp-total td { background: #ddebf7; color: #000; font-weight: 700; }
+.export-sheet .export-table tr.exp-income td { background: #eaf6ec; color: #2f6b3a; }
+.export-sheet .export-table tr.exp-expense td { background: #fcedee; color: #9e3a3a; }
+.export-sheet .export-table tr.exp-day td { background: #fff6dd; color: #5b4a1e; font-weight: 700; }
+.export-sheet .export-table tr.exp-total td { background: #e6f0fa; color: #24476b; font-weight: 700; }
 .export-sheet .export-json { margin: 0; padding: 10px; font-size: 11px; white-space: pre-wrap; word-break: break-all; }
 .export-sheet-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .export-sheet-actions > button { flex: 1 1 180px; width: auto; }

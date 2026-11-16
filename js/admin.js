@@ -9,7 +9,7 @@
 //    ссылка на товар, название цели, список покупок), способ и итог распознавания фото, тип и категория новой записи.
 //    НЕ передаётся: суммы, комментарии, баланс, названия подписок, пароли, ключи распознавания.
 
-window.APP_VERSION = window.APP_VERSION || '4.15.0';
+window.APP_VERSION = window.APP_VERSION || '4.16.0';
 window.APP_VERSION_NAME = window.APP_VERSION_NAME || 'Экстра'; // название версии (подпись внизу Настроек)
 window.APP_YEAR = window.APP_YEAR || 2026;                  // год обновления
 const ADMIN_EMAILS = ['lego2009as@gmail.com'];
@@ -181,8 +181,8 @@ function renderActivitySettings() {
     box.innerHTML = `
         <p class="hint">Журнал передаётся администратору приложения только с вашего согласия. Сейчас: <b>${on ? 'включён' : 'выключен'}</b>.</p>
         <p class="hint">Передаётся: почта и имя из Google, открытые разделы, то, что вписано в строки поиска и ввода, способ и итог распознавания фото, тип и категория новых записей. Суммы, комментарии, баланс, пароли и ключи — нет.</p>
-        ${on ? '<button type="button" class="btn-secondary btn-block" onclick="adminRevoke()"><span class="material-icons">block</span> Отключить и удалить мои данные на сервере</button>'
-             : '<button type="button" class="btn-primary btn-block" onclick="adminEnable()"><span class="material-icons">check</span> Включить журнал</button>'}
+        <label class="sw-row"><span>Журнал действий</span><input type="checkbox" class="ios-switch" ${on ? 'checked' : ''} onchange="this.checked ? adminEnable() : adminRevoke().then(renderActivitySettings)"></label>
+        ${on ? '<p class="hint">Выключение журнала удаляет и ваши данные на сервере администратора.</p>' : ''}
         <p class="hint" id="activity-status" aria-live="polite"></p>`;
 }
 function adminEnable() { adminSetConsent('yes'); adminLog('open', {}); adminFlush(); renderActivitySettings(); }

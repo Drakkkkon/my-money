@@ -11,6 +11,7 @@ const IMPORT_FIELDS = [
     { key: 'income', label: 'Сумма дохода (свой столбец)' },
     { key: 'expense', label: 'Сумма расхода (свой столбец)' },
     { key: 'category', label: 'Категория' },
+    { key: 'subcategory', label: 'Подкатегория' },
     { key: 'comment', label: 'Комментарий' }
 ];
 
@@ -23,6 +24,7 @@ const IMPORT_HINTS = {
     income: ['доход', 'доходы', 'приход', 'поступление', 'поступления', 'зачисление', 'income', 'credit', 'кредит'],
     expense: ['расход', 'расходы', 'списание', 'траты', 'потрачено', 'expense', 'debit', 'дебет'],
     category: ['категория', 'category', 'статья', 'назначение', 'на что', 'наименование', 'товар', 'описание', 'описание операции'],
+    subcategory: ['подкатегория', 'subcategory', 'подраздел', 'подстатья'],
     comment: ['комментарий', 'comment', 'примечание', 'описан', 'note', 'заметка', 'детали']
 };
 // Первое слово каждого списка — «главное»: при равенстве оно важнее (столбец «Категория» важнее «Описания»)
@@ -350,6 +352,9 @@ function buildImportRows() {
         item.type = type || st.defaultType;
         item.amount = Math.round(amount * 100) / 100;
         item.category = cellText(get(r, 'category')).replace(/\s+/g, ' ').slice(0, 60) || 'Без категории';
+        // 4.16.0: свой столбец «Подкатегория» (как в выгрузке My Money) → «Раздел: Подкатегория»
+        const subCat = cellText(get(r, 'subcategory')).replace(/[:]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40);
+        if (subCat && item.category !== 'Без категории' && item.category.indexOf(':') < 0) item.category = item.category + ': ' + subCat;
         item.comment = cellText(get(r, 'comment')).replace(/\s+/g, ' ').slice(0, typeof COMMENT_MAX === 'number' ? COMMENT_MAX : 100);
 
         if (!item.date) { item.status = 'skip'; item.reason = 'нет даты'; }

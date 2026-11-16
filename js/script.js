@@ -828,8 +828,9 @@ function generateReport() {
 }
 
 // --- ВЫГРУЗКА ФАЙЛОВ (Excel / JSON) ---
-const EXPORT_COLUMNS = ['Дата', 'Время', 'Тип', 'Категория', 'Комментарий', 'Сумма', 'ИТОГО ЗА ВСЁ ВРЕМЯ'];
-const EXPORT_AMOUNT_COLS = [5, 6]; // номера числовых колонок (Сумма, Итого)
+// 4.16.0: категория и подкатегория — отдельные столбцы («Семья: Отец» → «Семья» | «Отец»)
+const EXPORT_COLUMNS = ['Дата', 'Время', 'Тип', 'Категория', 'Подкатегория', 'Комментарий', 'Сумма', 'ИТОГО ЗА ВСЁ ВРЕМЯ'];
+const EXPORT_AMOUNT_COLS = [6, 7]; // номера числовых колонок (Сумма, Итого)
 
 function isMobileDevice() {
     const ua = navigator.userAgent || '';
@@ -850,7 +851,7 @@ function buildExportRows(list = transactions) {
         const txDate = parts[0];
 
         if (currentDate !== null && txDate !== currentDate) {
-            rows.push({ kind: 'day', cells: ['ИТОГО ЗА ДЕНЬ', '', '', '', '', dailyTotal, ''] });
+            rows.push({ kind: 'day', cells: ['ИТОГО ЗА ДЕНЬ', '', '', '', '', '', dailyTotal, ''] });
             dailyTotal = 0;
         }
         currentDate = txDate;
@@ -860,16 +861,20 @@ function buildExportRows(list = transactions) {
         dailyTotal += isIncome ? amount : -amount;
         allTimeTotal += isIncome ? amount : -amount;
 
+        const catFull = String(t.category || '');
+        const sepAt = catFull.indexOf(':');
+        const cat = (sepAt >= 0 ? catFull.slice(0, sepAt) : catFull).trim();
+        const sub = sepAt >= 0 ? catFull.slice(sepAt + 1).trim() : '';
         rows.push({
             kind: isIncome ? 'income' : 'expense',
-            cells: [txDate, parts[1] || '', isIncome ? 'Доход' : 'Расход', t.category || '', t.comment || '', amount, '']
+            cells: [txDate, parts[1] || '', isIncome ? 'Доход' : 'Расход', cat, sub, t.comment || '', amount, '']
         });
     });
 
     if (currentDate !== null) {
-        rows.push({ kind: 'day', cells: ['ИТОГО ЗА ДЕНЬ', '', '', '', '', dailyTotal, ''] });
+        rows.push({ kind: 'day', cells: ['ИТОГО ЗА ДЕНЬ', '', '', '', '', '', dailyTotal, ''] });
         // Общий чистый итог за всё время находится в отдельном последнем столбце.
-        rows.push({ kind: 'total', cells: ['ИТОГО ЗА ВСЁ ВРЕМЯ', '', '', '', '', '', allTimeTotal] });
+        rows.push({ kind: 'total', cells: ['ИТОГО ЗА ВСЁ ВРЕМЯ', '', '', '', '', '', '', allTimeTotal] });
     }
     return rows;
 }
@@ -877,24 +882,41 @@ function buildExportRows(list = transactions) {
 async function buildExcelBlob(rows) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Записи');
-    const widths = [15, 10, 12, 25, 34, 15, 23];
+    const widths = [12, 8, 9, 18, 18, 30, 13, 20];
     worksheet.columns = EXPORT_COLUMNS.map((header, i) => ({ header, width: widths[i] }));
 
-    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF424242' } };
+    // 4.16.0: мягкие пастельные цвета вместо ярких заливок — тёмный текст на светлом фоне, тонкие светлые рамки
+    const border = { style: 'thin', color: { argb: 'FFE3E6EA' } };
+    const borders = { top: border, left: border, bottom: border, right: border };
+    const header = worksheet.getRow(1);
+    header.height = 22;
+    header.eachCell(cell => {
+        cell.font = { bold: true, color: { argb: 'FF3E4A59' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE6EBF2' } };
+        cell.alignment = { vertical: 'middle' };
+        cell.border = borders;
+    });
 
-    const fills = { income: 'FF2E7D32', expense: 'FFD32F2F', day: 'FFFFFF00', total: 'FFDDEBF7' };
+    const look = {
+        income: { fill: 'FFEAF6EC', font: 'FF2F6B3A' },   // мятный
+        expense: { fill: 'FFFCEDEE', font: 'FF9E3A3A' },  // пудрово-розовый
+        day: { fill: 'FFFFF6DD', font: 'FF5B4A1E' },      // сливочный
+        total: { fill: 'FFE6F0FA', font: 'FF24476B' }     // голубой
+    };
     rows.forEach(r => {
         const row = worksheet.addRow(r.cells);
         const isSummary = r.kind === 'day' || r.kind === 'total';
-        row.eachCell({ includeEmpty: isSummary }, (cell) => {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fills[r.kind] } };
-            cell.font = isSummary ? { color: { argb: 'FF000000' }, bold: true } : { color: { argb: 'FFFFFFFF' } };
+        const lk = look[r.kind];
+        row.eachCell({ includeEmpty: true }, (cell, col) => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: lk.fill } };
+            cell.font = { color: { argb: lk.font }, bold: isSummary };
+            cell.border = borders;
+            if (EXPORT_AMOUNT_COLS.includes(col - 1) && typeof cell.value === 'number') cell.numFmt = '#,##0.##';
         });
     });
 
     worksheet.views = [{ state: 'frozen', ySplit: 1 }];
-    worksheet.autoFilter = { from: 'A1', to: 'G1' };
+    worksheet.autoFilter = { from: 'A1', to: 'H1' };
     const buffer = await workbook.xlsx.writeBuffer();
     return new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 }
@@ -1141,10 +1163,10 @@ function buildPdfDefinition(rows, list = transactions, title = 'My Money — в�
 
     // Печатные цвета: светлая заливка, тёмный текст; доход зелёный, расход красный.
     const styles = {
-        income: { fillColor: '#e8f5e9', color: '#1b5e20' },
-        expense: { fillColor: '#ffebee', color: '#b71c1c' },
-        day: { fillColor: '#fff59d', color: '#000000', bold: true },
-        total: { fillColor: '#ddebf7', color: '#000000', bold: true }
+        income: { fillColor: '#eaf6ec', color: '#2f6b3a' },
+        expense: { fillColor: '#fcedee', color: '#9e3a3a' },
+        day: { fillColor: '#fff6dd', color: '#5b4a1e', bold: true },
+        total: { fillColor: '#e6f0fa', color: '#24476b', bold: true }
     };
     const body = [EXPORT_COLUMNS.map(c => ({ text: c, style: 'th' }))];
     rows.forEach(r => {
@@ -1152,13 +1174,13 @@ function buildPdfDefinition(rows, list = transactions, title = 'My Money — в�
         const cells = r.cells.map((c, i) => ({
             text: EXPORT_AMOUNT_COLS.includes(i) && c !== '' ? fmtMoney(c) : String(c),
             alignment: EXPORT_AMOUNT_COLS.includes(i) ? 'right' : 'left',
-            italics: i === 4,
+            italics: i === 5,
             ...st
         }));
         // Итоговые строки: подпись на 4 колонки, чтобы «ИТОГО ЗА ДЕНЬ» не переносилось
         if (r.kind === 'day' || r.kind === 'total') {
-            cells[0].colSpan = 5;
-            cells[1] = {}; cells[2] = {}; cells[3] = {}; cells[4] = {};
+            cells[0].colSpan = 6;
+            cells[1] = {}; cells[2] = {}; cells[3] = {}; cells[4] = {}; cells[5] = {};
         }
         body.push(cells);
     });
@@ -1184,10 +1206,10 @@ function buildPdfDefinition(rows, list = transactions, title = 'My Money — в�
                 margin: [0, 0, 0, 12]
             },
             {
-                table: { headerRows: 1, widths: [52, 30, 38, '*', '*', 58, 66], body },
+                table: { headerRows: 1, widths: [46, 32, 34, '*', '*', '*', 50, 56], body },
                 layout: {
                     hLineWidth: () => 0.5, vLineWidth: () => 0.5,
-                    hLineColor: () => '#bdbdbd', vLineColor: () => '#bdbdbd',
+                    hLineColor: () => '#e3e6ea', vLineColor: () => '#e3e6ea',
                     paddingTop: () => 3, paddingBottom: () => 3
                 }
             }
@@ -1197,7 +1219,7 @@ function buildPdfDefinition(rows, list = transactions, title = 'My Money — в�
             title: { fontSize: 16, bold: true },
             muted: { fontSize: 8.5, color: '#616161' },
             kpi: { fontSize: 12, bold: true },
-            th: { bold: true, color: '#ffffff', fillColor: '#424242' }
+            th: { bold: true, color: '#3e4a59', fillColor: '#e6ebf2' }
         }
     };
 }
@@ -2137,18 +2159,28 @@ async function checkBiometricSupport() {
 }
 
 async function refreshBiometricUi() {
-    const btn = document.getElementById('bio-setup-btn');
+    // 4.16.0: тумблер «Вход по отпечатку» вместо кнопки
+    const sw = document.getElementById('bio-sw');
+    const rebind = document.getElementById('bio-rebind-btn');
     const hint = document.getElementById('bio-hint');
-    if (!btn) return;
+    if (!sw) return;
     const support = await checkBiometricSupport();
-    btn.classList.toggle('is-unavailable', !support.ok);
-    btn.innerHTML = bioEnabled && support.ok
-        ? '<span class="material-icons">fingerprint</span> Отпечаток подключён — привязать заново'
-        : '<span class="material-icons">fingerprint</span> Включить вход по отпечатку';
+    sw.checked = bioEnabled && support.ok;
+    sw.disabled = !support.ok;
+    if (rebind) rebind.style.display = bioEnabled && support.ok ? '' : 'none';
     if (hint) {
         hint.textContent = support.ok ? '' : 'Вход по отпечатку недоступен: ' + support.reason + ' Вход по ПИН-коду работает всегда.';
         hint.style.display = support.ok ? 'none' : 'block';
     }
+}
+
+// Тумблер «Вход по отпечатку»: включить — привязать отпечаток, выключить — забыть привязку (ПИН-код остаётся)
+async function bioSwitch(on) {
+    if (on) { await registerBiometrics(); refreshBiometricUi(); return; }
+    localStorage.removeItem('finance_bio');
+    try { localStorage.removeItem(BIO_CRED_KEY); } catch (e) {}
+    bioEnabled = false;
+    refreshBiometricUi();
 }
 
 async function registerBiometrics() {
