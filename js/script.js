@@ -829,7 +829,7 @@ function generateReport() {
 
 // --- ВЫГРУЗКА ФАЙЛОВ (Excel / JSON) ---
 // 4.16.0: категория и подкатегория — отдельные столбцы («Семья: Отец» → «Семья» | «Отец»)
-const EXPORT_COLUMNS = ['Дата', 'Время', 'Тип', 'Категория', 'Подкатегория', 'Комментарий', 'Сумма', 'ИТОГО ЗА ВСЁ ВРЕМЯ'];
+const EXPORT_COLUMNS = ['Дата', 'Время', 'Тип', 'Категория', 'Подкатегория', 'Комментарий', 'Сумма', 'ИТОГО'];
 const EXPORT_AMOUNT_COLS = [6, 7]; // номера числовых колонок (Сумма, Итого)
 
 function isMobileDevice() {
@@ -838,7 +838,7 @@ function isMobileDevice() {
 }
 
 // Строки таблицы выгрузки: kind = income | expense | day | total. Используются и для .xlsx, и для просмотра/копирования.
-function buildExportRows(list = transactions) {
+function buildExportRows(list = transactions, totalLabel = 'ИТОГО ЗА ВСЁ ВРЕМЯ') {
     const rows = [];
     const sortedTx = [...list].sort((a,b) => new Date((a.date||'').replace('T', ' ')) - new Date((b.date||'').replace('T', ' ')));
     let currentDate = null;
@@ -874,7 +874,7 @@ function buildExportRows(list = transactions) {
     if (currentDate !== null) {
         rows.push({ kind: 'day', cells: ['ИТОГО ЗА ДЕНЬ', '', '', '', '', '', dailyTotal, ''] });
         // Общий чистый итог за всё время находится в отдельном последнем столбце.
-        rows.push({ kind: 'total', cells: ['ИТОГО ЗА ВСЁ ВРЕМЯ', '', '', '', '', '', '', allTimeTotal] });
+        rows.push({ kind: 'total', cells: [totalLabel, '', '', '', '', '', '', allTimeTotal] });
     }
     return rows;
 }
@@ -1071,14 +1071,18 @@ function closeExportSheet() {
 }
 
 async function exportExcel(options = {}) {
+    // 4.17.0: кнопка «Скачать Excel» сначала открывает окно выбора периода и категорий (js/exportdlg.js);
+    // авто-выгрузка в 23:00 (silent) — как раньше, все записи
+    if (!options.list && !options.silent && typeof openExportDialog === 'function') { openExportDialog('xlsx'); return; }
     const silent = !!options.silent;
-    const rows = buildExportRows();
+    const list = options.list || transactions;
+    const rows = buildExportRows(list, options.totalLabel);
     if (rows.length === 0) {
         if (!silent) alert('Нет записей для выгрузки.');
         return;
     }
 
-    const fileName = exportFileName('xlsx');
+    const fileName = exportFileName('xlsx', options.suffix || '');
     let result = null;
     try {
         if (!(await loadExcelLibrary())) throw new Error('ExcelJS не загружен');
@@ -1103,8 +1107,8 @@ async function exportExcel(options = {}) {
                 : 'Не удалось сформировать файл .xlsx (нет интернета для библиотеки выгрузки). Скопируйте таблицу и вставьте её в Excel или Google Таблицы.',
         tableHtml: preview.tableHtml,
         copyText: preview.tsv,
-        retry: result === 'downloaded' ? () => exportExcel({ silent: true }) : null,
-        actions: result === 'unsupported' ? [] : [{ label: 'Скачать PDF (A4)', icon: 'picture_as_pdf', onClick: () => exportPdf() }]
+        retry: result === 'downloaded' ? () => exportExcel({ ...options, list, silent: true }) : null,
+        actions: result === 'unsupported' ? [] : [{ label: 'Скачать PDF (A4)', icon: 'picture_as_pdf', onClick: () => exportPdf({ ...options, list }) }]
     });
 }
 
@@ -1224,8 +1228,11 @@ function buildPdfDefinition(rows, list = transactions, title = 'My Money — в�
     };
 }
 
-async function exportPdf() {
-    const rows = buildExportRows();
+async function exportPdf(options = {}) {
+    // 4.17.0: сначала окно выбора периода и категорий (js/exportdlg.js)
+    if (!options.list && typeof openExportDialog === 'function') { openExportDialog('pdf'); return; }
+    const list = options.list || transactions;
+    const rows = buildExportRows(list, options.totalLabel);
     if (rows.length === 0) {
         alert('Нет записей для выгрузки.');
         return;
@@ -1240,11 +1247,11 @@ async function exportPdf() {
         alert('Не удалось загрузить модуль PDF. Проверьте подключение к интернету и попробуйте снова.');
         return;
     }
-    const fileName = exportFileName('pdf');
+    const fileName = exportFileName('pdf', options.suffix || '');
     let blob;
     try {
         blob = await new Promise((resolve, reject) => {
-            try { window.pdfMake.createPdf(buildPdfDefinition(rows)).getBlob(resolve); } catch (e) { reject(e); }
+            try { window.pdfMake.createPdf(buildPdfDefinition(rows, list, options.title || undefined)).getBlob(resolve); } catch (e) { reject(e); }
         });
     } catch (e) {
         console.error(e);

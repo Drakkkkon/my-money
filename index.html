@@ -798,7 +798,14 @@
                         </div>
                         <div class="changelog">
                             <div class="cl-version">
-                                <h4>4.16.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <h4>4.17.0 «Экстра» <span class="cl-tag">текущая</span></h4>
+                                <ul>
+                                    <li>Перед сохранением Excel или PDF открывается окно выбора: период (сегодня, 3 дня, неделя, 2 недели, месяц, 3 месяца, год, всё время или свои даты) и категории с подкатегориями кнопками — по умолчанию выбраны все, можно оставить любое количество. Показано, сколько записей попадёт в файл; из этого же окна можно сохранить и Excel, и PDF.</li>
+                                    <li>В имени файла — даты периода, в заголовке PDF — период и пометка, если выбраны не все категории. Выбранный период запоминается.</li>
+                                </ul>
+                            </div>
+                            <div class="cl-version">
+                                <h4>4.16.0 «Экстра»</h4>
                                 <ul>
                                     <li>Телефон, «Новая запись»: поле суммы выше, цифры суммы в два раза крупнее, кнопки цифровой клавиатуры больше (на ПК без изменений).</li>
                                     <li>Excel и PDF: мягкие пастельные цвета (мятный — доход, пудровый — расход, сливочный — итог дня, голубой — итог) и отдельные столбцы «Категория» и «Подкатегория». Загрузка таблицы понимает столбец «Подкатегория».</li>
@@ -1157,7 +1164,7 @@
                     </div>
 
                     <!-- 4.6.0: название версии и год обновления — самое последнее в Настройках (js/script.js подставляет значения из js/admin.js) -->
-                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.16.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
+                    <p class="app-footer" id="app-footer"><span class="app-brand" data-i18n-skip><img src="images/logo.png" alt="" class="app-logo" onerror="this.style.display='none'"><b>Money Pro</b></span>My Money · версия <b id="app-footer-ver">4.17.0</b> «<span id="app-footer-name">Экстра</span>» · обновлено в <b id="app-footer-year">2026</b> году</p>
                 </div>
             </main>
         </div>
@@ -1204,6 +1211,7 @@
     <script src="js/pages.js"></script>
     <script src="js/help.js"></script>
     <script src="js/switch.js"></script>
+    <script src="js/exportdlg.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/script.js"></script>
     <script src="js/welcome.js"></script>

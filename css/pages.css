@@ -615,3 +615,33 @@ html body label.sw-row.sw-big { padding: 14px 16px !important; margin: 6px 0 10p
 html body label.sw-row.sw-big .sw-text { display: flex; flex-direction: column; gap: 3px; }
 html body label.sw-row.sw-big .sw-text b { font-size: 16px; }
 html body label.sw-row.sw-big .sw-text small { font-size: 13px; opacity: .75; }
+
+/* ---------- 20. 4.17.0: окно выгрузки — период и категории (js/exportdlg.js) ---------- */
+.export-dialog { max-width: 560px; }
+.export-dialog .xd-body { max-height: 62vh; overflow: auto; padding: 2px 2px 6px; }
+.export-dialog .xd-title { margin: 10px 0 6px; font-size: 14px; }
+.export-dialog .xd-periods, .export-dialog .xd-cats, .export-dialog .xd-subs { display: flex; flex-wrap: wrap; gap: 6px; }
+html body .export-dialog .xd-chip { all: unset; box-sizing: border-box; display: inline-flex; width: auto !important; flex: 0 0 auto; align-items: center; gap: 5px; min-height: 34px;
+    padding: 6px 12px; border-radius: 999px; cursor: pointer; font: 14px/1.2 var(--w95-font-text, system-ui, sans-serif);
+    border: 1.5px solid var(--w95-grid, #cfd6df); background: var(--w95-field, #fff); color: var(--w95-text, #222); }
+html body .export-dialog .xd-chip .material-icons { font-size: 17px; opacity: .55; }
+html body .export-dialog .xd-chip small { font-size: 12px; opacity: .6; margin-left: 2px; }
+html body .export-dialog .xd-chip.is-on { background: #e3f1e6; border-color: #7cc38e; color: #1f5130; }
+html body .export-dialog .xd-chip.is-on .material-icons { opacity: 1; color: #2e8b4a; }
+html body .export-dialog .xd-period.is-on { background: #e6eefb; border-color: #8aa9e0; color: #1f3f73; }
+html body .export-dialog .xd-head.is-some { background: #f4f8ec; border-style: dashed; }
+html body .export-dialog .xd-chip:focus-visible { outline: 2px solid #0a84ff; outline-offset: 2px; }
+.export-dialog .xd-group { flex: 1 1 100%; display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 12px;
+    border: 1px solid var(--w95-grid, rgba(0, 0, 0, .1)); }
+.export-dialog .xd-head { font-weight: 700 !important; align-self: flex-start; }
+.export-dialog .xd-subs { padding-left: 14px; }
+.export-dialog .xd-cats-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.export-dialog .xd-cats-head .xd-title { margin: 4px 0; }
+.export-dialog .xd-all { display: flex; gap: 6px; }
+.export-dialog .xd-all .btn-secondary { padding: 4px 10px !important; min-height: 0 !important; font-size: 13px !important; width: auto !important; }
+.export-dialog .xd-dates { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0 0; }
+.export-dialog .xd-dates label { display: flex; align-items: center; gap: 6px; }
+.export-dialog .xd-dates input { width: auto !important; }
+.export-dialog .xd-range { margin: 6px 0 0; }
+.export-dialog .xd-count { margin: 8px 0 4px; font-weight: 700; }
+html body #export-dialog .xd-chip, html body #export-dialog .xd-head { width: auto !important; max-width: 100% !important; flex: 0 0 auto !important; align-self: flex-start !important; }
